@@ -12,6 +12,10 @@ export default function Refer() {
   const { data: referralsData, isLoading } = useListReferrals();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  // Telegram photo URLs sometimes fail to load (expired, CORS, deleted) —
+  // track which referral ids failed so we can fall back to the initial
+  // avatar instead of the browser's broken-image icon.
+  const [failedPhotoIds, setFailedPhotoIds] = useState<Set<number>>(new Set());
 
   // Fallback to botUsername from config, or generic default if missing
   const botUsername = config?.botUsername || 'as_earning_bot';
@@ -126,12 +130,13 @@ export default function Refer() {
               {referrals.map((ref) => (
                 <div key={ref.id} className="bg-card border rounded-xl p-3 flex items-center justify-between shadow-sm">
                   <div className="flex items-center gap-3">
-                    {ref.photoUrl ? (
+                    {ref.photoUrl && !failedPhotoIds.has(ref.id) ? (
                       <img
                         src={ref.photoUrl}
                         alt={ref.firstName}
                         className="w-10 h-10 rounded-full border border-border shadow-sm object-cover"
                         referrerPolicy="no-referrer"
+                        onError={() => setFailedPhotoIds((prev) => new Set(prev).add(ref.id))}
                       />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">

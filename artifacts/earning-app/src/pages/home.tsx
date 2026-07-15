@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useGetMe, useGetPublicConfig, useListReferrals } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,9 @@ export default function Home() {
   const { data: referralsData } = useListReferrals();
   const [, setLocation] = useLocation();
   const { user: authUser } = useAuth(); // just to be safe if useGetMe is slow
+  // Falls back to the initial avatar if the Telegram photo URL fails to
+  // load (expired, CORS, deleted), instead of showing a broken-image icon.
+  const [photoFailed, setPhotoFailed] = useState(false);
 
   const currentUser = user || authUser;
 
@@ -42,12 +46,13 @@ export default function Home() {
             </h1>
             <p className="text-muted-foreground text-sm font-medium mt-1">Ready to earn today?</p>
           </div>
-          {currentUser.photoUrl ? (
+          {currentUser.photoUrl && !photoFailed ? (
             <img 
               src={currentUser.photoUrl} 
               alt="Profile" 
               className="w-12 h-12 rounded-full border-2 border-background shadow-sm"
               referrerPolicy="no-referrer"
+              onError={() => setPhotoFailed(true)}
             />
           ) : (
             <div className="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-lg border-2 border-background shadow-sm">

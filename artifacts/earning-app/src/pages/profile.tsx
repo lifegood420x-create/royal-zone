@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useGetMe, useGetPublicConfig } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,9 @@ export default function Profile() {
   const { data: config } = useGetPublicConfig();
   const { isAdmin } = useAuth();
   const [, setLocation] = useLocation();
+  // Falls back to the initial avatar if the Telegram photo URL fails to
+  // load (expired, CORS, deleted), instead of showing a broken-image icon.
+  const [photoFailed, setPhotoFailed] = useState(false);
 
   if (!user) {
     return (
@@ -59,12 +63,13 @@ export default function Profile() {
         {/* Profile Header */}
         <Card className="border shadow-sm bg-card overflow-hidden">
           <CardContent className="p-6 flex items-center gap-4">
-            {user.photoUrl ? (
+            {user.photoUrl && !photoFailed ? (
               <img 
                 src={user.photoUrl} 
                 alt="Profile" 
                 className="w-16 h-16 rounded-full border border-border shadow-sm"
                 referrerPolicy="no-referrer"
+                onError={() => setPhotoFailed(true)}
               />
             ) : (
               <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-2xl border border-primary/20 shadow-sm">
