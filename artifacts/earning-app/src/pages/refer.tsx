@@ -107,7 +107,7 @@ export default function Refer() {
             }`}
           >
             <Trophy size={15} />
-            লিডারবোর্ড
+            Leaderboard
           </button>
           <button
             onClick={() => setActiveTab('my-referrals')}
@@ -181,7 +181,7 @@ export default function Refer() {
                       {/* Count */}
                       <div className="shrink-0 text-right">
                         <p className="text-sm font-black text-primary">{entry.referralCount}</p>
-                        <p className="text-[10px] text-muted-foreground">রেফারেল</p>
+                        <p className="text-[10px] text-muted-foreground">Referrals</p>
                       </div>
                     </div>
                   );
@@ -191,7 +191,7 @@ export default function Refer() {
               <Card className="border shadow-sm bg-card border-dashed">
                 <CardContent className="p-8 flex flex-col items-center justify-center text-center">
                   <Trophy size={32} className="text-muted-foreground/30 mb-2" />
-                  <p className="text-sm text-muted-foreground">এখনো কেউ লিডারবোর্ডে নেই</p>
+                  <p className="text-sm text-muted-foreground">No one on the leaderboard yet</p>
                 </CardContent>
               </Card>
             )}
