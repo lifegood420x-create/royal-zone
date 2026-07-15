@@ -34,6 +34,7 @@ import type {
   ClaimAdInput,
   ClaimAdResult,
   ConfigUpdate,
+  DeleteTaskResult,
   HealthStatus,
   ListAdminUsersParams,
   PostbackUrlInfo,
@@ -1884,9 +1885,9 @@ export const getDeleteTaskUrl = (id: number,) => {
 /**
  * @summary Delete a task
  */
-export const deleteTask = async (id: number, options?: RequestInit): Promise<void> => {
+export const deleteTask = async (id: number, options?: RequestInit): Promise<DeleteTaskResult | void> => {
 
-  return customFetch<void>(getDeleteTaskUrl(id),
+  return customFetch<DeleteTaskResult | void>(getDeleteTaskUrl(id),
   {
     ...options,
     method: 'DELETE'

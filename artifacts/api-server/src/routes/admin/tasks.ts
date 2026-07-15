@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { desc, eq } from "drizzle-orm";
-import { db, tasksTable } from "@workspace/db";
+import { desc, eq, sql } from "drizzle-orm";
+import { db, tasksTable, taskCompletionsTable } from "@workspace/db";
 import {
   CreateTaskBody,
   CreateTaskResponse,
@@ -64,6 +64,33 @@ router.delete("/admin/tasks/:id", requireAuth, requireAdmin, async (req, res): P
   const params = DeleteTaskParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  // Tasks that users have already completed are referenced by
+  // task_completions (reward history) via a foreign key with no cascade —
+  // hard-deleting them would violate that constraint and 500. Preserve the
+  // completion/reward history and just deactivate the task instead so it
+  // disappears from the user-facing task list.
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(taskCompletionsTable)
+    .where(eq(taskCompletionsTable.taskId, params.data.id));
+
+  if (count > 0) {
+    const [task] = await db
+      .update(tasksTable)
+      .set({ isActive: false })
+      .where(eq(tasksTable.id, params.data.id))
+      .returning();
+    if (!task) {
+      res.status(404).json({ error: "Task not found." });
+      return;
+    }
+    res.status(200).json({
+      deactivatedInstead: true,
+      message: "This task has already been completed by users, so it was deactivated instead of deleted to preserve their reward history.",
+    });
     return;
   }
 
