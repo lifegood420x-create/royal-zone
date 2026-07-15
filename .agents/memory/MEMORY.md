@@ -3,3 +3,4 @@
 - [TS project references need a build, not just noEmit](drizzle-project-references.md) — stale lib `dist/*.d.ts` causes false "no exported member" errors until `tsc --build` reruns.
 - [Concurrent user upsert race](concurrent-upsert-race.md) — first-touch upsert-by-external-id needs to catch the unique-constraint race, not just check-then-insert.
 - [Ad postback verification pattern](ad-postback-verification.md) — claim→show→server-postback flow to stop devtools-faked ad rewards; opt-in via a flag.
+- [Referral fraud auto-ban](referral-fraud-auto-ban.md) — first referred signup per IP under a referrer is allowed, repeats auto-ban; admin IP-spoof testing via curl doesn't work in this workspace.

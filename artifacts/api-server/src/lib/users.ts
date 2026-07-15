@@ -52,8 +52,34 @@ export async function upsertTelegramUser(
     referrer = found ?? null;
   }
 
+  // Anti-fraud: referral farming looks like one person creating account A
+  // (the referrer), then spinning up B, C, D... from the same device/IP,
+  // each entered A's referral code to farm bonuses. We let the *first*
+  // account from a given IP under a referrer through (so genuine friends
+  // sharing a home wifi/router aren't punished), and auto-ban every
+  // subsequent signup that reuses an IP already seen under that same
+  // referrer. This is a check-then-insert (not DB-constrained), so two
+  // truly simultaneous first-signups from the same IP could both slip
+  // through unbanned — acceptable given fraud farming is normally
+  // sequential, not parallel.
+  let hasSiblingWithSameIp = false;
+  if (referrer && opts.ip) {
+    const [sibling] = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(and(eq(usersTable.referredBy, referrer.id), eq(usersTable.registrationIp, opts.ip)));
+    hasSiblingWithSameIp = !!sibling;
+  }
+
   const isSameIpAsReferrer =
     !!referrer && !!opts.ip && !!referrer.registrationIp && referrer.registrationIp === opts.ip;
+
+  // Only the repeat (2nd+) same-IP signup under a referrer gets banned
+  // outright. A first signup that merely matches the referrer's own IP is
+  // just flagged for admin visibility (and denied the bonus below), not
+  // banned — per product decision, "let the first one through".
+  const isFakeReferralChain = hasSiblingWithSameIp;
+  const isSuspiciousFirstSignup = isSameIpAsReferrer && !hasSiblingWithSameIp;
 
   let created: User;
   try {
@@ -67,8 +93,13 @@ export async function upsertTelegramUser(
         referralCode,
         referredBy: referrer?.id ?? null,
         registrationIp: opts.ip ?? null,
-        isFlagged: isSameIpAsReferrer,
-        flagReason: isSameIpAsReferrer ? "Self/fake referral (same IP)" : null,
+        isBanned: isFakeReferralChain,
+        isFlagged: isFakeReferralChain || isSuspiciousFirstSignup,
+        flagReason: isFakeReferralChain
+          ? "Auto-banned: duplicate IP reused under the same referrer (fake referral chain)"
+          : isSuspiciousFirstSignup
+            ? "Self/fake referral (same IP as referrer)"
+            : null,
       })
       .returning();
     created = inserted;
@@ -87,8 +118,8 @@ export async function upsertTelegramUser(
     return existingRow;
   }
 
-  // Credit the referrer's bonus, unless this signup was flagged as fake.
-  if (referrer && !isSameIpAsReferrer) {
+  // Credit the referrer's bonus, unless this signup was flagged/banned as fake.
+  if (referrer && !isFakeReferralChain && !isSuspiciousFirstSignup) {
     const config = await getAppConfig();
     await db
       .update(usersTable)
