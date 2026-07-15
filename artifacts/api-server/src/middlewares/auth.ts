@@ -80,7 +80,16 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
   const config = await getAppConfig();
   req.currentUser = user;
-  req.isAdmin = normalizeUsername(user.username) === normalizeUsername(config.adminUsername);
+  // Normal path: username matches the admin_username stored in app_config.
+  // Bootstrap path: ADMIN_BOOTSTRAP_USERNAME is a temporary escape hatch for
+  // when app_config's admin_username is wrong/stale (e.g. a fresh production
+  // database still has the default "admin" row) and the real admin is
+  // locked out of the admin panel that would normally fix it. Set it,
+  // fix Bot Settings -> Admin Username from the panel, then remove it.
+  const bootstrapUsername = process.env.ADMIN_BOOTSTRAP_USERNAME;
+  req.isAdmin =
+    normalizeUsername(user.username) === normalizeUsername(config.adminUsername) ||
+    (!!bootstrapUsername && normalizeUsername(user.username) === normalizeUsername(bootstrapUsername));
 
   next();
 }
