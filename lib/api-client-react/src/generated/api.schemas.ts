@@ -200,6 +200,7 @@ export interface PublicConfig {
   monetagZoneId: string | null;
   /** @nullable */
   adsgramBlockId: string | null;
+  requireAdPostback: boolean;
 }
 
 export interface FlaggedUser {
@@ -277,6 +278,8 @@ export interface AppConfig {
   monetagZoneId: string | null;
   /** @nullable */
   adsgramBlockId: string | null;
+  requireAdPostback: boolean;
+  postbackUrl: string;
 }
 
 export interface ConfigUpdate {
@@ -294,6 +297,19 @@ export interface ConfigUpdate {
   adminUsername?: string;
   monetagZoneId?: string;
   adsgramBlockId?: string;
+  requireAdPostback?: boolean;
+}
+
+export interface PostbackUrlInfo {
+  postbackUrl: string;
+}
+
+export interface ClaimAdInput {
+  network: AdNetwork;
+}
+
+export interface ClaimAdResult {
+  claimId: string;
 }
 
 export interface BroadcastInput {
@@ -313,6 +329,16 @@ export interface WebhookStatus {
   /** @nullable */
   lastErrorMessage: string | null;
 }
+
+export type AdPostbackParams = {
+secret: string;
+claim_id: string;
+};
+
+export type AdPostbackPostParams = {
+secret: string;
+claim_id: string;
+};
 
 export type ListAdminUsersParams = {
 search?: string;

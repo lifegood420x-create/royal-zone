@@ -20,6 +20,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdPostbackParams,
+  AdPostbackPostParams,
   AdWatchResult,
   AdminDashboard,
   AdminUser,
@@ -29,9 +31,12 @@ import type {
   AuthResponse,
   BroadcastInput,
   BroadcastResult,
+  ClaimAdInput,
+  ClaimAdResult,
   ConfigUpdate,
   HealthStatus,
   ListAdminUsersParams,
+  PostbackUrlInfo,
   PublicConfig,
   ReferralsSummary,
   RejectPayoutInput,
@@ -594,6 +599,239 @@ export const useWatchAd = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getWatchAdMutationOptions(options));
+    }
+
+export const getClaimAdUrl = () => {
+
+
+
+
+  return `/api/ads/claim`
+}
+
+/**
+ * @summary Reserve a daily ad-watch slot before showing the ad, for postback-verified crediting
+ */
+export const claimAd = async (claimAdInput: ClaimAdInput, options?: RequestInit): Promise<ClaimAdResult> => {
+
+  return customFetch<ClaimAdResult>(getClaimAdUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(claimAdInput)
+  }
+);}
+
+
+
+
+
+export const getClaimAdMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimAd>>, TError,{data: BodyType<ClaimAdInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimAd>>, TError,{data: BodyType<ClaimAdInput>}, TContext> => {
+
+const mutationKey = ['claimAd'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimAd>>, {data: BodyType<ClaimAdInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  claimAd(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimAdMutationResult = NonNullable<Awaited<ReturnType<typeof claimAd>>>
+    export type ClaimAdMutationBody = BodyType<ClaimAdInput>
+    export type ClaimAdMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Reserve a daily ad-watch slot before showing the ad, for postback-verified crediting
+ */
+export const useClaimAd = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimAd>>, TError,{data: BodyType<ClaimAdInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof claimAd>>,
+        TError,
+        {data: BodyType<ClaimAdInput>},
+        TContext
+      > => {
+      return useMutation(getClaimAdMutationOptions(options));
+    }
+
+export const getAdPostbackUrl = (params: AdPostbackParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/ads/postback?${stringifiedParams}` : `/api/ads/postback`
+}
+
+/**
+ * @summary Server-to-server confirmation from the ad network that a rewarded view completed
+ */
+export const adPostback = async (params: AdPostbackParams, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getAdPostbackUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdPostbackQueryKey = (params?: AdPostbackParams,) => {
+    return [
+    `/api/ads/postback`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAdPostbackQueryOptions = <TData = Awaited<ReturnType<typeof adPostback>>, TError = ErrorType<unknown>>(params: AdPostbackParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adPostback>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdPostbackQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adPostback>>> = ({ signal }) => adPostback(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adPostback>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdPostbackQueryResult = NonNullable<Awaited<ReturnType<typeof adPostback>>>
+export type AdPostbackQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Server-to-server confirmation from the ad network that a rewarded view completed
+ */
+
+export function useAdPostback<TData = Awaited<ReturnType<typeof adPostback>>, TError = ErrorType<unknown>>(
+ params: AdPostbackParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adPostback>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdPostbackQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAdPostbackPostUrl = (params: AdPostbackPostParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/ads/postback?${stringifiedParams}` : `/api/ads/postback`
+}
+
+/**
+ * @summary Same as GET /ads/postback, for networks that call postbacks via POST
+ */
+export const adPostbackPost = async (params: AdPostbackPostParams, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getAdPostbackPostUrl(params),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdPostbackPostMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adPostbackPost>>, TError,{params: AdPostbackPostParams}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adPostbackPost>>, TError,{params: AdPostbackPostParams}, TContext> => {
+
+const mutationKey = ['adPostbackPost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adPostbackPost>>, {params: AdPostbackPostParams}> = (props) => {
+          const {params} = props ?? {};
+
+          return  adPostbackPost(params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdPostbackPostMutationResult = NonNullable<Awaited<ReturnType<typeof adPostbackPost>>>
+
+    export type AdPostbackPostMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Same as GET /ads/postback, for networks that call postbacks via POST
+ */
+export const useAdPostbackPost = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adPostbackPost>>, TError,{params: AdPostbackPostParams}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adPostbackPost>>,
+        TError,
+        {params: AdPostbackPostParams},
+        TContext
+      > => {
+      return useMutation(getAdPostbackPostMutationOptions(options));
     }
 
 export const getListReferralsUrl = () => {
@@ -1852,6 +2090,77 @@ export const useUpdateAdminConfig = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getUpdateAdminConfigMutationOptions(options));
+    }
+
+export const getRegeneratePostbackSecretUrl = () => {
+
+
+
+
+  return `/api/admin/config/postback-secret`
+}
+
+/**
+ * @summary Regenerate the shared secret used to authenticate incoming ad postback calls
+ */
+export const regeneratePostbackSecret = async ( options?: RequestInit): Promise<PostbackUrlInfo> => {
+
+  return customFetch<PostbackUrlInfo>(getRegeneratePostbackSecretUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRegeneratePostbackSecretMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof regeneratePostbackSecret>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof regeneratePostbackSecret>>, TError,void, TContext> => {
+
+const mutationKey = ['regeneratePostbackSecret'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof regeneratePostbackSecret>>, void> = () => {
+
+
+          return  regeneratePostbackSecret(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegeneratePostbackSecretMutationResult = NonNullable<Awaited<ReturnType<typeof regeneratePostbackSecret>>>
+
+    export type RegeneratePostbackSecretMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Regenerate the shared secret used to authenticate incoming ad postback calls
+ */
+export const useRegeneratePostbackSecret = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof regeneratePostbackSecret>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof regeneratePostbackSecret>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getRegeneratePostbackSecretMutationOptions(options));
     }
 
 export const getSendBroadcastUrl = () => {

@@ -88,7 +88,8 @@ export const GetPublicConfigResponse = zod.object({
   "botUsername": zod.string(),
   "channelUsername": zod.string().nullable(),
   "monetagZoneId": zod.string().nullable(),
-  "adsgramBlockId": zod.string().nullable()
+  "adsgramBlockId": zod.string().nullable(),
+  "requireAdPostback": zod.boolean()
 })
 
 
@@ -185,6 +186,40 @@ export const WatchAdResponse = zod.object({
   "watchedAt": zod.coerce.date()
 })
 })
+
+
+/**
+ * @summary Reserve a daily ad-watch slot before showing the ad, for postback-verified crediting
+ */
+export const ClaimAdBody = zod.object({
+  "network": zod.enum(['monetag', 'adsgram'])
+})
+
+export const ClaimAdResponse = zod.object({
+  "claimId": zod.string()
+})
+
+
+/**
+ * @summary Server-to-server confirmation from the ad network that a rewarded view completed
+ */
+export const AdPostbackQueryParams = zod.object({
+  "secret": zod.coerce.string(),
+  "claim_id": zod.coerce.string()
+})
+
+export const AdPostbackResponse = zod.unknown()
+
+
+/**
+ * @summary Same as GET /ads/postback, for networks that call postbacks via POST
+ */
+export const AdPostbackPostQueryParams = zod.object({
+  "secret": zod.coerce.string(),
+  "claim_id": zod.coerce.string()
+})
+
+export const AdPostbackPostResponse = zod.unknown()
 
 
 /**
@@ -524,7 +559,9 @@ export const GetAdminConfigResponse = zod.object({
   "channelUsername": zod.string().nullable(),
   "adminUsername": zod.string(),
   "monetagZoneId": zod.string().nullable(),
-  "adsgramBlockId": zod.string().nullable()
+  "adsgramBlockId": zod.string().nullable(),
+  "requireAdPostback": zod.boolean(),
+  "postbackUrl": zod.string()
 })
 
 
@@ -551,7 +588,8 @@ export const UpdateAdminConfigBody = zod.object({
   "channelUsername": zod.string().optional(),
   "adminUsername": zod.string().optional(),
   "monetagZoneId": zod.string().optional(),
-  "adsgramBlockId": zod.string().optional()
+  "adsgramBlockId": zod.string().optional(),
+  "requireAdPostback": zod.boolean().optional()
 })
 
 export const UpdateAdminConfigResponse = zod.object({
@@ -564,7 +602,17 @@ export const UpdateAdminConfigResponse = zod.object({
   "channelUsername": zod.string().nullable(),
   "adminUsername": zod.string(),
   "monetagZoneId": zod.string().nullable(),
-  "adsgramBlockId": zod.string().nullable()
+  "adsgramBlockId": zod.string().nullable(),
+  "requireAdPostback": zod.boolean(),
+  "postbackUrl": zod.string()
+})
+
+
+/**
+ * @summary Regenerate the shared secret used to authenticate incoming ad postback calls
+ */
+export const RegeneratePostbackSecretResponse = zod.object({
+  "postbackUrl": zod.string()
 })
 
 

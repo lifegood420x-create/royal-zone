@@ -19,4 +19,5 @@ export interface PublicConfig {
   monetagZoneId: string | null;
   /** @nullable */
   adsgramBlockId: string | null;
+  requireAdPostback: boolean;
 }

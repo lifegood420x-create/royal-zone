@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { 
   useGetAdminConfig, 
   useUpdateAdminConfig,
   useSendBroadcast,
   useGetWebhookStatus,
   useResetWebhook,
+  useRegeneratePostbackSecret,
   getGetAdminConfigQueryKey,
   getGetWebhookStatusQueryKey,
 } from '@workspace/api-client-react';
@@ -12,9 +13,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { Save, Send, RefreshCw, ServerCog, Settings2, Megaphone, Link2, AlertCircle } from 'lucide-react';
+import { Save, Send, RefreshCw, ServerCog, Settings2, Megaphone, Link2, AlertCircle, ShieldCheck, Copy, KeyRound } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -38,6 +40,7 @@ const configSchema = z.object({
   adminUsername: z.string().min(1),
   monetagZoneId: z.string().optional().or(z.literal('')),
   adsgramBlockId: z.string().optional().or(z.literal('')),
+  requireAdPostback: z.boolean(),
 });
 
 type ConfigFormValues = z.infer<typeof configSchema>;
@@ -49,6 +52,8 @@ export default function AdminConfig() {
   const updateConfigMutation = useUpdateAdminConfig();
   const broadcastMutation = useSendBroadcast();
   const resetWebhookMutation = useResetWebhook();
+  const regenerateSecretMutation = useRegeneratePostbackSecret();
+  const [copied, setCopied] = useState(false);
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -66,6 +71,7 @@ export default function AdminConfig() {
       adminUsername: '',
       monetagZoneId: '',
       adsgramBlockId: '',
+      requireAdPostback: false,
     },
   });
 
@@ -88,6 +94,7 @@ export default function AdminConfig() {
         adminUsername: config.adminUsername,
         monetagZoneId: config.monetagZoneId || '',
         adsgramBlockId: config.adsgramBlockId || '',
+        requireAdPostback: config.requireAdPostback,
       });
       initializedRef.current = true;
     }
@@ -141,6 +148,26 @@ export default function AdminConfig() {
         }
       }
     );
+  };
+
+  const handleCopyPostbackUrl = () => {
+    if (!config?.postbackUrl) return;
+    navigator.clipboard.writeText(config.postbackUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleRegenerateSecret = () => {
+    if (!confirm('This invalidates the current postback URL — you will need to update it in your Monetag/Adsgram dashboard. Continue?')) return;
+    regenerateSecretMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast({ title: 'Postback secret regenerated', description: 'Update the URL in your ad network dashboard.' });
+        queryClient.invalidateQueries({ queryKey: getGetAdminConfigQueryKey() });
+      },
+      onError: (err: any) => {
+        toast({ title: 'Error', description: err.message || 'Could not regenerate secret.', variant: 'destructive' });
+      }
+    });
   };
 
   if (isConfigLoading) {
@@ -252,6 +279,56 @@ export default function AdminConfig() {
                               <Input placeholder="e.g. block-123" {...field} />
                             </FormControl>
                             <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="font-bold text-sm text-muted-foreground uppercase tracking-wider">Ad Postback Verification</h3>
+                    <p className="text-xs text-muted-foreground -mt-2">
+                      By default, a reward is credited as soon as the ad SDK reports "watched" — which a user could fake via devtools.
+                      For fraud-proof crediting, paste the URL below as the <strong>Postback URL</strong> in your Monetag/Adsgram dashboard
+                      for each zone, then enable the toggle below once you've confirmed test postbacks are arriving.
+                    </p>
+                    <div className="rounded-lg border bg-muted/20 p-3 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 text-xs break-all bg-background border rounded px-2 py-1.5 font-mono">
+                          {config?.postbackUrl || 'Loading...'}
+                        </code>
+                        <Button type="button" size="sm" variant="outline" onClick={handleCopyPostbackUrl}>
+                          <Copy size={14} className="mr-1.5" /> {copied ? 'Copied' : 'Copy'}
+                        </Button>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="text-orange-600 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                        onClick={handleRegenerateSecret}
+                        disabled={regenerateSecretMutation.isPending}
+                      >
+                        <KeyRound size={14} className={`mr-1.5 ${regenerateSecretMutation.isPending ? 'animate-spin' : ''}`} />
+                        Regenerate Secret
+                      </Button>
+                      <FormField
+                        control={form.control}
+                        name="requireAdPostback"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background">
+                            <div className="space-y-0.5 flex items-start gap-2">
+                              <ShieldCheck size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                              <div>
+                                <FormLabel>Require Postback Verification</FormLabel>
+                                <p className="text-[10px] text-muted-foreground">
+                                  When on, ad rewards are only credited after the ad network's server confirms the view — not the browser.
+                                </p>
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            </FormControl>
                           </FormItem>
                         )}
                       />

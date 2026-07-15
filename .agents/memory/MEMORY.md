@@ -2,3 +2,4 @@
 - [Orval schema/type naming collisions](orval-schema-naming-collision.md) — name OpenAPI response schemas by entity, not `<Operation>Response`, or codegen TS2308 collisions occur.
 - [TS project references need a build, not just noEmit](drizzle-project-references.md) — stale lib `dist/*.d.ts` causes false "no exported member" errors until `tsc --build` reruns.
 - [Concurrent user upsert race](concurrent-upsert-race.md) — first-touch upsert-by-external-id needs to catch the unique-constraint race, not just check-then-insert.
+- [Ad postback verification pattern](ad-postback-verification.md) — claim→show→server-postback flow to stop devtools-faked ad rewards; opt-in via a flag.

@@ -129,6 +129,59 @@ paths:
               schema:
                 $ref: "#/components/schemas/AdWatchResult"
 
+  /ads/claim:
+    post:
+      operationId: claimAd
+      tags: [user]
+      summary: Reserve a daily ad-watch slot before showing the ad, for postback-verified crediting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClaimAdInput"
+      responses:
+        "200":
+          description: Claim reserved; pass claimId to the ad network's show call
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClaimAdResult"
+
+  /ads/postback:
+    get:
+      operationId: adPostback
+      tags: [public]
+      summary: Server-to-server confirmation from the ad network that a rewarded view completed
+      parameters:
+        - name: secret
+          in: query
+          required: true
+          schema: { type: string }
+        - name: claim_id
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Postback processed (idempotent; always 200 so the network doesn't retry)
+    post:
+      operationId: adPostbackPost
+      tags: [public]
+      summary: Same as GET /ads/postback, for networks that call postbacks via POST
+      parameters:
+        - name: secret
+          in: query
+          required: true
+          schema: { type: string }
+        - name: claim_id
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Postback processed (idempotent; always 200 so the network doesn't retry)
+
   /referrals:
     get:
       operationId: listReferrals
@@ -424,6 +477,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/AppConfig"
 
+  /admin/config/postback-secret:
+    post:
+      operationId: regeneratePostbackSecret
+      tags: [admin]
+      summary: Regenerate the shared secret used to authenticate incoming ad postback calls
+      responses:
+        "200":
+          description: New postback URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostbackUrlInfo"
+
   /admin/broadcast:
     post:
       operationId: sendBroadcast
@@ -694,6 +760,7 @@ components:
         - channelUsername
         - monetagZoneId
         - adsgramBlockId
+        - requireAdPostback
       properties:
         minWithdraw: { type: number }
         baseMinWithdraw: { type: number }
@@ -704,6 +771,7 @@ components:
         channelUsername: { type: ["string", "null"] }
         monetagZoneId: { type: ["string", "null"] }
         adsgramBlockId: { type: ["string", "null"] }
+        requireAdPostback: { type: boolean }
 
     FlaggedUser:
       type: object
@@ -802,6 +870,8 @@ components:
         - adminUsername
         - monetagZoneId
         - adsgramBlockId
+        - requireAdPostback
+        - postbackUrl
       properties:
         minWithdraw: { type: number }
         referralBonus: { type: number }
@@ -813,6 +883,8 @@ components:
         adminUsername: { type: string }
         monetagZoneId: { type: ["string", "null"] }
         adsgramBlockId: { type: ["string", "null"] }
+        requireAdPostback: { type: boolean }
+        postbackUrl: { type: string }
 
     ConfigUpdate:
       type: object
@@ -827,6 +899,25 @@ components:
         adminUsername: { type: string }
         monetagZoneId: { type: string }
         adsgramBlockId: { type: string }
+        requireAdPostback: { type: boolean }
+
+    PostbackUrlInfo:
+      type: object
+      required: [postbackUrl]
+      properties:
+        postbackUrl: { type: string }
+
+    ClaimAdInput:
+      type: object
+      required: [network]
+      properties:
+        network: { $ref: "#/components/schemas/AdNetwork" }
+
+    ClaimAdResult:
+      type: object
+      required: [claimId]
+      properties:
+        claimId: { type: string }
 
     BroadcastInput:
       type: object

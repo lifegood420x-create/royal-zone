@@ -4,6 +4,7 @@ import {
   useGetPublicConfig, 
   useListTasks, 
   useWatchAd, 
+  useClaimAd,
   useCompleteTask,
   getGetMeQueryKey,
   getListTasksQueryKey
@@ -27,6 +28,7 @@ export default function Earn() {
   const [visitingTask, setVisitingTask] = useState<number | null>(null);
   
   const watchAdMutation = useWatchAd();
+  const claimAdMutation = useClaimAd();
   const completeTaskMutation = useCompleteTask();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -36,27 +38,42 @@ export default function Earn() {
     setActiveAd(network);
     try {
       const zoneId = network === 'monetag' ? config.monetagZoneId : config.adsgramBlockId;
-      await showRewardedAd(network, zoneId);
-      
-      watchAdMutation.mutate(
-        { data: { network } },
-        {
-          onSuccess: (res) => {
-            toast({ 
-              title: 'Ad Completed!', 
-              description: `You earned ${formatCurrency(res.adWatch.reward)}` 
-            });
-            queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
-          },
-          onError: () => {
-            toast({ 
-              title: 'Error', 
-              description: 'Something went wrong while crediting your reward.', 
-              variant: 'destructive' 
-            });
+
+      if (config.requireAdPostback) {
+        // Postback-verified flow: reserve the slot first, pass the claimId
+        // into the ad so the network can echo it back on its own server
+        // call, and only refresh balance afterwards — the reward is
+        // credited by /ads/postback, not by anything this tab does.
+        const claim = await claimAdMutation.mutateAsync({ data: { network } });
+        await showRewardedAd(network, zoneId, claim.claimId);
+        toast({
+          title: 'Ad watched',
+          description: 'Reward will be credited once the ad network confirms the view (usually within a minute).',
+        });
+        setTimeout(() => queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() }), 5000);
+      } else {
+        await showRewardedAd(network, zoneId);
+
+        watchAdMutation.mutate(
+          { data: { network } },
+          {
+            onSuccess: (res) => {
+              toast({
+                title: 'Ad Completed!',
+                description: `You earned ${formatCurrency(res.adWatch.reward)}`
+              });
+              queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
+            },
+            onError: () => {
+              toast({
+                title: 'Error',
+                description: 'Something went wrong while crediting your reward.',
+                variant: 'destructive'
+              });
+            }
           }
-        }
-      );
+        );
+      }
     } catch (err: any) {
       toast({ 
         title: 'Ad failed', 

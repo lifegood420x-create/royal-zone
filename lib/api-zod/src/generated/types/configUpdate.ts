@@ -21,4 +21,5 @@ export interface ConfigUpdate {
   adminUsername?: string;
   monetagZoneId?: string;
   adsgramBlockId?: string;
+  requireAdPostback?: boolean;
 }
