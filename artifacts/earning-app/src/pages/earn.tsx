@@ -320,7 +320,7 @@ export default function Earn() {
                           }}
                           data-testid={`button-do-task-${task.id}`}
                         >
-                          Do it <ExternalLink size={14} className="ml-1" />
+                          Join <ExternalLink size={14} className="ml-1" />
                         </Button>
                       )}
                     </div>
