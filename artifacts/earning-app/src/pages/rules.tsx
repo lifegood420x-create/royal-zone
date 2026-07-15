@@ -4,19 +4,19 @@ import { useLocation } from 'wouter';
 import { ArrowLeft, ShieldAlert, CheckCircle2, XCircle } from 'lucide-react';
 
 const doRules = [
-  'Use only one account per person, per device, and per Telegram ID.',
-  'Watch ads and complete tasks yourself — automation, bots, and click-farms are not allowed.',
-  'Refer real friends who genuinely want to use the app.',
-  'Keep your withdrawal account details accurate and up to date.',
-  'Report bugs or suspicious activity to Help & Support.',
+  'প্রতি ব্যক্তি, প্রতি ডিভাইস এবং প্রতি Telegram ID-তে শুধুমাত্র একটি অ্যাকাউন্ট ব্যবহার করুন।',
+  'নিজে ad দেখুন এবং task সম্পন্ন করুন — অটোমেশন, বট বা ক্লিক-ফার্ম ব্যবহার করা যাবে না।',
+  'প্রকৃত বন্ধুদের রেফার করুন যারা সত্যিই অ্যাপটি ব্যবহার করতে চান।',
+  'আপনার withdrawal অ্যাকাউন্টের তথ্য সঠিক ও আপডেট রাখুন।',
+  'কোনো bug বা সন্দেহজনক কার্যকলাপ দেখলে Help & Support-এ জানান।',
 ];
 
 const dontRules = [
-  'Do not create multiple/duplicate accounts to farm referral bonuses or ad rewards.',
-  'Do not use VPNs, emulators, bots, or scripts to fake ad views or task completions.',
-  'Do not refer accounts created from the same device or network as your own.',
-  'Do not share, sell, or trade your account with anyone.',
-  'Do not attempt to exploit bugs for extra balance — report them instead.',
+  'রেফারেল বোনাস বা ad reward পাওয়ার জন্য একাধিক/ডুপ্লিকেট অ্যাকাউন্ট তৈরি করা যাবে না।',
+  'ad view বা task completion ভুয়া দেখাতে VPN, emulator, বট বা স্ক্রিপ্ট ব্যবহার করা যাবে না।',
+  'নিজের ডিভাইস বা নেটওয়ার্ক থেকে তৈরি অ্যাকাউন্ট রেফার করা যাবে না।',
+  'আপনার অ্যাকাউন্ট কারো সাথে শেয়ার, বিক্রি বা লেনদেন করা যাবে না।',
+  'বাড়তি ব্যালেন্সের জন্য কোনো bug কাজে লাগানো যাবে না — বরং সেটা রিপোর্ট করুন।',
 ];
 
 export default function Rules() {
@@ -36,7 +36,7 @@ export default function Rules() {
         </Button>
         <div>
           <h1 className="text-xl font-bold text-foreground">App Rules</h1>
-          <p className="text-sm text-muted-foreground mt-1">Read before earning</p>
+          <p className="text-sm text-muted-foreground mt-1">আয় শুরু করার আগে পড়ে নিন</p>
         </div>
       </div>
 
@@ -45,7 +45,7 @@ export default function Rules() {
           <CardContent className="p-5 space-y-3">
             <h2 className="font-bold text-base flex items-center gap-2 text-green-700">
               <CheckCircle2 size={18} />
-              Do
+              যা করবেন
             </h2>
             <ul className="space-y-2.5">
               {doRules.map((rule, i) => (
@@ -62,7 +62,7 @@ export default function Rules() {
           <CardContent className="p-5 space-y-3">
             <h2 className="font-bold text-base flex items-center gap-2 text-destructive">
               <XCircle size={18} />
-              Don't
+              যা করবেন না
             </h2>
             <ul className="space-y-2.5">
               {dontRules.map((rule, i) => (
@@ -78,11 +78,11 @@ export default function Rules() {
         <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 flex gap-3 items-start">
           <ShieldAlert className="text-destructive shrink-0 mt-0.5" size={20} />
           <div>
-            <p className="font-bold text-destructive text-sm">Enforcement</p>
+            <p className="font-bold text-destructive text-sm">নিয়ম ভঙ্গের ফলাফল</p>
             <p className="text-xs text-destructive/80 mt-1 leading-relaxed">
-              Accounts that break these rules — including fake referrals, multi-accounting, or faked ad/task activity — will be
-              flagged and may be permanently banned, and pending balances forfeited. Withdrawals from flagged or banned accounts
-              will be rejected. If you believe your account was flagged by mistake, contact Help & Support.
+              যেসব অ্যাকাউন্ট এই নিয়ম ভঙ্গ করবে — যেমন ভুয়া রেফারেল, একাধিক অ্যাকাউন্ট, অথবা ভুয়া ad/task কার্যকলাপ — সেগুলো ফ্ল্যাগ হবে
+              এবং স্থায়ীভাবে ব্যান হতে পারে, সাথে জমাকৃত ব্যালেন্সও বাতিল হয়ে যেতে পারে। ফ্ল্যাগড বা ব্যানড অ্যাকাউন্ট থেকে withdrawal
+              রিকোয়েস্ট বাতিল করা হবে। যদি মনে করেন আপনার অ্যাকাউন্ট ভুলবশত ফ্ল্যাগ হয়েছে, তাহলে Help & Support-এ যোগাযোগ করুন।
             </p>
           </div>
         </div>
