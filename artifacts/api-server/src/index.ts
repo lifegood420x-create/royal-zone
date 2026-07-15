@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { getWebhookInfo, setWebhook } from "./lib/telegram";
 
 const rawPort = process.env["PORT"];
 
@@ -22,4 +23,32 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+  void ensureWebhookRegistered();
 });
+
+/**
+ * Registers the Telegram webhook on boot if it isn't already pointed at
+ * this deployment's domain. Without this, /start (and its referral code)
+ * never reaches the server — Telegram just queues updates silently, which
+ * then arrive all at once in a burst whenever the webhook is eventually
+ * (re)configured, e.g. via the admin "Reset Webhook" button.
+ */
+async function ensureWebhookRegistered(): Promise<void> {
+  try {
+    const domains = (process.env.REPLIT_DOMAINS ?? "").split(",").filter(Boolean);
+    const domain = domains[0];
+    if (!domain) {
+      logger.warn("No REPLIT_DOMAINS available; skipping Telegram webhook registration.");
+      return;
+    }
+
+    const expectedUrl = `https://${domain}/api/telegram/webhook`;
+    const info = await getWebhookInfo();
+    if (info.url === expectedUrl) return;
+
+    await setWebhook(expectedUrl);
+    logger.info({ expectedUrl, previousUrl: info.url || null, hadPendingUpdates: info.pending_update_count }, "Telegram webhook (re)registered on boot");
+  } catch (error) {
+    logger.warn({ error }, "Failed to auto-register Telegram webhook on boot");
+  }
+}

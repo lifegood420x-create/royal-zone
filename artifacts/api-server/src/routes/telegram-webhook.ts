@@ -40,6 +40,9 @@ router.post("/telegram/webhook", async (req, res): Promise<void> => {
   );
 
   const config = await getAppConfig();
+  const domains = (process.env.REPLIT_DOMAINS ?? "").split(",").filter(Boolean);
+  const appUrl = domains[0] ? `https://${domains[0]}/` : null;
+
   try {
     await sendMessage(
       String(message.chat.id),
@@ -48,10 +51,9 @@ router.post("/telegram/webhook", async (req, res): Promise<void> => {
         reply_markup: {
           inline_keyboard: [
             [
-              {
-                text: "Open " + config.botName,
-                url: `https://t.me/${config.botUsername}`,
-              },
+              appUrl
+                ? { text: "Open " + config.botName, web_app: { url: appUrl } }
+                : { text: "Open " + config.botName, url: `https://t.me/${config.botUsername}` },
             ],
           ],
         },

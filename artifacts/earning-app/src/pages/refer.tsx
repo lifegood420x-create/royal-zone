@@ -15,7 +15,13 @@ export default function Refer() {
 
   // Fallback to botUsername from config, or generic default if missing
   const botUsername = config?.botUsername || 'as_earning_bot';
-  const referralLink = user ? `https://t.me/${botUsername}?startapp=${user.referralCode}` : '';
+  // `?start=` (not `?startapp=`) is used deliberately: it always sends a
+  // `/start <code>` message to the bot, which our webhook reliably turns
+  // into a referral credit for ANY bot — `?startapp=` only opens the Mini
+  // App directly (skipping the bot chat, and the referral code with it)
+  // when the bot has a Main Mini App attached in BotFather, which this bot
+  // doesn't. The bot's reply then offers a button to actually open the app.
+  const referralLink = user ? `https://t.me/${botUsername}?start=${user.referralCode}` : '';
 
   const handleCopy = () => {
     if (!referralLink) return;
