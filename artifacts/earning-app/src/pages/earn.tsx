@@ -146,43 +146,53 @@ export default function Earn() {
               </div>
               <Progress value={adProgress} className="h-2.5 mb-5" />
               
-              <div className="grid grid-cols-2 gap-3">
-                <Button 
-                  disabled={adsLeft === 0 || activeAd !== null}
-                  onClick={() => handleWatchAd('monetag')}
-                  className="w-full font-bold relative overflow-hidden group"
-                  variant="outline"
-                  data-testid="button-ad-monetag"
-                >
-                  {activeAd === 'monetag' ? (
-                    <Loader2 className="animate-spin" size={18} />
-                  ) : (
-                    <>
-                      <Play className="fill-primary text-primary mr-2" size={16} />
-                      Server 1
-                    </>
+              {(config?.monetagEnabled || config?.adsgramEnabled) ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {config?.monetagEnabled && (
+                    <Button 
+                      disabled={adsLeft === 0 || activeAd !== null}
+                      onClick={() => handleWatchAd('monetag')}
+                      className="w-full font-bold relative overflow-hidden group"
+                      variant="outline"
+                      data-testid="button-ad-monetag"
+                    >
+                      {activeAd === 'monetag' ? (
+                        <Loader2 className="animate-spin" size={18} />
+                      ) : (
+                        <>
+                          <Play className="fill-primary text-primary mr-2" size={16} />
+                          Server 1
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
-                
-                <Button 
-                  disabled={adsLeft === 0 || activeAd !== null}
-                  onClick={() => handleWatchAd('adsgram')}
-                  className="w-full font-bold relative overflow-hidden group"
-                  variant="outline"
-                  data-testid="button-ad-adsgram"
-                >
-                  {activeAd === 'adsgram' ? (
-                    <Loader2 className="animate-spin" size={18} />
-                  ) : (
-                    <>
-                      <Play className="fill-primary text-primary mr-2" size={16} />
-                      Server 2
-                    </>
+
+                  {config?.adsgramEnabled && (
+                    <Button 
+                      disabled={adsLeft === 0 || activeAd !== null}
+                      onClick={() => handleWatchAd('adsgram')}
+                      className="w-full font-bold relative overflow-hidden group"
+                      variant="outline"
+                      data-testid="button-ad-adsgram"
+                    >
+                      {activeAd === 'adsgram' ? (
+                        <Loader2 className="animate-spin" size={18} />
+                      ) : (
+                        <>
+                          <Play className="fill-primary text-primary mr-2" size={16} />
+                          Server 2
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
-              </div>
+                </div>
+              ) : (
+                <p className="text-sm text-center text-muted-foreground py-4 font-medium" data-testid="text-ads-unavailable">
+                  Video ads are temporarily unavailable. Please check back later.
+                </p>
+              )}
               
-              {adsLeft === 0 && (
+              {adsLeft === 0 && (config?.monetagEnabled || config?.adsgramEnabled) && (
                 <p className="text-xs text-center text-muted-foreground mt-3 font-medium">
                   You've reached your daily limit. Come back tomorrow!
                 </p>

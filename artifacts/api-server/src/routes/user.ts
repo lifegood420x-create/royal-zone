@@ -23,6 +23,8 @@ router.get("/config/public", requireAuth, async (req, res): Promise<void> => {
     channelUsername: config.channelUsername,
     monetagZoneId: config.monetagZoneId,
     adsgramBlockId: config.adsgramBlockId,
+    monetagEnabled: config.monetagEnabled,
+    adsgramEnabled: config.adsgramEnabled,
     requireAdPostback: config.requireAdPostback,
   });
   res.json(data);

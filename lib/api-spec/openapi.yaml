@@ -761,6 +761,8 @@ components:
         - channelUsername
         - monetagZoneId
         - adsgramBlockId
+        - monetagEnabled
+        - adsgramEnabled
         - requireAdPostback
       properties:
         minWithdraw: { type: number }
@@ -772,6 +774,8 @@ components:
         channelUsername: { type: ["string", "null"] }
         monetagZoneId: { type: ["string", "null"] }
         adsgramBlockId: { type: ["string", "null"] }
+        monetagEnabled: { type: boolean }
+        adsgramEnabled: { type: boolean }
         requireAdPostback: { type: boolean }
 
     FlaggedUser:
@@ -871,6 +875,8 @@ components:
         - adminUsername
         - monetagZoneId
         - adsgramBlockId
+        - monetagEnabled
+        - adsgramEnabled
         - requireAdPostback
         - postbackUrl
       properties:
@@ -884,6 +890,8 @@ components:
         adminUsername: { type: string }
         monetagZoneId: { type: ["string", "null"] }
         adsgramBlockId: { type: ["string", "null"] }
+        monetagEnabled: { type: boolean }
+        adsgramEnabled: { type: boolean }
         requireAdPostback: { type: boolean }
         postbackUrl: { type: string }
 
@@ -900,6 +908,8 @@ components:
         adminUsername: { type: string }
         monetagZoneId: { type: string }
         adsgramBlockId: { type: string }
+        monetagEnabled: { type: boolean }
+        adsgramEnabled: { type: boolean }
         requireAdPostback: { type: boolean }
 
     PostbackUrlInfo:

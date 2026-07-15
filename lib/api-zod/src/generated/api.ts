@@ -89,6 +89,8 @@ export const GetPublicConfigResponse = zod.object({
   "channelUsername": zod.string().nullable(),
   "monetagZoneId": zod.string().nullable(),
   "adsgramBlockId": zod.string().nullable(),
+  "monetagEnabled": zod.boolean(),
+  "adsgramEnabled": zod.boolean(),
   "requireAdPostback": zod.boolean()
 })
 
@@ -561,6 +563,8 @@ export const GetAdminConfigResponse = zod.object({
   "adminUsername": zod.string(),
   "monetagZoneId": zod.string().nullable(),
   "adsgramBlockId": zod.string().nullable(),
+  "monetagEnabled": zod.boolean(),
+  "adsgramEnabled": zod.boolean(),
   "requireAdPostback": zod.boolean(),
   "postbackUrl": zod.string()
 })
@@ -590,6 +594,8 @@ export const UpdateAdminConfigBody = zod.object({
   "adminUsername": zod.string().optional(),
   "monetagZoneId": zod.string().optional(),
   "adsgramBlockId": zod.string().optional(),
+  "monetagEnabled": zod.boolean().optional(),
+  "adsgramEnabled": zod.boolean().optional(),
   "requireAdPostback": zod.boolean().optional()
 })
 
@@ -604,6 +610,8 @@ export const UpdateAdminConfigResponse = zod.object({
   "adminUsername": zod.string(),
   "monetagZoneId": zod.string().nullable(),
   "adsgramBlockId": zod.string().nullable(),
+  "monetagEnabled": zod.boolean(),
+  "adsgramEnabled": zod.boolean(),
   "requireAdPostback": zod.boolean(),
   "postbackUrl": zod.string()
 })

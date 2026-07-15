@@ -202,6 +202,8 @@ export interface PublicConfig {
   monetagZoneId: string | null;
   /** @nullable */
   adsgramBlockId: string | null;
+  monetagEnabled: boolean;
+  adsgramEnabled: boolean;
   requireAdPostback: boolean;
 }
 
@@ -280,6 +282,8 @@ export interface AppConfig {
   monetagZoneId: string | null;
   /** @nullable */
   adsgramBlockId: string | null;
+  monetagEnabled: boolean;
+  adsgramEnabled: boolean;
   requireAdPostback: boolean;
   postbackUrl: string;
 }
@@ -299,6 +303,8 @@ export interface ConfigUpdate {
   adminUsername?: string;
   monetagZoneId?: string;
   adsgramBlockId?: string;
+  monetagEnabled?: boolean;
+  adsgramEnabled?: boolean;
   requireAdPostback?: boolean;
 }
 

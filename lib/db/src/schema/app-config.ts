@@ -21,6 +21,11 @@ export const appConfigTable = pgTable("app_config", {
   adminUsername: text("admin_username").notNull().default("admin"),
   monetagZoneId: text("monetag_zone_id"),
   adsgramBlockId: text("adsgram_block_id"),
+  // Lets the admin turn each ad network on/off from the panel without
+  // clearing its zone/block ID (so the ID stays saved for when it's
+  // re-enabled).
+  monetagEnabled: boolean("monetag_enabled").notNull().default(true),
+  adsgramEnabled: boolean("adsgram_enabled").notNull().default(true),
   // Shared secret appended to the postback URL registered in the ad
   // network's dashboard, so incoming postback calls can be authenticated.
   postbackSecret: text("postback_secret"),

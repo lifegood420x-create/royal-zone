@@ -20,6 +20,8 @@ export interface AppConfig {
   monetagZoneId: string | null;
   /** @nullable */
   adsgramBlockId: string | null;
+  monetagEnabled: boolean;
+  adsgramEnabled: boolean;
   requireAdPostback: boolean;
   postbackUrl: string;
 }

@@ -40,6 +40,8 @@ const configSchema = z.object({
   adminUsername: z.string().min(1),
   monetagZoneId: z.string().optional().or(z.literal('')),
   adsgramBlockId: z.string().optional().or(z.literal('')),
+  monetagEnabled: z.boolean().default(true),
+  adsgramEnabled: z.boolean().default(true),
   requireAdPostback: z.boolean(),
 });
 
@@ -71,6 +73,8 @@ export default function AdminConfig() {
       adminUsername: '',
       monetagZoneId: '',
       adsgramBlockId: '',
+      monetagEnabled: true,
+      adsgramEnabled: true,
       requireAdPostback: false,
     },
   });
@@ -94,6 +98,8 @@ export default function AdminConfig() {
         adminUsername: config.adminUsername,
         monetagZoneId: config.monetagZoneId || '',
         adsgramBlockId: config.adsgramBlockId || '',
+        monetagEnabled: config.monetagEnabled,
+        adsgramEnabled: config.adsgramEnabled,
         requireAdPostback: config.requireAdPostback,
       });
       initializedRef.current = true;
@@ -279,6 +285,43 @@ export default function AdminConfig() {
                               <Input placeholder="e.g. block-123" {...field} />
                             </FormControl>
                             <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="monetagEnabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-muted/20">
+                            <div className="space-y-0.5">
+                              <FormLabel>Monetag Ads</FormLabel>
+                              <p className="text-[10px] text-muted-foreground">
+                                Turn off to hide the Monetag "Server 1" button from users.
+                              </p>
+                            </div>
+                            <FormControl>
+                              <Switch checked={field.value} onCheckedChange={field.onChange} data-testid="switch-monetag-enabled" />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="adsgramEnabled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-muted/20">
+                            <div className="space-y-0.5">
+                              <FormLabel>Adsgram Ads</FormLabel>
+                              <p className="text-[10px] text-muted-foreground">
+                                Turn off to hide the Adsgram "Server 2" button from users.
+                              </p>
+                            </div>
+                            <FormControl>
+                              <Switch checked={field.value} onCheckedChange={field.onChange} data-testid="switch-adsgram-enabled" />
+                            </FormControl>
                           </FormItem>
                         )}
                       />
