@@ -262,6 +262,7 @@ export interface AdminWithdrawal {
   processedAt: string | null;
   /** @nullable */
   note: string | null;
+  isFirstWithdrawal: boolean;
   user: AdminWithdrawalUser;
 }
 

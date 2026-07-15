@@ -414,6 +414,7 @@ export const ListPendingPayoutsResponseItem = zod.object({
   "requestedAt": zod.coerce.date(),
   "processedAt": zod.coerce.date().nullable(),
   "note": zod.string().nullable(),
+  "isFirstWithdrawal": zod.boolean(),
   "user": zod.object({
   "id": zod.number(),
   "firstName": zod.string(),
@@ -440,6 +441,7 @@ export const ApprovePayoutResponse = zod.object({
   "requestedAt": zod.coerce.date(),
   "processedAt": zod.coerce.date().nullable(),
   "note": zod.string().nullable(),
+  "isFirstWithdrawal": zod.boolean(),
   "user": zod.object({
   "id": zod.number(),
   "firstName": zod.string(),
@@ -469,6 +471,7 @@ export const RejectPayoutResponse = zod.object({
   "requestedAt": zod.coerce.date(),
   "processedAt": zod.coerce.date().nullable(),
   "note": zod.string().nullable(),
+  "isFirstWithdrawal": zod.boolean(),
   "user": zod.object({
   "id": zod.number(),
   "firstName": zod.string(),
@@ -501,6 +504,7 @@ export const UpdatePayoutAccountNumberResponse = zod.object({
   "requestedAt": zod.coerce.date(),
   "processedAt": zod.coerce.date().nullable(),
   "note": zod.string().nullable(),
+  "isFirstWithdrawal": zod.boolean(),
   "user": zod.object({
   "id": zod.number(),
   "firstName": zod.string(),

@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, and, ne, count } from "drizzle-orm";
 import { db, usersTable, withdrawalsTable } from "@workspace/db";
 import {
   ApprovePayoutParams,
@@ -18,8 +18,22 @@ const router: IRouter = Router();
 
 async function withUser(withdrawal: typeof withdrawalsTable.$inferSelect) {
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, withdrawal.userId));
+
+  // Count previous non-pending withdrawals for this user (excluding current)
+  const [{ prevCount }] = await db
+    .select({ prevCount: count() })
+    .from(withdrawalsTable)
+    .where(
+      and(
+        eq(withdrawalsTable.userId, withdrawal.userId),
+        ne(withdrawalsTable.id, withdrawal.id),
+        ne(withdrawalsTable.status, "pending"),
+      )
+    );
+
   return {
     ...withdrawal,
+    isFirstWithdrawal: Number(prevCount) === 0,
     user: { id: user.id, firstName: user.firstName, username: user.username, telegramId: user.telegramId },
   };
 }

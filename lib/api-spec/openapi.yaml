@@ -888,6 +888,7 @@ components:
         - processedAt
         - note
         - user
+        - isFirstWithdrawal
       properties:
         id: { type: integer }
         amount: { type: number }
@@ -897,6 +898,7 @@ components:
         requestedAt: { type: string, format: date-time }
         processedAt: { type: ["string", "null"], format: date-time }
         note: { type: ["string", "null"] }
+        isFirstWithdrawal: { type: boolean }
         user: { $ref: "#/components/schemas/AdminWithdrawalUser" }
 
     LeaderboardEntry:
