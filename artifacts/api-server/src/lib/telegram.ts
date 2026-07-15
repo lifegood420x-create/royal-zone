@@ -105,6 +105,48 @@ export function setWebhook(url: string) {
   return callTelegramApi<boolean>("setWebhook", { url });
 }
 
+interface UserProfilePhotos {
+  total_count: number;
+  photos: { file_id: string; file_size?: number }[][];
+}
+
+interface TelegramFile {
+  file_id: string;
+  file_path?: string;
+}
+
+/**
+ * Fetches a Telegram user's current profile-photo bytes via the Bot API.
+ * Used as a fallback for users who registered through the `/start` webhook
+ * (where Telegram never includes a photo URL), so their avatar can still
+ * show up once they have a public profile photo. Returns `null` when the
+ * user has no photo or it can't be retrieved (e.g. privacy settings).
+ */
+export async function fetchTelegramAvatar(
+  telegramUserId: string,
+): Promise<{ buffer: Buffer; contentType: string } | null> {
+  const numericId = Number(telegramUserId);
+  if (!Number.isFinite(numericId)) return null;
+
+  const photos = await callTelegramApi<UserProfilePhotos>("getUserProfilePhotos", {
+    user_id: numericId,
+    limit: 1,
+  });
+  const smallestSize = photos.photos[0]?.[0];
+  if (!smallestSize) return null;
+
+  const file = await callTelegramApi<TelegramFile>("getFile", { file_id: smallestSize.file_id });
+  if (!file.file_path) return null;
+
+  const response = await fetch(`${TELEGRAM_API_BASE}/file/bot${getBotToken()}/${file.file_path}`);
+  if (!response.ok) return null;
+
+  const extension = file.file_path.split(".").pop()?.toLowerCase();
+  const contentType = extension === "png" ? "image/png" : "image/jpeg";
+  const buffer = Buffer.from(await response.arrayBuffer());
+  return { buffer, contentType };
+}
+
 /** Sends a message to every user, tolerating individual failures (blocked bot, etc). */
 export async function broadcastMessage(chatIds: string[], text: string) {
   let sentCount = 0;

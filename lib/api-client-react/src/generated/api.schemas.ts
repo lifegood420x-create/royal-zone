@@ -155,6 +155,8 @@ export interface ReferralUser {
   firstName: string;
   /** @nullable */
   username: string | null;
+  /** @nullable */
+  photoUrl: string | null;
   joinedAt: string;
 }
 

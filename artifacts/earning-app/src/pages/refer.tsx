@@ -126,9 +126,18 @@ export default function Refer() {
               {referrals.map((ref) => (
                 <div key={ref.id} className="bg-card border rounded-xl p-3 flex items-center justify-between shadow-sm">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
-                      {ref.firstName.charAt(0).toUpperCase()}
-                    </div>
+                    {ref.photoUrl ? (
+                      <img
+                        src={ref.photoUrl}
+                        alt={ref.firstName}
+                        className="w-10 h-10 rounded-full border border-border shadow-sm object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                        {ref.firstName.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div>
                       <p className="font-bold text-sm text-foreground">{ref.firstName}</p>
                       <p className="text-xs text-muted-foreground">Joined {formatDate(ref.joinedAt)}</p>

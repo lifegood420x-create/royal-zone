@@ -700,11 +700,12 @@ components:
 
     ReferralUser:
       type: object
-      required: [id, firstName, username, joinedAt]
+      required: [id, firstName, username, photoUrl, joinedAt]
       properties:
         id: { type: integer }
         firstName: { type: string }
         username: { type: ["string", "null"] }
+        photoUrl: { type: ["string", "null"] }
         joinedAt: { type: string, format: date-time }
 
     ReferralsSummary:

@@ -234,6 +234,7 @@ export const ListReferralsResponse = zod.object({
   "id": zod.number(),
   "firstName": zod.string(),
   "username": zod.string().nullable(),
+  "photoUrl": zod.string().nullable(),
   "joinedAt": zod.coerce.date()
 }))
 })

@@ -22,6 +22,7 @@ router.get("/referrals", requireAuth, async (req, res): Promise<void> => {
       id: r.id,
       firstName: r.firstName,
       username: r.username,
+      photoUrl: r.photoUrl,
       joinedAt: r.createdAt,
     })),
   });
