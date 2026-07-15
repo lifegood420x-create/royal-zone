@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Wallet, AlertCircle, Clock, CheckCircle2, XCircle, ArrowDownToLine, Loader2 } from 'lucide-react';
+import { Wallet, AlertCircle, Clock, CheckCircle2, XCircle, ArrowDownToLine, Loader2, ChevronDown } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency, formatDate, formatTime } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -43,6 +43,19 @@ export default function Withdraw() {
   const requestMutation = useRequestWithdrawal();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [expandedReasons, setExpandedReasons] = useState<Set<number>>(new Set());
+
+  const toggleReason = (id: number) => {
+    setExpandedReasons((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   const form = useForm<WithdrawFormValues>({
     resolver: zodResolver(withdrawSchema),
@@ -283,14 +296,34 @@ export default function Withdraw() {
                       </div>
                     </div>
                     
-                    <div className="flex justify-between items-center mt-3 pt-3 border-t text-xs text-muted-foreground">
+                    <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
                       <span>{formatDate(w.requestedAt)} • {formatTime(w.requestedAt)}</span>
-                      {w.note && w.status === 'rejected' && (
-                        <span className="text-destructive font-medium truncate max-w-[150px]" title={w.note}>
-                          Reason: {w.note}
-                        </span>
-                      )}
                     </div>
+
+                    {w.note && w.status === 'rejected' && (
+                      <button
+                        type="button"
+                        onClick={() => toggleReason(w.id)}
+                        className="w-full mt-2 text-left"
+                        data-testid={`button-reason-${w.id}`}
+                      >
+                        <div className="flex items-start gap-1.5">
+                          <p
+                            className={`text-destructive font-medium text-xs flex-1 ${
+                              expandedReasons.has(w.id) ? '' : 'truncate'
+                            }`}
+                          >
+                            Reason: {w.note}
+                          </p>
+                          <ChevronDown
+                            size={14}
+                            className={`text-destructive shrink-0 mt-0.5 transition-transform ${
+                              expandedReasons.has(w.id) ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </div>
+                      </button>
+                    )}
                   </CardContent>
                 </Card>
               ))}
