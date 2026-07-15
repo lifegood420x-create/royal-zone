@@ -25,12 +25,17 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // AdminLayout renders inside <Route path="/admin" nest>, so wouter's
+  // router base for this subtree is already "/admin" — hrefs here must be
+  // relative to that nest (not repeat the "/admin" prefix), or Link
+  // double-prepends it (e.g. "/admin/admin/payouts") and the nested Switch
+  // 404s because it never sees a route it recognizes.
   const navItems = [
-    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/payouts', label: 'Payouts', icon: CreditCard },
-    { href: '/admin/users', label: 'Users', icon: Users },
-    { href: '/admin/tasks', label: 'Tasks', icon: ListTodo },
-    { href: '/admin/config', label: 'Settings', icon: Settings },
+    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/payouts', label: 'Payouts', icon: CreditCard },
+    { href: '/users', label: 'Users', icon: Users },
+    { href: '/tasks', label: 'Tasks', icon: ListTodo },
+    { href: '/config', label: 'Settings', icon: Settings },
   ];
 
   return (
@@ -64,7 +69,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </nav>
         <div className="p-4 border-t">
           <Link
-            href="/"
+            href="~/"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             <ChevronLeft size={18} />
@@ -78,7 +83,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         {/* Material-style top app bar (mobile only) */}
         <header className="bg-primary text-primary-foreground px-4 h-14 flex items-center gap-1 sticky top-0 z-20 shadow-md md:hidden">
           <Link
-            href="/"
+            href="~/"
             className="p-2 -ml-2 rounded-full active:bg-white/15 transition-colors"
             aria-label="Back to app"
           >
