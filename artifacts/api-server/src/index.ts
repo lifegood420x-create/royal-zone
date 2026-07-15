@@ -32,8 +32,20 @@ app.listen(port, (err) => {
  * never reaches the server — Telegram just queues updates silently, which
  * then arrive all at once in a burst whenever the webhook is eventually
  * (re)configured, e.g. via the admin "Reset Webhook" button.
+ *
+ * Only runs in production. The dev workflow restarts frequently while
+ * iterating (every code change, workflow restart, etc.), and each restart
+ * used to steal the webhook away from the live production domain and point
+ * it at the dev preview domain instead — silently breaking the bot in
+ * production every time the agent touched the dev server. Dev/test webhook
+ * registration must go through the admin panel's explicit "Reset Webhook"
+ * action, never automatically on boot.
  */
 async function ensureWebhookRegistered(): Promise<void> {
+  if (process.env.NODE_ENV !== "production") {
+    logger.info("Skipping automatic Telegram webhook registration (not production).");
+    return;
+  }
   try {
     const domains = (process.env.REPLIT_DOMAINS ?? "").split(",").filter(Boolean);
     const domain = domains[0];

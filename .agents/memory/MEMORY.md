@@ -3,7 +3,8 @@
 - [TS project references need a build, not just noEmit](drizzle-project-references.md) — stale lib `dist/*.d.ts` causes false "no exported member" errors until `tsc --build` reruns.
 - [Concurrent user upsert race](concurrent-upsert-race.md) — first-touch upsert-by-external-id needs to catch the unique-constraint race, not just check-then-insert.
 - [Ad postback verification pattern](ad-postback-verification.md) — claim→show→server-postback flow to stop devtools-faked ad rewards; opt-in via a flag.
-- [Referral fraud auto-ban](referral-fraud-auto-ban.md) — first referred signup per IP under a referrer is allowed, repeats auto-ban; admin IP-spoof testing via curl doesn't work in this workspace.
+- [Referral fraud flagging](referral-fraud-auto-ban.md) — fraud signups are flagged (bonus denied, ad rewards blocked), never auto-banned; admin IP-spoof testing via curl doesn't work in this workspace.
+- [Telegram webhook dev-vs-prod](telegram-webhook-dev-vs-prod.md) — auto-registering the webhook on every boot let dev restarts hijack it from production; gate on NODE_ENV=production. Also: publish syncs schema, not app_config data rows.
 - [Config-driven contact links](earning-app-config-links.md) — Help & Support/App Rules must read from admin-configured values (adminUsername, in-app /rules page), never hardcode placeholder t.me links.
 - [Ad reward countdown gate](ad-reward-countdown-gate.md) — reward request only fires after Promise.all(adSDK, admin-configurable countdown) resolves, not on SDK resolution alone.
 - [Telegram avatar broken-image fallback](telegram-avatar-fallback.md) — always pair a Telegram photoUrl `<img>` with an `onError` state fallback to the initial-letter avatar; the URL alone isn't reliable enough.
