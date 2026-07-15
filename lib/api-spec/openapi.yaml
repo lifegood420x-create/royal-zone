@@ -3,13 +3,19 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AS Earning Telegram mini app API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Telegram authentication
+  - name: user
+    description: End-user facing operations
+  - name: admin
+    description: Admin panel operations
 paths:
   /healthz:
     get:
@@ -24,6 +30,445 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/session:
+    post:
+      operationId: authenticate
+      tags: [auth]
+      summary: Authenticate the current Telegram user and upsert their record
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthInput"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /me:
+    get:
+      operationId: getMe
+      tags: [user]
+      summary: Get the current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /config/public:
+    get:
+      operationId: getPublicConfig
+      tags: [user]
+      summary: Get public app configuration relevant to the current user
+      responses:
+        "200":
+          description: Public configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicConfig"
+
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [user]
+      summary: List active tasks with the current user's completion status
+      responses:
+        "200":
+          description: Task list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaskWithStatus"
+
+  /tasks/{id}/complete:
+    post:
+      operationId: completeTask
+      tags: [user]
+      summary: Mark a task as completed by the current user and credit the reward
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Task completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskCompletionResult"
+
+  /ads/watch:
+    post:
+      operationId: watchAd
+      tags: [user]
+      summary: Record a completed rewarded ad view and credit the reward
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WatchAdInput"
+      responses:
+        "200":
+          description: Ad reward credited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdWatchResult"
+
+  /referrals:
+    get:
+      operationId: listReferrals
+      tags: [user]
+      summary: Get the current user's referral summary and referred users
+      responses:
+        "200":
+          description: Referral summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReferralsSummary"
+
+  /withdrawals:
+    get:
+      operationId: listWithdrawals
+      tags: [user]
+      summary: List the current user's withdrawal history
+      responses:
+        "200":
+          description: Withdrawal history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Withdrawal"
+    post:
+      operationId: requestWithdrawal
+      tags: [user]
+      summary: Request a withdrawal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawalInput"
+      responses:
+        "201":
+          description: Withdrawal requested
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Withdrawal"
+
+  /admin/dashboard:
+    get:
+      operationId: getAdminDashboard
+      tags: [admin]
+      summary: Get admin dashboard summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDashboard"
+
+  /admin/users:
+    get:
+      operationId: listAdminUsers
+      tags: [admin]
+      summary: Search and list users
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminUser"
+
+  /admin/users/{id}/ban:
+    post:
+      operationId: banUser
+      tags: [admin]
+      summary: Ban a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User banned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+
+  /admin/users/{id}/unban:
+    post:
+      operationId: unbanUser
+      tags: [admin]
+      summary: Unban a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User unbanned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+
+  /admin/flagged/{id}/clear:
+    post:
+      operationId: clearFlaggedUser
+      tags: [admin]
+      summary: Clear a user's fraud flag
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Flag cleared
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+
+  /admin/payouts:
+    get:
+      operationId: listPendingPayouts
+      tags: [admin]
+      summary: List pending withdrawal requests
+      responses:
+        "200":
+          description: Pending payouts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminWithdrawal"
+
+  /admin/payouts/{id}/approve:
+    post:
+      operationId: approvePayout
+      tags: [admin]
+      summary: Approve and mark a withdrawal as paid
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Payout approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminWithdrawal"
+
+  /admin/payouts/{id}/reject:
+    post:
+      operationId: rejectPayout
+      tags: [admin]
+      summary: Reject a withdrawal request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectPayoutInput"
+      responses:
+        "200":
+          description: Payout rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminWithdrawal"
+
+  /admin/tasks:
+    get:
+      operationId: listAdminTasks
+      tags: [admin]
+      summary: List all tasks
+      responses:
+        "200":
+          description: Tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      operationId: createTask
+      tags: [admin]
+      summary: Create a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /admin/tasks/{id}:
+    patch:
+      operationId: updateTask
+      tags: [admin]
+      summary: Update a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdate"
+      responses:
+        "200":
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    delete:
+      operationId: deleteTask
+      tags: [admin]
+      summary: Delete a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Task deleted
+
+  /admin/config:
+    get:
+      operationId: getAdminConfig
+      tags: [admin]
+      summary: Get app configuration
+      responses:
+        "200":
+          description: App configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppConfig"
+    patch:
+      operationId: updateAdminConfig
+      tags: [admin]
+      summary: Update app configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigUpdate"
+      responses:
+        "200":
+          description: App configuration updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppConfig"
+
+  /admin/broadcast:
+    post:
+      operationId: sendBroadcast
+      tags: [admin]
+      summary: Send a broadcast message to all users via the Telegram bot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BroadcastInput"
+      responses:
+        "200":
+          description: Broadcast sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BroadcastResult"
+
+  /admin/webhook/status:
+    get:
+      operationId: getWebhookStatus
+      tags: [admin]
+      summary: Get the Telegram bot webhook status
+      responses:
+        "200":
+          description: Webhook status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookStatus"
+
+  /admin/webhook/reset:
+    post:
+      operationId: resetWebhook
+      tags: [admin]
+      summary: Reset the Telegram bot webhook
+      responses:
+        "200":
+          description: Webhook reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookStatus"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +479,372 @@ components:
       required:
         - status
 
+    TaskType:
+      type: string
+      enum: [youtube, facebook, telegram, join_bonus, bonus, other]
+
+    WithdrawalMethod:
+      type: string
+      enum: [bkash, nagad]
+
+    WithdrawalStatus:
+      type: string
+      enum: [pending, paid, rejected]
+
+    AdNetwork:
+      type: string
+      enum: [monetag, adsgram]
+
+    AuthInput:
+      type: object
+      properties:
+        startParam:
+          type: ["string", "null"]
+
+    User:
+      type: object
+      required:
+        - id
+        - telegramId
+        - firstName
+        - username
+        - photoUrl
+        - balance
+        - totalEarned
+        - totalWithdrawn
+        - referralCode
+        - referredBy
+        - isBanned
+        - isFlagged
+        - flagReason
+        - todayAdsWatched
+        - todayTasksCount
+        - totalTasksCount
+        - rejectedWithdrawCount
+        - createdAt
+        - lastActiveAt
+      properties:
+        id: { type: integer }
+        telegramId: { type: string }
+        firstName: { type: string }
+        username: { type: ["string", "null"] }
+        photoUrl: { type: ["string", "null"] }
+        balance: { type: number }
+        totalEarned: { type: number }
+        totalWithdrawn: { type: number }
+        referralCode: { type: string }
+        referredBy: { type: ["integer", "null"] }
+        isBanned: { type: boolean }
+        isFlagged: { type: boolean }
+        flagReason: { type: ["string", "null"] }
+        todayAdsWatched: { type: integer }
+        todayTasksCount: { type: integer }
+        totalTasksCount: { type: integer }
+        rejectedWithdrawCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+        lastActiveAt: { type: string, format: date-time }
+
+    AuthResponse:
+      type: object
+      required: [user, isAdmin]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        isAdmin: { type: boolean }
+
+    Task:
+      type: object
+      required: [id, title, description, reward, type, link, isActive, createdAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: ["string", "null"] }
+        reward: { type: number }
+        type: { $ref: "#/components/schemas/TaskType" }
+        link: { type: ["string", "null"] }
+        isActive: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    TaskWithStatus:
+      allOf:
+        - $ref: "#/components/schemas/Task"
+        - type: object
+          required: [completed]
+          properties:
+            completed: { type: boolean }
+
+    TaskInput:
+      type: object
+      required: [title, reward, type]
+      properties:
+        title: { type: string, minLength: 1 }
+        description: { type: string }
+        reward: { type: number, minimum: 0 }
+        type: { $ref: "#/components/schemas/TaskType" }
+        link: { type: string }
+        isActive: { type: boolean }
+
+    TaskUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        description: { type: string }
+        reward: { type: number, minimum: 0 }
+        type: { $ref: "#/components/schemas/TaskType" }
+        link: { type: string }
+        isActive: { type: boolean }
+
+    TaskCompletion:
+      type: object
+      required: [id, taskId, userId, reward, completedAt]
+      properties:
+        id: { type: integer }
+        taskId: { type: integer }
+        userId: { type: integer }
+        reward: { type: number }
+        completedAt: { type: string, format: date-time }
+
+    TaskCompletionResult:
+      type: object
+      required: [user, completion]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        completion: { $ref: "#/components/schemas/TaskCompletion" }
+
+    WatchAdInput:
+      type: object
+      required: [network]
+      properties:
+        network: { $ref: "#/components/schemas/AdNetwork" }
+
+    AdWatch:
+      type: object
+      required: [id, network, reward, watchedAt]
+      properties:
+        id: { type: integer }
+        network: { $ref: "#/components/schemas/AdNetwork" }
+        reward: { type: number }
+        watchedAt: { type: string, format: date-time }
+
+    AdWatchResult:
+      type: object
+      required: [user, adWatch]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        adWatch: { $ref: "#/components/schemas/AdWatch" }
+
+    ReferralUser:
+      type: object
+      required: [id, firstName, username, joinedAt]
+      properties:
+        id: { type: integer }
+        firstName: { type: string }
+        username: { type: ["string", "null"] }
+        joinedAt: { type: string, format: date-time }
+
+    ReferralsSummary:
+      type: object
+      required: [referralCode, referralBonus, totalReferrals, totalReferralEarnings, referrals]
+      properties:
+        referralCode: { type: string }
+        referralBonus: { type: number }
+        totalReferrals: { type: integer }
+        totalReferralEarnings: { type: number }
+        referrals:
+          type: array
+          items: { $ref: "#/components/schemas/ReferralUser" }
+
+    WithdrawalInput:
+      type: object
+      required: [method, accountNumber, amount]
+      properties:
+        method: { $ref: "#/components/schemas/WithdrawalMethod" }
+        accountNumber: { type: string, minLength: 5 }
+        amount: { type: number, minimum: 1 }
+
+    Withdrawal:
+      type: object
+      required:
+        - id
+        - amount
+        - method
+        - accountNumber
+        - status
+        - requestedAt
+        - processedAt
+        - note
+      properties:
+        id: { type: integer }
+        amount: { type: number }
+        method: { $ref: "#/components/schemas/WithdrawalMethod" }
+        accountNumber: { type: string }
+        status: { $ref: "#/components/schemas/WithdrawalStatus" }
+        requestedAt: { type: string, format: date-time }
+        processedAt: { type: ["string", "null"], format: date-time }
+        note: { type: ["string", "null"] }
+
+    PublicConfig:
+      type: object
+      required:
+        - minWithdraw
+        - baseMinWithdraw
+        - referralBonus
+        - adReward
+        - adDailyLimit
+        - botUsername
+        - channelUsername
+        - monetagZoneId
+        - adsgramBlockId
+      properties:
+        minWithdraw: { type: number }
+        baseMinWithdraw: { type: number }
+        referralBonus: { type: number }
+        adReward: { type: number }
+        adDailyLimit: { type: integer }
+        botUsername: { type: string }
+        channelUsername: { type: ["string", "null"] }
+        monetagZoneId: { type: ["string", "null"] }
+        adsgramBlockId: { type: ["string", "null"] }
+
+    FlaggedUser:
+      type: object
+      required: [id, firstName, username, telegramId, ip, reason, balance]
+      properties:
+        id: { type: integer }
+        firstName: { type: string }
+        username: { type: ["string", "null"] }
+        telegramId: { type: string }
+        ip: { type: ["string", "null"] }
+        reason: { type: string }
+        balance: { type: number }
+
+    AdminDashboard:
+      type: object
+      required: [totalUsers, active24h, totalPaidOut, pendingRequestsCount, flaggedUsers]
+      properties:
+        totalUsers: { type: integer }
+        active24h: { type: integer }
+        totalPaidOut: { type: number }
+        pendingRequestsCount: { type: integer }
+        flaggedUsers:
+          type: array
+          items: { $ref: "#/components/schemas/FlaggedUser" }
+
+    AdminUser:
+      type: object
+      required:
+        - id
+        - telegramId
+        - firstName
+        - username
+        - balance
+        - isBanned
+        - isFlagged
+        - flagReason
+        - createdAt
+      properties:
+        id: { type: integer }
+        telegramId: { type: string }
+        firstName: { type: string }
+        username: { type: ["string", "null"] }
+        balance: { type: number }
+        isBanned: { type: boolean }
+        isFlagged: { type: boolean }
+        flagReason: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+
+    AdminWithdrawalUser:
+      type: object
+      required: [id, firstName, username, telegramId]
+      properties:
+        id: { type: integer }
+        firstName: { type: string }
+        username: { type: ["string", "null"] }
+        telegramId: { type: string }
+
+    AdminWithdrawal:
+      type: object
+      required:
+        - id
+        - amount
+        - method
+        - accountNumber
+        - status
+        - requestedAt
+        - processedAt
+        - note
+        - user
+      properties:
+        id: { type: integer }
+        amount: { type: number }
+        method: { $ref: "#/components/schemas/WithdrawalMethod" }
+        accountNumber: { type: string }
+        status: { $ref: "#/components/schemas/WithdrawalStatus" }
+        requestedAt: { type: string, format: date-time }
+        processedAt: { type: ["string", "null"], format: date-time }
+        note: { type: ["string", "null"] }
+        user: { $ref: "#/components/schemas/AdminWithdrawalUser" }
+
+    RejectPayoutInput:
+      type: object
+      properties:
+        note: { type: ["string", "null"] }
+
+    AppConfig:
+      type: object
+      required:
+        - minWithdraw
+        - referralBonus
+        - adReward
+        - adDailyLimit
+        - botName
+        - botUsername
+        - channelUsername
+        - adminUsername
+        - monetagZoneId
+        - adsgramBlockId
+      properties:
+        minWithdraw: { type: number }
+        referralBonus: { type: number }
+        adReward: { type: number }
+        adDailyLimit: { type: integer }
+        botName: { type: string }
+        botUsername: { type: string }
+        channelUsername: { type: ["string", "null"] }
+        adminUsername: { type: string }
+        monetagZoneId: { type: ["string", "null"] }
+        adsgramBlockId: { type: ["string", "null"] }
+
+    ConfigUpdate:
+      type: object
+      properties:
+        minWithdraw: { type: number, minimum: 0 }
+        referralBonus: { type: number, minimum: 0 }
+        adReward: { type: number, minimum: 0 }
+        adDailyLimit: { type: integer, minimum: 0 }
+        botName: { type: string }
+        botUsername: { type: string }
+        channelUsername: { type: string }
+        adminUsername: { type: string }
+        monetagZoneId: { type: string }
+        adsgramBlockId: { type: string }
+
+    BroadcastInput:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string, minLength: 1 }
+
+    BroadcastResult:
+      type: object
+      required: [sentCount, failedCount]
+      properties:
+        sentCount: { type: integer }
+        failedCount: { type: integer }
+
+    WebhookStatus:
+      type: object
+      required: [url, pendingUpdateCount, lastErrorMessage]
+      properties:
+        url: { type: ["string", "null"] }
+        pendingUpdateCount: { type: integer }
+        lastErrorMessage: { type: ["string", "null"] }

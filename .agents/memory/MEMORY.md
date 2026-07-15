@@ -1,0 +1,4 @@
+- [Telegram Mini App auth pattern](telegram-mini-app-auth.md) — send initData as Bearer token, HMAC-verify server-side, dev bypass for non-Telegram preview testing.
+- [Orval schema/type naming collisions](orval-schema-naming-collision.md) — name OpenAPI response schemas by entity, not `<Operation>Response`, or codegen TS2308 collisions occur.
+- [TS project references need a build, not just noEmit](drizzle-project-references.md) — stale lib `dist/*.d.ts` causes false "no exported member" errors until `tsc --build` reruns.
+- [Concurrent user upsert race](concurrent-upsert-race.md) — first-touch upsert-by-external-id needs to catch the unique-constraint race, not just check-then-insert.
