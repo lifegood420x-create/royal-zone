@@ -74,17 +74,26 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-y-auto">
-        <header className="bg-card border-b px-4 py-4 md:px-8 flex items-center justify-between sticky top-0 z-10 md:hidden">
-          <h2 className="font-bold text-lg">Admin Panel</h2>
-          <Link href="/" className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-            <ChevronLeft size={16} /> Exit
+      <div className="flex-1 flex flex-col min-w-0 md:h-[100dvh] md:overflow-y-auto bg-muted/30 md:pb-0 pb-20">
+        {/* Material-style top app bar (mobile only) */}
+        <header className="bg-primary text-primary-foreground px-4 h-14 flex items-center gap-1 sticky top-0 z-20 shadow-md md:hidden">
+          <Link
+            href="/"
+            className="p-2 -ml-2 rounded-full active:bg-white/15 transition-colors"
+            aria-label="Back to app"
+          >
+            <ChevronLeft size={22} />
           </Link>
+          <h2 className="font-medium text-lg tracking-tight">Admin Panel</h2>
         </header>
-        
-        {/* Mobile Navigation (Horizontal Scroll) */}
-        <div className="bg-card border-b md:hidden sticky top-[60px] z-10 overflow-x-auto no-scrollbar">
-          <div className="flex px-4 py-2 gap-2 min-w-max">
+
+        <main className="flex-1 p-4 md:p-8 max-w-md md:max-w-6xl mx-auto w-full">
+          {children}
+        </main>
+
+        {/* Android-style bottom navigation bar (mobile only) */}
+        <nav className="fixed bottom-0 left-0 right-0 z-30 bg-card border-t shadow-[0_-4px_24px_rgba(0,0,0,0.08)] pb-[env(safe-area-inset-bottom)] md:hidden">
+          <div className="max-w-md mx-auto flex items-stretch justify-between px-1 h-16">
             {navItems.map((item) => {
               const isActive = location === item.href;
               const Icon = item.icon;
@@ -92,23 +101,28 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
-                    isActive 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'bg-muted text-muted-foreground'
-                  }`}
+                  className="flex-1 flex flex-col items-center justify-center gap-1 relative active:scale-95 transition-transform"
+                  data-testid={`admin-nav-${item.label.toLowerCase()}`}
                 >
-                  <Icon size={16} />
-                  {item.label}
+                  <div
+                    className={`flex items-center justify-center h-8 w-14 rounded-full transition-colors ${
+                      isActive ? 'bg-primary/15 text-primary' : 'text-muted-foreground'
+                    }`}
+                  >
+                    <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                  </div>
+                  <span
+                    className={`text-[11px] font-medium leading-none ${
+                      isActive ? 'text-primary' : 'text-muted-foreground'
+                    }`}
+                  >
+                    {item.label}
+                  </span>
                 </Link>
               );
             })}
           </div>
-        </div>
-
-        <main className="flex-1 p-4 md:p-8 max-w-6xl mx-auto w-full">
-          {children}
-        </main>
+        </nav>
       </div>
     </div>
   );
