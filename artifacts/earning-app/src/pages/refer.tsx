@@ -173,9 +173,6 @@ export default function Refer() {
                     {/* Name */}
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-sm text-foreground truncate">{entry.firstName}</p>
-                      {entry.username && (
-                        <p className="text-xs text-muted-foreground truncate">@{entry.username}</p>
-                      )}
                     </div>
 
                     {/* Count */}
