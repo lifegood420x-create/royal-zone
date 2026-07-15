@@ -14,7 +14,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { Play, CheckCircle2, ExternalLink, Loader2, PlayCircle } from 'lucide-react';
+import { Play, CheckCircle2, ExternalLink, Loader2, PlayCircle, Clock } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency } from '../lib/utils';
 import { TaskIcon, getTaskIconConfig } from '../lib/task-icons';
@@ -24,6 +24,7 @@ export default function Earn() {
   const { data: config } = useGetPublicConfig();
   const { data: tasks, isLoading: tasksLoading } = useListTasks();
   const [activeAd, setActiveAd] = useState<'monetag' | 'adsgram' | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
   const [completingTask, setCompletingTask] = useState<number | null>(null);
   const [visitingTask, setVisitingTask] = useState<number | null>(null);
   
@@ -33,11 +34,33 @@ export default function Earn() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  /**
+   * Runs a visible countdown for `seconds` and resolves only once it hits
+   * zero — this is an in-app enforcement layer on top of the ad SDK's own
+   * promise, so the reward can never be credited before the user has
+   * waited out the full ad duration, no matter how fast the SDK resolves.
+   */
+  const runCountdown = (seconds: number): Promise<void> => {
+    return new Promise((resolve) => {
+      const start = Date.now();
+      setCountdown(seconds);
+      const interval = setInterval(() => {
+        const remaining = Math.max(0, Math.ceil((seconds * 1000 - (Date.now() - start)) / 1000));
+        setCountdown(remaining);
+        if (remaining <= 0) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 200);
+    });
+  };
+
   const handleWatchAd = async (network: 'monetag' | 'adsgram') => {
     if (!config) return;
     setActiveAd(network);
     try {
       const zoneId = network === 'monetag' ? config.monetagZoneId : config.adsgramBlockId;
+      const durationSeconds = config.adDurationSeconds || 15;
 
       if (config.requireAdPostback) {
         // Postback-verified flow: reserve the slot first, pass the claimId
@@ -45,14 +68,18 @@ export default function Earn() {
         // call, and only refresh balance afterwards — the reward is
         // credited by /ads/postback, not by anything this tab does.
         const claim = await claimAdMutation.mutateAsync({ data: { network } });
-        await showRewardedAd(network, zoneId, claim.claimId);
+        await Promise.all([showRewardedAd(network, zoneId, claim.claimId), runCountdown(durationSeconds)]);
         toast({
           title: 'Ad watched',
           description: 'Reward will be credited once the ad network confirms the view (usually within a minute).',
         });
         setTimeout(() => queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() }), 5000);
       } else {
-        await showRewardedAd(network, zoneId);
+        // Reward is only requested from the server after BOTH the ad SDK's
+        // own promise resolves AND our own countdown finishes — watching
+        // isn't "done" (and no reward request goes out) until the timer
+        // hits zero.
+        await Promise.all([showRewardedAd(network, zoneId), runCountdown(durationSeconds)]);
 
         watchAdMutation.mutate(
           { data: { network } },
@@ -82,6 +109,7 @@ export default function Earn() {
       });
     } finally {
       setActiveAd(null);
+      setCountdown(null);
     }
   };
 
@@ -118,6 +146,29 @@ export default function Earn() {
 
   return (
     <div className="flex-1 flex flex-col bg-muted/20 overflow-y-auto">
+      {countdown !== null && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-6" data-testid="overlay-ad-countdown">
+          <Card className="max-w-xs w-full border shadow-lg bg-card">
+            <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+              <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                <Clock size={28} />
+              </div>
+              <p className="font-bold text-foreground">Watching ad...</p>
+              <p className="text-sm text-muted-foreground">
+                Reward unlocks in <span className="font-bold text-foreground" data-testid="text-ad-countdown">{countdown}s</span>
+              </p>
+              <Progress
+                value={config?.adDurationSeconds ? ((config.adDurationSeconds - countdown) / config.adDurationSeconds) * 100 : 0}
+                className="h-2 w-full"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Please don't close this — leaving early forfeits the reward.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       <div className="bg-card border-b px-6 py-4 sticky top-0 z-10 shadow-sm">
         <h1 className="text-xl font-bold text-foreground">Earn</h1>
         <p className="text-sm text-muted-foreground mt-1">Complete tasks to earn real cash</p>

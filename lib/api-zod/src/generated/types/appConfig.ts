@@ -11,6 +11,7 @@ export interface AppConfig {
   referralBonus: number;
   adReward: number;
   adDailyLimit: number;
+  adDurationSeconds: number;
   botName: string;
   botUsername: string;
   /** @nullable */

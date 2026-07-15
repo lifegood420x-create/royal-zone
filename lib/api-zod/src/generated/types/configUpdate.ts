@@ -15,6 +15,8 @@ export interface ConfigUpdate {
   adReward?: number;
   /** @minimum 0 */
   adDailyLimit?: number;
+  /** @minimum 1 */
+  adDurationSeconds?: number;
   botName?: string;
   botUsername?: string;
   channelUsername?: string;

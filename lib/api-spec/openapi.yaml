@@ -757,6 +757,7 @@ components:
         - referralBonus
         - adReward
         - adDailyLimit
+        - adDurationSeconds
         - botUsername
         - channelUsername
         - adminUsername
@@ -771,6 +772,7 @@ components:
         referralBonus: { type: number }
         adReward: { type: number }
         adDailyLimit: { type: integer }
+        adDurationSeconds: { type: integer }
         botUsername: { type: string }
         channelUsername: { type: ["string", "null"] }
         adminUsername: { type: string }
@@ -871,6 +873,7 @@ components:
         - referralBonus
         - adReward
         - adDailyLimit
+        - adDurationSeconds
         - botName
         - botUsername
         - channelUsername
@@ -886,6 +889,7 @@ components:
         referralBonus: { type: number }
         adReward: { type: number }
         adDailyLimit: { type: integer }
+        adDurationSeconds: { type: integer }
         botName: { type: string }
         botUsername: { type: string }
         channelUsername: { type: ["string", "null"] }
@@ -904,6 +908,7 @@ components:
         referralBonus: { type: number, minimum: 0 }
         adReward: { type: number, minimum: 0 }
         adDailyLimit: { type: integer, minimum: 0 }
+        adDurationSeconds: { type: integer, minimum: 1 }
         botName: { type: string }
         botUsername: { type: string }
         channelUsername: { type: string }

@@ -12,6 +12,7 @@ export interface PublicConfig {
   referralBonus: number;
   adReward: number;
   adDailyLimit: number;
+  adDurationSeconds: number;
   botUsername: string;
   /** @nullable */
   channelUsername: string | null;

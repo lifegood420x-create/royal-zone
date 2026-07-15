@@ -34,6 +34,7 @@ const configSchema = z.object({
   referralBonus: z.coerce.number().min(0),
   adReward: z.coerce.number().min(0),
   adDailyLimit: z.coerce.number().min(0),
+  adDurationSeconds: z.coerce.number().min(1),
   botName: z.string().min(1),
   botUsername: z.string().min(1),
   channelUsername: z.string().optional().or(z.literal('')),
@@ -67,6 +68,7 @@ export default function AdminConfig() {
       referralBonus: 0,
       adReward: 0,
       adDailyLimit: 0,
+      adDurationSeconds: 15,
       botName: '',
       botUsername: '',
       channelUsername: '',
@@ -92,6 +94,7 @@ export default function AdminConfig() {
         referralBonus: config.referralBonus,
         adReward: config.adReward,
         adDailyLimit: config.adDailyLimit,
+        adDurationSeconds: config.adDurationSeconds,
         botName: config.botName,
         botUsername: config.botUsername,
         channelUsername: config.channelUsername || '',
@@ -258,6 +261,22 @@ export default function AdminConfig() {
                             <FormControl>
                               <Input type="number" {...field} />
                             </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="adDurationSeconds"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Ad Countdown (seconds)</FormLabel>
+                            <FormControl>
+                              <Input type="number" min={1} {...field} />
+                            </FormControl>
+                            <p className="text-[10px] text-muted-foreground">
+                              User must wait this long after starting an ad before the reward is credited.
+                            </p>
                             <FormMessage />
                           </FormItem>
                         )}

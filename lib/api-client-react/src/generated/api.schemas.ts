@@ -195,6 +195,7 @@ export interface PublicConfig {
   referralBonus: number;
   adReward: number;
   adDailyLimit: number;
+  adDurationSeconds: number;
   botUsername: string;
   /** @nullable */
   channelUsername: string | null;
@@ -274,6 +275,7 @@ export interface AppConfig {
   referralBonus: number;
   adReward: number;
   adDailyLimit: number;
+  adDurationSeconds: number;
   botName: string;
   botUsername: string;
   /** @nullable */
@@ -298,6 +300,8 @@ export interface ConfigUpdate {
   adReward?: number;
   /** @minimum 0 */
   adDailyLimit?: number;
+  /** @minimum 1 */
+  adDurationSeconds?: number;
   botName?: string;
   botUsername?: string;
   channelUsername?: string;

@@ -19,6 +19,7 @@ router.get("/config/public", requireAuth, async (req, res): Promise<void> => {
     referralBonus: config.referralBonus,
     adReward: config.adReward,
     adDailyLimit: config.adDailyLimit,
+    adDurationSeconds: config.adDurationSeconds,
     botUsername: config.botUsername,
     channelUsername: config.channelUsername,
     adminUsername: config.adminUsername,

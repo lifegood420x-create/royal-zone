@@ -85,6 +85,7 @@ export const GetPublicConfigResponse = zod.object({
   "referralBonus": zod.number(),
   "adReward": zod.number(),
   "adDailyLimit": zod.number(),
+  "adDurationSeconds": zod.number(),
   "botUsername": zod.string(),
   "channelUsername": zod.string().nullable(),
   "adminUsername": zod.string(),
@@ -558,6 +559,7 @@ export const GetAdminConfigResponse = zod.object({
   "referralBonus": zod.number(),
   "adReward": zod.number(),
   "adDailyLimit": zod.number(),
+  "adDurationSeconds": zod.number(),
   "botName": zod.string(),
   "botUsername": zod.string(),
   "channelUsername": zod.string().nullable(),
@@ -584,11 +586,13 @@ export const updateAdminConfigBodyAdDailyLimitMin = 0;
 
 
 
+
 export const UpdateAdminConfigBody = zod.object({
   "minWithdraw": zod.number().min(updateAdminConfigBodyMinWithdrawMin).optional(),
   "referralBonus": zod.number().min(updateAdminConfigBodyReferralBonusMin).optional(),
   "adReward": zod.number().min(updateAdminConfigBodyAdRewardMin).optional(),
   "adDailyLimit": zod.number().min(updateAdminConfigBodyAdDailyLimitMin).optional(),
+  "adDurationSeconds": zod.number().min(1).optional(),
   "botName": zod.string().optional(),
   "botUsername": zod.string().optional(),
   "channelUsername": zod.string().optional(),
@@ -605,6 +609,7 @@ export const UpdateAdminConfigResponse = zod.object({
   "referralBonus": zod.number(),
   "adReward": zod.number(),
   "adDailyLimit": zod.number(),
+  "adDurationSeconds": zod.number(),
   "botName": zod.string(),
   "botUsername": zod.string(),
   "channelUsername": zod.string().nullable(),

@@ -15,6 +15,11 @@ export const appConfigTable = pgTable("app_config", {
     .notNull()
     .default(5),
   adDailyLimit: integer("ad_daily_limit").notNull().default(20),
+  // Minimum number of seconds the in-app countdown must run after an ad is
+  // triggered before the reward is credited — enforced client-side on top
+  // of whatever the ad network's own SDK does, so users can't skip straight
+  // to the reward.
+  adDurationSeconds: integer("ad_duration_seconds").notNull().default(15),
   botName: text("bot_name").notNull().default("AS Earning"),
   botUsername: text("bot_username").notNull().default(""),
   channelUsername: text("channel_username"),
