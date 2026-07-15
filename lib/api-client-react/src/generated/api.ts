@@ -45,6 +45,7 @@ import type {
   TaskInput,
   TaskUpdate,
   TaskWithStatus,
+  UpdatePayoutAccountNumberInput,
   User,
   WatchAdInput,
   WebhookStatus,
@@ -1651,6 +1652,78 @@ export const useRejectPayout = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getRejectPayoutMutationOptions(options));
+    }
+
+export const getUpdatePayoutAccountNumberUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/payouts/${id}/account-number`
+}
+
+/**
+ * @summary Correct the payout account number on a pending withdrawal
+ */
+export const updatePayoutAccountNumber = async (id: number,
+    updatePayoutAccountNumberInput: UpdatePayoutAccountNumberInput, options?: RequestInit): Promise<AdminWithdrawal> => {
+
+  return customFetch<AdminWithdrawal>(getUpdatePayoutAccountNumberUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updatePayoutAccountNumberInput)
+  }
+);}
+
+
+
+
+
+export const getUpdatePayoutAccountNumberMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePayoutAccountNumber>>, TError,{id: number;data: BodyType<UpdatePayoutAccountNumberInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePayoutAccountNumber>>, TError,{id: number;data: BodyType<UpdatePayoutAccountNumberInput>}, TContext> => {
+
+const mutationKey = ['updatePayoutAccountNumber'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePayoutAccountNumber>>, {id: number;data: BodyType<UpdatePayoutAccountNumberInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updatePayoutAccountNumber(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePayoutAccountNumberMutationResult = NonNullable<Awaited<ReturnType<typeof updatePayoutAccountNumber>>>
+    export type UpdatePayoutAccountNumberMutationBody = BodyType<UpdatePayoutAccountNumberInput>
+    export type UpdatePayoutAccountNumberMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Correct the payout account number on a pending withdrawal
+ */
+export const useUpdatePayoutAccountNumber = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePayoutAccountNumber>>, TError,{id: number;data: BodyType<UpdatePayoutAccountNumberInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updatePayoutAccountNumber>>,
+        TError,
+        {id: number;data: BodyType<UpdatePayoutAccountNumberInput>},
+        TContext
+      > => {
+      return useMutation(getUpdatePayoutAccountNumberMutationOptions(options));
     }
 
 export const getListAdminTasksUrl = () => {

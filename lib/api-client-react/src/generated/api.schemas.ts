@@ -270,6 +270,11 @@ export interface RejectPayoutInput {
   note?: string | null;
 }
 
+export interface UpdatePayoutAccountNumberInput {
+  /** @minLength 1 */
+  accountNumber: string;
+}
+
 export interface AppConfig {
   minWithdraw: number;
   referralBonus: number;

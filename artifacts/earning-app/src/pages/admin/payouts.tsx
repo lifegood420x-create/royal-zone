@@ -3,6 +3,7 @@ import {
   useListPendingPayouts, 
   useApprovePayout, 
   useRejectPayout,
+  useUpdatePayoutAccountNumber,
   getListPendingPayoutsQueryKey,
   AdminWithdrawal
 } from '@workspace/api-client-react';
@@ -10,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { CheckCircle, XCircle, Search, CreditCard, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Search, CreditCard, Loader2, Pencil } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import { Input } from '@/components/ui/input';
 
@@ -18,11 +19,14 @@ export default function AdminPayouts() {
   const { data: payouts, isLoading } = useListPendingPayouts();
   const approveMutation = useApprovePayout();
   const rejectMutation = useRejectPayout();
+  const updateNumberMutation = useUpdatePayoutAccountNumber();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [rejectingId, setRejectingId] = useState<number | null>(null);
   const [rejectNote, setRejectNote] = useState('');
+  const [editingNumberId, setEditingNumberId] = useState<number | null>(null);
+  const [editedNumber, setEditedNumber] = useState('');
 
   const handleApprove = (id: number) => {
     approveMutation.mutate(
@@ -34,6 +38,28 @@ export default function AdminPayouts() {
         },
         onError: () => {
           toast({ title: 'Error', description: 'Could not approve payout.', variant: 'destructive' });
+        }
+      }
+    );
+  };
+
+  const handleSaveNumber = (id: number) => {
+    const trimmed = editedNumber.trim();
+    if (!trimmed) {
+      toast({ title: 'Error', description: 'Account number cannot be empty.', variant: 'destructive' });
+      return;
+    }
+    updateNumberMutation.mutate(
+      { id, data: { accountNumber: trimmed } },
+      {
+        onSuccess: () => {
+          toast({ title: 'Updated', description: 'Account number corrected.' });
+          setEditingNumberId(null);
+          setEditedNumber('');
+          queryClient.invalidateQueries({ queryKey: getListPendingPayoutsQueryKey() });
+        },
+        onError: () => {
+          toast({ title: 'Error', description: 'Could not update account number.', variant: 'destructive' });
         }
       }
     );
@@ -109,13 +135,47 @@ export default function AdminPayouts() {
                     {/* Payment Details */}
                     <div>
                       <p className="text-xs text-muted-foreground font-medium mb-1">Payment Method</p>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white ${payout.method === 'bkash' ? 'bg-[#E2136E]' : 'bg-[#EC1C24]'}`}>
-                          {payout.method === 'bkash' ? 'b' : 'n'}
+                      {editingNumberId === payout.id ? (
+                        <div className="space-y-2">
+                          <Input
+                            className="h-8 text-xs font-mono"
+                            value={editedNumber}
+                            onChange={e => setEditedNumber(e.target.value)}
+                            autoFocus
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              className="flex-1 text-xs h-8"
+                              onClick={() => handleSaveNumber(payout.id)}
+                              disabled={updateNumberMutation.isPending}
+                            >
+                              {updateNumberMutation.isPending ? <Loader2 className="animate-spin" size={14} /> : 'Save'}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 text-xs h-8"
+                              onClick={() => {
+                                setEditingNumberId(null);
+                                setEditedNumber('');
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
                         </div>
-                        <span className="font-mono text-sm font-bold">{payout.accountNumber}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground uppercase mt-1">{payout.method}</p>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white ${payout.method === 'bkash' ? 'bg-[#E2136E]' : 'bg-[#EC1C24]'}`}>
+                              {payout.method === 'bkash' ? 'b' : 'n'}
+                            </div>
+                            <span className="font-mono text-sm font-bold">{payout.accountNumber}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground uppercase mt-1">{payout.method}</p>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -160,6 +220,16 @@ export default function AdminPayouts() {
                           disabled={approveMutation.isPending}
                         >
                           <CheckCircle size={16} className="mr-1.5" /> Approve
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="font-bold px-3"
+                          onClick={() => {
+                            setEditingNumberId(payout.id);
+                            setEditedNumber(payout.accountNumber);
+                          }}
+                        >
+                          <Pencil size={16} className="mr-1.5" /> নাম্বার
                         </Button>
                         <Button 
                           variant="destructive" 

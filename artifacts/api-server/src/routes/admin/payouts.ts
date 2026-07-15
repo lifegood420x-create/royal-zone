@@ -8,6 +8,9 @@ import {
   RejectPayoutBody,
   RejectPayoutParams,
   RejectPayoutResponse,
+  UpdatePayoutAccountNumberBody,
+  UpdatePayoutAccountNumberParams,
+  UpdatePayoutAccountNumberResponse,
 } from "@workspace/api-zod";
 import { requireAuth, requireAdmin } from "../../middlewares/auth";
 
@@ -101,6 +104,36 @@ router.post("/admin/payouts/:id/reject", requireAuth, requireAdmin, async (req, 
     .where(eq(usersTable.id, user.id));
 
   res.json(RejectPayoutResponse.parse(await withUser(updated)));
+});
+
+router.post("/admin/payouts/:id/account-number", requireAuth, requireAdmin, async (req, res): Promise<void> => {
+  const params = UpdatePayoutAccountNumberParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+  const body = UpdatePayoutAccountNumberBody.safeParse(req.body ?? {});
+  if (!body.success) {
+    res.status(400).json({ error: body.error.message });
+    return;
+  }
+
+  const [withdrawal] = await db
+    .select()
+    .from(withdrawalsTable)
+    .where(eq(withdrawalsTable.id, params.data.id));
+  if (!withdrawal || withdrawal.status !== "pending") {
+    res.status(404).json({ error: "Pending withdrawal not found." });
+    return;
+  }
+
+  const [updated] = await db
+    .update(withdrawalsTable)
+    .set({ accountNumber: body.data.accountNumber })
+    .where(eq(withdrawalsTable.id, params.data.id))
+    .returning();
+
+  res.json(UpdatePayoutAccountNumberResponse.parse(await withUser(updated)));
 });
 
 export default router;

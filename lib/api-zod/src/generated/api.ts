@@ -464,6 +464,38 @@ export const RejectPayoutResponse = zod.object({
 
 
 /**
+ * @summary Correct the payout account number on a pending withdrawal
+ */
+export const UpdatePayoutAccountNumberParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+
+
+export const UpdatePayoutAccountNumberBody = zod.object({
+  "accountNumber": zod.string().min(1)
+})
+
+export const UpdatePayoutAccountNumberResponse = zod.object({
+  "id": zod.number(),
+  "amount": zod.number(),
+  "method": zod.enum(['bkash', 'nagad']),
+  "accountNumber": zod.string(),
+  "status": zod.enum(['pending', 'paid', 'rejected']),
+  "requestedAt": zod.coerce.date(),
+  "processedAt": zod.coerce.date().nullable(),
+  "note": zod.string().nullable(),
+  "user": zod.object({
+  "id": zod.number(),
+  "firstName": zod.string(),
+  "username": zod.string().nullable(),
+  "telegramId": zod.string()
+})
+})
+
+
+/**
  * @summary List all tasks
  */
 export const ListAdminTasksResponseItem = zod.object({

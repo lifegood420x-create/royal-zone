@@ -38,6 +38,7 @@ export * from './taskInput';
 export * from './taskType';
 export * from './taskUpdate';
 export * from './taskWithStatus';
+export * from './updatePayoutAccountNumberInput';
 export * from './user';
 export * from './watchAdInput';
 export * from './webhookStatus';
