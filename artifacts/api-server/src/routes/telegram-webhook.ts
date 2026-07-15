@@ -53,7 +53,7 @@ router.post("/telegram/webhook", async (req, res): Promise<void> => {
   try {
     await sendMessage(
       String(message.chat.id),
-      `স্বাগতম ${message.from.first_name ?? ""}! ${config.botName}-এ বিজ্ঞাপন দেখুন, টাস্ক শেষ করুন এবং বন্ধুদের রেফার করে আয় করুন।`,
+      `Bangla Task Hub 🇧🇩\n\n📋 এখন ঘরে বসেই ইনকাম করুন সহজে! 💻\n\n✅ YouTube Subscribe Task 📺\n✅ Telegram Join Task 💬\n✅ Referral Income System 🤝\n✅ Daily Bonus 💰\n✅ Instant Withdraw ⚡\n\n🏆 Trusted & Professional Telegram Earning Platform\n🎯 আজই জয়েন করুন এবং ইনকাম শুরু করুন! 🚀`,
       {
         reply_markup: {
           inline_keyboard: [
