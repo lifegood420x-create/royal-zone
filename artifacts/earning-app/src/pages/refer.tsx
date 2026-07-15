@@ -37,7 +37,7 @@ export default function Refer() {
 
   const handleShare = () => {
     if (!referralLink) return;
-    const text = `Join me on AS Earning and get rewarded! Use my link: ${referralLink}`;
+    const text = `Join me on ${config?.botName || 'Bangla Task Hub'} and get rewarded! Use my link: ${referralLink}`;
     const url = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };

@@ -43,7 +43,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       {/* Desktop Sidebar */}
       <aside className="w-64 bg-card border-r hidden md:flex flex-col h-[100dvh] sticky top-0">
         <div className="p-6 border-b">
-          <h2 className="text-lg font-bold text-foreground">AS Earning Admin</h2>
+          <h2 className="text-lg font-bold text-foreground">Admin Panel</h2>
           <p className="text-sm text-muted-foreground">Control Panel</p>
         </div>
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
