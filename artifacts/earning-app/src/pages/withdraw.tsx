@@ -153,10 +153,10 @@ export default function Withdraw() {
               <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800 rounded-lg p-3 flex gap-3 items-start mb-6">
                 <AlertCircle className="text-orange-500 shrink-0 mt-0.5" size={18} />
                 <div>
-                  <p className="text-sm font-bold text-orange-800 dark:text-orange-400">Notice</p>
+                  <p className="text-sm font-bold text-orange-800 dark:text-orange-400">নোটিশ</p>
                   <p className="text-xs text-orange-700 dark:text-orange-300 mt-0.5 leading-relaxed">
-                    Due to previous rejected requests, your minimum withdrawal amount has increased. 
-                    Ensure all your tasks and referrals are genuine.
+                    আগের রিজেক্টেড রিকোয়েস্টের কারণে আপনার সর্বনিম্ন উইথড্র পরিমাণ বাড়ানো হয়েছে।
+                    অনুগ্রহ করে নিশ্চিত করুন আপনার সকল টাস্ক ও রেফারেল সঠিক এবং বৈধ।
                   </p>
                 </div>
               </div>
