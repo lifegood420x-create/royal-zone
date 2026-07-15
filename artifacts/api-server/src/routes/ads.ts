@@ -17,6 +17,12 @@ router.post("/ads/watch", requireAuth, async (req, res): Promise<void> => {
   }
 
   const user = req.currentUser!;
+
+  if (user.isFlagged) {
+    res.status(403).json({ error: "Ad rewards are disabled for this account." });
+    return;
+  }
+
   const config = await getAppConfig();
 
   if (config.requireAdPostback) {
@@ -72,6 +78,12 @@ router.post("/ads/claim", requireAuth, async (req, res): Promise<void> => {
   }
 
   const user = req.currentUser!;
+
+  if (user.isFlagged) {
+    res.status(403).json({ error: "Ad rewards are disabled for this account." });
+    return;
+  }
+
   const config = await getAppConfig();
   const currentCount = todaysAdCount(user);
 

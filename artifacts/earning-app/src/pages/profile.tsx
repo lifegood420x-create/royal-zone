@@ -169,7 +169,7 @@ export default function Profile() {
             <div>
               <p className="font-bold text-destructive text-sm">Account Flagged</p>
               <p className="text-xs text-destructive/80 mt-1 leading-relaxed">
-                Your account has been flagged for suspicious activity. Withdrawals may be delayed or rejected. Please contact support.
+                Your account has been flagged for suspicious activity (fake referral). Ad rewards are disabled and withdrawals may be delayed or rejected. Please contact support.
               </p>
             </div>
           </div>

@@ -74,10 +74,11 @@ export async function upsertTelegramUser(
   const isSameIpAsReferrer =
     !!referrer && !!opts.ip && !!referrer.registrationIp && referrer.registrationIp === opts.ip;
 
-  // Only the repeat (2nd+) same-IP signup under a referrer gets banned
-  // outright. A first signup that merely matches the referrer's own IP is
-  // just flagged for admin visibility (and denied the bonus below), not
-  // banned — per product decision, "let the first one through".
+  // Neither case is auto-banned (the account can still use the app) — per
+  // product decision, fake-referral accounts are instead: (1) denied the
+  // referral bonus below, and (2) blocked from earning ad rewards (see the
+  // isFlagged check in routes/ads.ts). This avoids collateral damage from
+  // outright bans while still removing the financial incentive to farm.
   const isFakeReferralChain = hasSiblingWithSameIp;
   const isSuspiciousFirstSignup = isSameIpAsReferrer && !hasSiblingWithSameIp;
 
@@ -93,12 +94,12 @@ export async function upsertTelegramUser(
         referralCode,
         referredBy: referrer?.id ?? null,
         registrationIp: opts.ip ?? null,
-        isBanned: isFakeReferralChain,
+        isBanned: false,
         isFlagged: isFakeReferralChain || isSuspiciousFirstSignup,
         flagReason: isFakeReferralChain
-          ? "Auto-banned: duplicate IP reused under the same referrer (fake referral chain)"
+          ? "Fake referral chain: duplicate IP reused under the same referrer. Referral bonus denied and ad rewards blocked."
           : isSuspiciousFirstSignup
-            ? "Self/fake referral (same IP as referrer)"
+            ? "Self/fake referral (same IP as referrer). Referral bonus denied and ad rewards blocked."
             : null,
       })
       .returning();
