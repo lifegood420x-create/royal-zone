@@ -1,4 +1,4 @@
-import { useGetMe, useGetPublicConfig } from '@workspace/api-client-react';
+import { useGetMe, useGetPublicConfig, useListReferrals } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Play, Wallet, Gift, Users, Trophy } from 'lucide-react';
@@ -9,6 +9,7 @@ import { useAuth } from '../components/auth-provider';
 export default function Home() {
   const { data: user, isLoading: isLoadingMe } = useGetMe();
   const { data: config, isLoading: isLoadingConfig } = useGetPublicConfig();
+  const { data: referralsData } = useListReferrals();
   const [, setLocation] = useLocation();
   const { user: authUser } = useAuth(); // just to be safe if useGetMe is slow
 
@@ -109,7 +110,7 @@ export default function Home() {
                 <Users size={16} />
               </div>
               <div>
-                <p className="text-xl font-bold text-foreground" data-testid="text-referral-count">{currentUser.totalTasksCount}</p>
+                <p className="text-xl font-bold text-foreground" data-testid="text-referral-count">{referralsData?.totalReferrals ?? 0}</p>
                 <p className="text-xs font-medium text-muted-foreground">Total Referrals</p>
               </div>
             </CardContent>
