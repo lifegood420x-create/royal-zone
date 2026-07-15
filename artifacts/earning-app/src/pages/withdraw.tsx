@@ -91,7 +91,7 @@ export default function Withdraw() {
         {activeTab === 'request' ? (
           <div className="space-y-6 animate-fade-up">
             {/* Balance Card */}
-            <div className="bg-primary text-primary-foreground rounded-3xl p-6 shadow-md relative overflow-hidden">
+            <div className="gradient-primary gradient-card-shine text-primary-foreground rounded-3xl p-6 shadow-md relative overflow-hidden">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white opacity-5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3"></div>
               <div className="relative z-10 flex justify-between items-end">
                 <div>

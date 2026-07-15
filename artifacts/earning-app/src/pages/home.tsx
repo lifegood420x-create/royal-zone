@@ -46,7 +46,7 @@ export default function Home() {
 
       <div className="px-6 space-y-6 mt-2">
         {/* Main Balance Card */}
-        <div className="bg-primary text-primary-foreground rounded-3xl p-6 shadow-xl relative overflow-hidden animate-fade-up">
+        <div className="gradient-primary gradient-card-shine text-primary-foreground rounded-3xl p-6 shadow-xl relative overflow-hidden animate-fade-up">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
           
           <div className="relative z-10">

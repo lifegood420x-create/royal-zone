@@ -108,7 +108,7 @@ function AdsSection({ config, user }: { config: any, user: any }) {
         <button 
           onClick={handleWatchAd}
           disabled={isWatching || remaining === 0}
-          className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-bold shadow-md hover:bg-opacity-90 active-scale disabled:opacity-50 disabled:pointer-events-none flex justify-center items-center gap-2 transition-all"
+          className="w-full gradient-primary text-primary-foreground py-4 rounded-2xl font-bold shadow-md active-scale disabled:opacity-50 disabled:pointer-events-none flex justify-center items-center gap-2 transition-all"
         >
           {isWatching ? (
             <>
