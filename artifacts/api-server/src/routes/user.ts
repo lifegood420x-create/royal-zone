@@ -21,6 +21,7 @@ router.get("/config/public", requireAuth, async (req, res): Promise<void> => {
     adDailyLimit: config.adDailyLimit,
     botUsername: config.botUsername,
     channelUsername: config.channelUsername,
+    adminUsername: config.adminUsername,
     monetagZoneId: config.monetagZoneId,
     adsgramBlockId: config.adsgramBlockId,
     monetagEnabled: config.monetagEnabled,

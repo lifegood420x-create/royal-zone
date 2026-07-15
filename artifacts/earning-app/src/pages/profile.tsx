@@ -1,4 +1,4 @@
-import { useGetMe } from '@workspace/api-client-react';
+import { useGetMe, useGetPublicConfig } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation } from 'wouter';
@@ -17,6 +17,7 @@ import { formatCurrency, formatDate } from '../lib/utils';
 
 export default function Profile() {
   const { data: user } = useGetMe();
+  const { data: config } = useGetPublicConfig();
   const { isAdmin } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -119,7 +120,7 @@ export default function Profile() {
             <div className="space-y-1">
               <button 
                 className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-muted transition-colors text-left"
-                onClick={() => window.open('https://t.me/as_earning_support', '_blank')}
+                onClick={() => window.open(`https://t.me/${(config?.adminUsername || 'shanto_As').replace(/^@/, '')}`, '_blank')}
                 data-testid="link-support"
               >
                 <div className="flex items-center gap-3">
@@ -138,7 +139,7 @@ export default function Profile() {
 
               <button 
                 className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-muted transition-colors text-left"
-                onClick={() => window.open('https://t.me/as_earning_rules', '_blank')}
+                onClick={() => setLocation('/rules')}
                 data-testid="link-rules"
               >
                 <div className="flex items-center gap-3">

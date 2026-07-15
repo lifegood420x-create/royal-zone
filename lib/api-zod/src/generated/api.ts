@@ -87,6 +87,7 @@ export const GetPublicConfigResponse = zod.object({
   "adDailyLimit": zod.number(),
   "botUsername": zod.string(),
   "channelUsername": zod.string().nullable(),
+  "adminUsername": zod.string(),
   "monetagZoneId": zod.string().nullable(),
   "adsgramBlockId": zod.string().nullable(),
   "monetagEnabled": zod.boolean(),

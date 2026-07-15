@@ -198,6 +198,7 @@ export interface PublicConfig {
   botUsername: string;
   /** @nullable */
   channelUsername: string | null;
+  adminUsername: string;
   /** @nullable */
   monetagZoneId: string | null;
   /** @nullable */

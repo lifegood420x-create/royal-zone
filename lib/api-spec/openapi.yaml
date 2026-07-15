@@ -759,6 +759,7 @@ components:
         - adDailyLimit
         - botUsername
         - channelUsername
+        - adminUsername
         - monetagZoneId
         - adsgramBlockId
         - monetagEnabled
@@ -772,6 +773,7 @@ components:
         adDailyLimit: { type: integer }
         botUsername: { type: string }
         channelUsername: { type: ["string", "null"] }
+        adminUsername: { type: string }
         monetagZoneId: { type: ["string", "null"] }
         adsgramBlockId: { type: ["string", "null"] }
         monetagEnabled: { type: boolean }

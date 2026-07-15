@@ -4,3 +4,4 @@
 - [Concurrent user upsert race](concurrent-upsert-race.md) — first-touch upsert-by-external-id needs to catch the unique-constraint race, not just check-then-insert.
 - [Ad postback verification pattern](ad-postback-verification.md) — claim→show→server-postback flow to stop devtools-faked ad rewards; opt-in via a flag.
 - [Referral fraud auto-ban](referral-fraud-auto-ban.md) — first referred signup per IP under a referrer is allowed, repeats auto-ban; admin IP-spoof testing via curl doesn't work in this workspace.
+- [Config-driven contact links](earning-app-config-links.md) — Help & Support/App Rules must read from admin-configured values (adminUsername, in-app /rules page), never hardcode placeholder t.me links.
