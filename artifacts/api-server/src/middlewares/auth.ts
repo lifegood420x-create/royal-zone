@@ -70,8 +70,9 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 
   const ip = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ?? req.ip ?? null;
+  const deviceId = (req.body as Record<string, unknown>)?.deviceId as string | null ?? null;
 
-  const user = await upsertTelegramUser(telegramUser, { startParam, ip });
+  const user = await upsertTelegramUser(telegramUser, { startParam, ip, deviceId });
 
   if (user.isBanned) {
     res.status(403).json({ error: "This account has been banned." });

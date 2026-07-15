@@ -16,6 +16,16 @@ const AuthContext = createContext<AuthContextValue>({
   error: null,
 });
 
+function getOrCreateDeviceId(): string {
+  const KEY = 'bth_device_id';
+  let id = localStorage.getItem(KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(KEY, id);
+  }
+  return id;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -25,9 +35,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     bootstrapTelegram();
     const startParam = getStartParam();
+    const deviceId = getOrCreateDeviceId();
 
     authMutation.mutate(
-      { data: { startParam } },
+      { data: { startParam, deviceId } },
       {
         onSuccess: (data) => {
           setIsAdmin(data.isAdmin);

@@ -9,4 +9,6 @@
 export interface AuthInput {
   /** @nullable */
   startParam?: string | null;
+  /** @nullable */
+  deviceId?: string | null;
 }

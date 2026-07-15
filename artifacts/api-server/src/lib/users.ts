@@ -18,12 +18,12 @@ async function findUniqueReferralCode(): Promise<string> {
 
 /**
  * Finds the existing user by Telegram ID, or creates one — handling
- * referral crediting and same-IP fake-referral flagging on first
+ * referral crediting and same-device fake-referral flagging on first
  * registration. Always refreshes `lastActiveAt`.
  */
 export async function upsertTelegramUser(
   info: TelegramUserInfo,
-  opts: { startParam?: string | null; ip?: string | null } = {},
+  opts: { startParam?: string | null; ip?: string | null; deviceId?: string | null } = {},
 ): Promise<User> {
   const [existing] = await db.select().from(usersTable).where(eq(usersTable.telegramId, info.id));
 
@@ -52,35 +52,34 @@ export async function upsertTelegramUser(
     referrer = found ?? null;
   }
 
-  // Anti-fraud: referral farming looks like one person creating account A
-  // (the referrer), then spinning up B, C, D... from the same device/IP,
-  // each entered A's referral code to farm bonuses. We let the *first*
-  // account from a given IP under a referrer through (so genuine friends
-  // sharing a home wifi/router aren't punished), and auto-ban every
-  // subsequent signup that reuses an IP already seen under that same
-  // referrer. This is a check-then-insert (not DB-constrained), so two
-  // truly simultaneous first-signups from the same IP could both slip
-  // through unbanned — acceptable given fraud farming is normally
-  // sequential, not parallel.
-  let hasSiblingWithSameIp = false;
-  if (referrer && opts.ip) {
+  // Anti-fraud: referral farming — one person creates account A (referrer),
+  // then spins up B, C, D... on the SAME DEVICE, each using A's referral code.
+  // Detection is device-based (persistent client-generated ID stored in
+  // localStorage) rather than IP-based, so family members sharing a Wi-Fi
+  // router are never penalised. If no deviceId is provided (old client), fall
+  // back gracefully — no flag.
+  let hasSiblingWithSameDevice = false;
+  if (referrer && opts.deviceId) {
     const [sibling] = await db
       .select({ id: usersTable.id })
       .from(usersTable)
-      .where(and(eq(usersTable.referredBy, referrer.id), eq(usersTable.registrationIp, opts.ip)));
-    hasSiblingWithSameIp = !!sibling;
+      .where(and(
+        eq(usersTable.referredBy, referrer.id),
+        eq(usersTable.registrationDevice, opts.deviceId),
+      ));
+    hasSiblingWithSameDevice = !!sibling;
   }
 
-  const isSameIpAsReferrer =
-    !!referrer && !!opts.ip && !!referrer.registrationIp && referrer.registrationIp === opts.ip;
+  const isSameDeviceAsReferrer =
+    !!referrer &&
+    !!opts.deviceId &&
+    !!referrer.registrationDevice &&
+    referrer.registrationDevice === opts.deviceId;
 
-  // Neither case is auto-banned (the account can still use the app) — per
-  // product decision, fake-referral accounts are instead: (1) denied the
-  // referral bonus below, and (2) blocked from earning ad rewards (see the
-  // isFlagged check in routes/ads.ts). This avoids collateral damage from
-  // outright bans while still removing the financial incentive to farm.
-  const isFakeReferralChain = hasSiblingWithSameIp;
-  const isSuspiciousFirstSignup = isSameIpAsReferrer && !hasSiblingWithSameIp;
+  // Neither case auto-bans — fake-referral accounts are: (1) denied the
+  // referral bonus and (2) blocked from ad rewards (see isFlagged in ads.ts).
+  const isFakeReferralChain = hasSiblingWithSameDevice;
+  const isSuspiciousFirstSignup = isSameDeviceAsReferrer && !hasSiblingWithSameDevice;
 
   let created: User;
   try {
@@ -94,21 +93,18 @@ export async function upsertTelegramUser(
         referralCode,
         referredBy: referrer?.id ?? null,
         registrationIp: opts.ip ?? null,
+        registrationDevice: opts.deviceId ?? null,
         isBanned: false,
         isFlagged: isFakeReferralChain || isSuspiciousFirstSignup,
         flagReason: isFakeReferralChain
-          ? "Fake referral chain: duplicate IP reused under the same referrer. Referral bonus denied and ad rewards blocked."
+          ? "Fake referral chain: same device reused under the same referrer. Referral bonus denied and ad rewards blocked."
           : isSuspiciousFirstSignup
-            ? "Self/fake referral (same IP as referrer). Referral bonus denied and ad rewards blocked."
+            ? "Self/fake referral (same device as referrer). Referral bonus denied and ad rewards blocked."
             : null,
       })
       .returning();
     created = inserted;
   } catch (error) {
-    // Two concurrent first-requests for the same Telegram user can both
-    // reach here (e.g. the client firing several authenticated calls at
-    // once before the row exists). The loser hits the unique constraint
-    // on telegram_id — just fall back to the row the winner created.
     const errorCode =
       (error as { code?: string; cause?: { code?: string } }).code ??
       (error as { cause?: { code?: string } }).cause?.code;
@@ -119,7 +115,7 @@ export async function upsertTelegramUser(
     return existingRow;
   }
 
-  // Credit the referrer's bonus, unless this signup was flagged/banned as fake.
+  // Credit the referrer's bonus unless this signup was flagged as fake.
   if (referrer && !isFakeReferralChain && !isSuspiciousFirstSignup) {
     const config = await getAppConfig();
     await db

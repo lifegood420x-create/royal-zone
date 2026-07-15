@@ -32,6 +32,7 @@ export const usersTable = pgTable("users", {
   isFlagged: boolean("is_flagged").notNull().default(false),
   flagReason: text("flag_reason"),
   registrationIp: text("registration_ip"),
+  registrationDevice: text("registration_device"),
   rejectedWithdrawCount: integer("rejected_withdraw_count").notNull().default(0),
   adWatchDate: date("ad_watch_date", { mode: "string" }),
   adWatchCountToday: integer("ad_watch_count_today").notNull().default(0),

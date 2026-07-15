@@ -49,6 +49,8 @@ export const AdNetwork = {
 export interface AuthInput {
   /** @nullable */
   startParam?: string | null;
+  /** @nullable */
+  deviceId?: string | null;
 }
 
 export interface User {

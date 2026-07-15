@@ -21,7 +21,8 @@ export const HealthCheckResponse = zod.object({
  * @summary Authenticate the current Telegram user and upsert their record
  */
 export const AuthenticateBody = zod.object({
-  "startParam": zod.string().nullish()
+  "startParam": zod.string().nullish(),
+  "deviceId": zod.string().nullish()
 })
 
 export const AuthenticateResponse = zod.object({
