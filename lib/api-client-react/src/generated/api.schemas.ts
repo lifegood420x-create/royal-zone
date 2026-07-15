@@ -95,11 +95,6 @@ export interface Task {
   createdAt: string;
 }
 
-export interface DeleteTaskResult {
-  deactivatedInstead: boolean;
-  message: string;
-}
-
 export type TaskWithStatus = Task & {
   completed: boolean;
 };

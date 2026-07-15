@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { db, tasksTable, taskCompletionsTable } from "@workspace/db";
 import {
   CreateTaskBody,
@@ -15,7 +15,11 @@ import { requireAuth, requireAdmin } from "../../middlewares/auth";
 const router: IRouter = Router();
 
 router.get("/admin/tasks", requireAuth, requireAdmin, async (_req, res): Promise<void> => {
-  const rows = await db.select().from(tasksTable).orderBy(desc(tasksTable.createdAt));
+  const rows = await db
+    .select()
+    .from(tasksTable)
+    .where(isNull(tasksTable.deletedAt))
+    .orderBy(desc(tasksTable.createdAt));
   res.json(ListAdminTasksResponse.parse(rows));
 });
 
@@ -80,17 +84,14 @@ router.delete("/admin/tasks/:id", requireAuth, requireAdmin, async (req, res): P
   if (count > 0) {
     const [task] = await db
       .update(tasksTable)
-      .set({ isActive: false })
-      .where(eq(tasksTable.id, params.data.id))
+      .set({ isActive: false, deletedAt: new Date() })
+      .where(and(eq(tasksTable.id, params.data.id), isNull(tasksTable.deletedAt)))
       .returning();
     if (!task) {
       res.status(404).json({ error: "Task not found." });
       return;
     }
-    res.status(200).json({
-      deactivatedInstead: true,
-      message: "This task has already been completed by users, so it was deactivated instead of deleted to preserve their reward history.",
-    });
+    res.sendStatus(204);
     return;
   }
 

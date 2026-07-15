@@ -23,7 +23,6 @@ export * from './broadcastResult';
 export * from './claimAdInput';
 export * from './claimAdResult';
 export * from './configUpdate';
-export * from './deleteTaskResult';
 export * from './flaggedUser';
 export * from './healthStatus';
 export * from './listAdminUsersParams';

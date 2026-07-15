@@ -106,12 +106,8 @@ export default function AdminTasks() {
     deleteMutation.mutate(
       { id },
       {
-        onSuccess: (result: any) => {
-          if (result?.deactivatedInstead) {
-            toast({ title: 'Task deactivated', description: result.message });
-          } else {
-            toast({ title: 'Task deleted' });
-          }
+        onSuccess: () => {
+          toast({ title: 'Task deleted' });
           queryClient.invalidateQueries({ queryKey: getListAdminTasksQueryKey() });
         },
         onError: () => {

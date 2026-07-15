@@ -444,14 +444,8 @@ paths:
           schema:
             type: integer
       responses:
-        "200":
-          description: Task already had completions, so it was deactivated instead of deleted to preserve reward history
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DeleteTaskResult"
         "204":
-          description: Task deleted
+          description: Task deleted (or, if it already has completions, hidden from the admin list to preserve reward history)
 
   /admin/config:
     get:
@@ -635,13 +629,6 @@ components:
         link: { type: ["string", "null"] }
         isActive: { type: boolean }
         createdAt: { type: string, format: date-time }
-
-    DeleteTaskResult:
-      type: object
-      required: [deactivatedInstead, message]
-      properties:
-        deactivatedInstead: { type: boolean }
-        message: { type: string }
 
     TaskWithStatus:
       allOf:

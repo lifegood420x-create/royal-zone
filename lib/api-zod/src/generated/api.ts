@@ -544,10 +544,7 @@ export const DeleteTaskParams = zod.object({
   "id": zod.coerce.number()
 })
 
-export const DeleteTaskResponse = zod.object({
-  "deactivatedInstead": zod.boolean(),
-  "message": zod.string()
-})
+export const DeleteTaskResponse = zod.void()
 
 
 /**

@@ -20,6 +20,12 @@ export const tasksTable = pgTable("tasks", {
   type: text("type", { enum: taskTypeValues }).notNull().default("other"),
   link: text("link"),
   isActive: boolean("is_active").notNull().default(true),
+  // Set when an admin "deletes" a task that already has completions (see
+  // admin/tasks.ts) — the row can't be hard-deleted without breaking the
+  // task_completions foreign key / reward history, so it's hidden from the
+  // admin list via this flag instead of relying on isActive (which users
+  // also read to decide what shows in their task list).
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
