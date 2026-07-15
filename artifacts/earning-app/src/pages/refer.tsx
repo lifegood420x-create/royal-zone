@@ -1,175 +1,133 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useGetMe, useGetPublicConfig, useListReferrals } from '@workspace/api-client-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { Users, Copy, Share2, Check, UserPlus } from 'lucide-react';
-import { formatCurrency, formatDate } from '../lib/utils';
+import { Copy, Share2, Users, Gift, Check } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 export default function Refer() {
-  const { data: user } = useGetMe();
+  const { data: user, isLoading: userLoading } = useGetMe();
   const { data: config } = useGetPublicConfig();
-  const { data: referralsData, isLoading } = useListReferrals();
-  const { toast } = useToast();
-  const [copied, setCopied] = useState(false);
-  // Telegram photo URLs sometimes fail to load (expired, CORS, deleted) —
-  // track which referral ids failed so we can fall back to the initial
-  // avatar instead of the browser's broken-image icon.
-  const [failedPhotoIds, setFailedPhotoIds] = useState<Set<number>>(new Set());
+  const { data: refData, isLoading: refLoading } = useListReferrals();
 
-  // Fallback to botUsername from config, or generic default if missing
-  const botUsername = config?.botUsername || 'as_earning_bot';
-  // `?start=` (not `?startapp=`) is used deliberately: it always sends a
-  // `/start <code>` message to the bot, which our webhook reliably turns
-  // into a referral credit for ANY bot — `?startapp=` only opens the Mini
-  // App directly (skipping the bot chat, and the referral code with it)
-  // when the bot has a Main Mini App attached in BotFather, which this bot
-  // doesn't. The bot's reply then offers a button to actually open the app.
-  const referralLink = user ? `https://t.me/${botUsername}?start=${user.referralCode}` : '';
+  const [copied, setCopied] = useState(false);
+
+  if (userLoading || refLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <Skeleton className="h-10 w-40" />
+        <Skeleton className="h-48 w-full rounded-3xl" />
+        <Skeleton className="h-32 w-full rounded-2xl" />
+      </div>
+    );
+  }
+
+  const referralLink = `https://t.me/${config?.botUsername}?start=${user?.referralCode}`;
 
   const handleCopy = () => {
-    if (!referralLink) return;
     navigator.clipboard.writeText(referralLink);
     setCopied(true);
-    toast({ title: 'Copied!', description: 'Referral link copied to clipboard.' });
+    toast.success('Referral link copied!');
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleShare = () => {
-    if (!referralLink) return;
-    const text = `Join me on AS Earning and get rewarded! Use my link: ${referralLink}`;
-    const url = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'AS Earning',
+          text: `Join AS Earning and start earning real money! Use my link:`,
+          url: referralLink,
+        });
+      } catch (err) {
+        console.log('Error sharing', err);
+      }
+    } else {
+      handleCopy();
+    }
   };
 
-  const referrals = referralsData?.referrals || [];
-
   return (
-    <div className="flex-1 flex flex-col bg-muted/20 overflow-y-auto">
-      <div className="bg-card border-b px-6 py-4 sticky top-0 z-10 shadow-sm">
-        <h1 className="text-xl font-bold text-foreground">Refer Friends</h1>
-        <p className="text-sm text-muted-foreground mt-1">Earn bonuses together</p>
-      </div>
+    <div className="flex flex-col min-h-full pb-6">
+      <header className="px-6 pt-10 pb-6 animate-fade-in">
+        <h1 className="text-2xl font-bold text-foreground mb-1">Invite Friends</h1>
+        <p className="text-sm text-muted-foreground font-medium">Earn bonus for every friend who joins.</p>
+      </header>
 
-      <div className="p-6 space-y-6">
+      <div className="px-6 space-y-6">
         {/* Hero Card */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-primary to-primary/90 text-primary-foreground overflow-hidden relative">
-          <div className="absolute -right-6 -bottom-6 opacity-10">
-            <Users size={120} />
+        <div className="bg-secondary/10 border border-secondary/20 rounded-3xl p-6 text-center animate-fade-up">
+          <div className="w-16 h-16 bg-secondary/20 text-secondary-foreground rounded-full flex items-center justify-center mx-auto mb-4">
+            <Gift size={32} />
           </div>
-          <CardContent className="p-6 relative z-10 text-center">
-            <div className="w-16 h-16 bg-primary-foreground/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-              <UserPlus size={32} className="text-primary-foreground" />
-            </div>
-            <h2 className="text-2xl font-bold mb-2">Invite & Earn</h2>
-            <p className="text-primary-foreground/80 text-sm mb-6 max-w-[250px] mx-auto leading-relaxed">
-              Get <span className="font-bold text-white">{formatCurrency(config?.referralBonus || 0)}</span> for every friend who joins using your link.
-            </p>
+          <h2 className="text-xl font-extrabold text-foreground mb-2">Earn ৳{config?.referralBonus} per friend</h2>
+          <p className="text-muted-foreground text-sm mb-6 px-4">
+            Share your unique link. When they join and verify, you both get rewarded instantly.
+          </p>
 
-            <div className="bg-background/10 backdrop-blur-md rounded-xl p-1 flex items-center border border-white/20">
-              <div className="flex-1 text-sm font-mono truncate px-3 py-2 text-white text-left">
-                {referralLink || 'Loading...'}
-              </div>
-              <div className="flex gap-1 shrink-0 bg-background/20 p-1 rounded-lg">
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  className="h-8 w-8 hover:bg-white/20 text-white rounded-md"
-                  onClick={handleCopy}
-                  data-testid="button-copy-referral"
-                >
-                  {copied ? <Check size={16} /> : <Copy size={16} />}
-                </Button>
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  className="h-8 w-8 hover:bg-white/20 text-white rounded-md"
-                  onClick={handleShare}
-                  data-testid="button-share-referral"
-                >
-                  <Share2 size={16} />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <div className="bg-card border border-border rounded-2xl p-2 pl-4 flex items-center justify-between mb-4 shadow-sm">
+            <span className="text-sm font-mono font-medium truncate text-muted-foreground mr-2">
+              {referralLink}
+            </span>
+            <button 
+              onClick={handleCopy}
+              className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-2.5 rounded-xl transition-colors active-scale shrink-0"
+            >
+              {copied ? <Check size={18} /> : <Copy size={18} />}
+            </button>
+          </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="border shadow-sm bg-card">
-            <CardContent className="p-4 text-center">
-              <p className="text-sm font-medium text-muted-foreground mb-1">Total Referrals</p>
-              <p className="text-2xl font-black text-foreground" data-testid="text-total-referrals">
-                {referralsData?.totalReferrals || 0}
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card className="border shadow-sm bg-card">
-            <CardContent className="p-4 text-center">
-              <p className="text-sm font-medium text-muted-foreground mb-1">Total Earned</p>
-              <p className="text-2xl font-black text-foreground text-primary" data-testid="text-referral-earnings">
-                {formatCurrency(referralsData?.totalReferralEarnings || 0)}
-              </p>
-            </CardContent>
-          </Card>
+          <button 
+            onClick={handleShare}
+            className="w-full bg-primary text-primary-foreground py-3.5 rounded-2xl font-bold shadow-md hover:bg-opacity-90 active-scale flex justify-center items-center gap-2 transition-all"
+          >
+            <Share2 size={18} />
+            Share Link
+          </button>
         </div>
 
-        {/* Referrals List */}
-        <section>
-          <h3 className="font-bold text-lg mb-3">Your Referrals</h3>
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 gap-4 animate-fade-up stagger-1">
+          <div className="bg-card border border-border rounded-2xl p-4 shadow-sm">
+            <p className="text-xs font-semibold text-muted-foreground mb-1">Total Invites</p>
+            <p className="text-2xl font-bold font-mono text-foreground">{refData?.totalReferrals || 0}</p>
+          </div>
+          <div className="bg-card border border-border rounded-2xl p-4 shadow-sm">
+            <p className="text-xs font-semibold text-muted-foreground mb-1">Earned from Ref</p>
+            <p className="text-2xl font-bold font-mono text-success">৳{refData?.totalReferralEarnings?.toFixed(2) || '0.00'}</p>
+          </div>
+        </div>
+
+        {/* List of Referrals */}
+        <div className="animate-fade-up stagger-2">
+          <h3 className="text-sm font-bold text-muted-foreground tracking-wide uppercase px-2 mb-3">Your Referrals</h3>
           
-          {isLoading ? (
-            <div className="space-y-3">
-              {[1, 2].map(i => (
-                <div key={i} className="h-16 bg-muted animate-pulse rounded-xl border border-border" />
-              ))}
-            </div>
-          ) : referrals.length > 0 ? (
-            <div className="space-y-3">
-              {referrals.map((ref) => (
-                <div key={ref.id} className="bg-card border rounded-xl p-3 flex items-center justify-between shadow-sm">
-                  <div className="flex items-center gap-3">
-                    {ref.photoUrl && !failedPhotoIds.has(ref.id) ? (
-                      <img
-                        src={ref.photoUrl}
-                        alt={ref.firstName}
-                        className="w-10 h-10 rounded-full border border-border shadow-sm object-cover"
-                        referrerPolicy="no-referrer"
-                        onError={() => setFailedPhotoIds((prev) => new Set(prev).add(ref.id))}
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
-                        {ref.firstName.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-bold text-sm text-foreground">{ref.firstName}</p>
-                      <p className="text-xs text-muted-foreground">Joined {formatDate(ref.joinedAt)}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs font-bold text-secondary-foreground bg-secondary/20 px-2 py-1 rounded">
-                      +{formatCurrency(config?.referralBonus || 0)}
-                    </span>
-                  </div>
-                </div>
-              ))}
+          {!refData?.referrals || refData.referrals.length === 0 ? (
+            <div className="bg-card border border-border border-dashed rounded-3xl p-8 text-center text-muted-foreground">
+              <Users size={32} className="mx-auto mb-3 opacity-50" />
+              <p className="font-medium">No friends invited yet.</p>
+              <p className="text-xs mt-1">Start sharing to grow your network!</p>
             </div>
           ) : (
-            <Card className="border shadow-sm bg-card border-dashed">
-              <CardContent className="p-8 flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                  <Users size={24} className="text-muted-foreground/50" />
+            <div className="space-y-3">
+              {refData.referrals.map((ref, idx) => (
+                <div key={ref.id} className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                      {ref.firstName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-foreground">{ref.firstName}</p>
+                      <p className="text-xs text-muted-foreground">{new Date(ref.joinedAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <div className="text-xs font-bold text-success bg-success/10 px-2 py-1 rounded-lg">
+                    +৳{config?.referralBonus}
+                  </div>
                 </div>
-                <p className="font-bold text-foreground mb-1">No referrals yet</p>
-                <p className="text-sm text-muted-foreground max-w-[200px]">
-                  Share your link with friends to start earning passive income.
-                </p>
-              </CardContent>
-            </Card>
+              ))}
+            </div>
           )}
-        </section>
+        </div>
       </div>
     </div>
   );

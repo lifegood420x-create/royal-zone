@@ -1,95 +1,48 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   useGetAdminConfig, 
-  useUpdateAdminConfig,
-  useSendBroadcast,
-  useGetWebhookStatus,
-  useResetWebhook,
+  useUpdateAdminConfig, 
   useRegeneratePostbackSecret,
-  getGetAdminConfigQueryKey,
-  getGetWebhookStatusQueryKey,
+  useGetWebhookStatus,
+  useResetWebhook
 } from '@workspace/api-client-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useQueryClient } from '@tanstack/react-query';
-import { Save, Send, RefreshCw, ServerCog, Settings2, Megaphone, Link2, AlertCircle, ShieldCheck, Copy, KeyRound } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-
-const configSchema = z.object({
-  minWithdraw: z.coerce.number().min(0),
-  referralBonus: z.coerce.number().min(0),
-  adReward: z.coerce.number().min(0),
-  adDailyLimit: z.coerce.number().min(0),
-  adDurationSeconds: z.coerce.number().min(1),
-  botName: z.string().min(1),
-  botUsername: z.string().min(1),
-  channelUsername: z.string().optional().or(z.literal('')),
-  adminUsername: z.string().min(1),
-  monetagZoneId: z.string().optional().or(z.literal('')),
-  adsgramBlockId: z.string().optional().or(z.literal('')),
-  monetagEnabled: z.boolean().default(true),
-  adsgramEnabled: z.boolean().default(true),
-  requireAdPostback: z.boolean(),
-});
-
-type ConfigFormValues = z.infer<typeof configSchema>;
+import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
+import { 
+  Settings2, 
+  Save, 
+  RefreshCw, 
+  Copy, 
+  ServerCrash,
+  CheckCircle2,
+  DollarSign,
+  PlaySquare,
+  Bot
+} from 'lucide-react';
+import type { ConfigUpdate } from '@workspace/api-client-react';
 
 export default function AdminConfig() {
-  const { data: config, isLoading: isConfigLoading } = useGetAdminConfig();
-  const { data: webhookStatus, isLoading: isWebhookLoading } = useGetWebhookStatus();
+  const { data: config, isLoading: isConfigLoading, refetch: refetchConfig } = useGetAdminConfig();
+  const { data: webhookStatus, isLoading: isWebhookLoading, refetch: refetchWebhook } = useGetWebhookStatus();
   
-  const updateConfigMutation = useUpdateAdminConfig();
-  const broadcastMutation = useSendBroadcast();
-  const resetWebhookMutation = useResetWebhook();
-  const regenerateSecretMutation = useRegeneratePostbackSecret();
-  const [copied, setCopied] = useState(false);
-  
-  const queryClient = useQueryClient();
+  const updateConfig = useUpdateAdminConfig();
+  const regenSecret = useRegeneratePostbackSecret();
+  const resetWebhook = useResetWebhook();
   const { toast } = useToast();
+
+  const [formData, setFormData] = useState<ConfigUpdate>({});
   
-  const form = useForm<ConfigFormValues>({
-    resolver: zodResolver(configSchema),
-    defaultValues: {
-      minWithdraw: 0,
-      referralBonus: 0,
-      adReward: 0,
-      adDailyLimit: 0,
-      adDurationSeconds: 15,
-      botName: '',
-      botUsername: '',
-      channelUsername: '',
-      adminUsername: '',
-      monetagZoneId: '',
-      adsgramBlockId: '',
-      monetagEnabled: true,
-      adsgramEnabled: true,
-      requireAdPostback: false,
-    },
-  });
-
-  const broadcastForm = useForm<{ message: string }>({
-    defaultValues: { message: '' }
-  });
-
-  const initializedRef = useRef(false);
-
+  // Guard initialization to run once per fetch result
+  const initialized = useRef(false);
   useEffect(() => {
-    if (config && !initializedRef.current) {
-      form.reset({
+    if (config && !initialized.current) {
+      setFormData({
         minWithdraw: config.minWithdraw,
         referralBonus: config.referralBonus,
         adReward: config.adReward,
@@ -97,455 +50,262 @@ export default function AdminConfig() {
         adDurationSeconds: config.adDurationSeconds,
         botName: config.botName,
         botUsername: config.botUsername,
-        channelUsername: config.channelUsername || '',
+        channelUsername: config.channelUsername || undefined,
         adminUsername: config.adminUsername,
-        monetagZoneId: config.monetagZoneId || '',
-        adsgramBlockId: config.adsgramBlockId || '',
+        monetagZoneId: config.monetagZoneId || undefined,
+        adsgramBlockId: config.adsgramBlockId || undefined,
         monetagEnabled: config.monetagEnabled,
         adsgramEnabled: config.adsgramEnabled,
-        requireAdPostback: config.requireAdPostback,
+        requireAdPostback: config.requireAdPostback
       });
-      initializedRef.current = true;
+      initialized.current = true;
     }
-  }, [config, form]);
+  }, [config]);
 
-  const onConfigSubmit = (data: ConfigFormValues) => {
-    updateConfigMutation.mutate(
-      { data },
-      {
-        onSuccess: () => {
-          toast({ title: 'Settings saved', description: 'App configuration updated successfully.' });
-          queryClient.invalidateQueries({ queryKey: getGetAdminConfigQueryKey() });
-        },
-        onError: (err: any) => {
-          toast({ title: 'Error saving settings', description: err.message || 'Something went wrong.', variant: 'destructive' });
-        }
-      }
-    );
+  const handleChange = (key: keyof ConfigUpdate, value: ConfigUpdate[keyof ConfigUpdate]) => {
+    setFormData((prev: ConfigUpdate) => ({ ...prev, [key]: value }));
   };
 
-  const onBroadcastSubmit = (data: { message: string }) => {
-    if (!data.message.trim()) return;
-    
-    broadcastMutation.mutate(
-      { data: { message: data.message } },
-      {
-        onSuccess: (res) => {
-          toast({ 
-            title: 'Broadcast sent', 
-            description: `Successfully sent to ${res.sentCount} users. Failed: ${res.failedCount}.` 
-          });
-          broadcastForm.reset();
-        },
-        onError: (err: any) => {
-          toast({ title: 'Broadcast failed', description: err.message || 'Could not send message.', variant: 'destructive' });
-        }
-      }
-    );
-  };
-
-  const handleResetWebhook = () => {
-    resetWebhookMutation.mutate(
-      undefined,
-      {
-        onSuccess: () => {
-          toast({ title: 'Webhook reset', description: 'Telegram webhook has been reconfigured.' });
-          queryClient.invalidateQueries({ queryKey: getGetWebhookStatusQueryKey() });
-        },
-        onError: (err: any) => {
-          toast({ title: 'Webhook error', description: err.message || 'Could not reset webhook.', variant: 'destructive' });
-        }
-      }
-    );
-  };
-
-  const handleCopyPostbackUrl = () => {
-    if (!config?.postbackUrl) return;
-    navigator.clipboard.writeText(config.postbackUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleRegenerateSecret = () => {
-    if (!confirm('This invalidates the current postback URL — you will need to update it in your Monetag/Adsgram dashboard. Continue?')) return;
-    regenerateSecretMutation.mutate(undefined, {
+  const handleSave = () => {
+    updateConfig.mutate({ data: formData }, {
       onSuccess: () => {
-        toast({ title: 'Postback secret regenerated', description: 'Update the URL in your ad network dashboard.' });
-        queryClient.invalidateQueries({ queryKey: getGetAdminConfigQueryKey() });
+        toast({ title: "Settings Saved", description: "Global configuration updated successfully." });
+        refetchConfig();
       },
-      onError: (err: any) => {
-        toast({ title: 'Error', description: err.message || 'Could not regenerate secret.', variant: 'destructive' });
+      onError: () => {
+        toast({ title: "Error", description: "Failed to save settings.", variant: "destructive" });
       }
     });
   };
 
+  const handleRegenSecret = () => {
+    if (confirm("Are you sure? Existing ad postbacks will stop working until ad networks are updated with the new URL.")) {
+      regenSecret.mutate(undefined, {
+        onSuccess: () => {
+          toast({ title: "Secret Regenerated", description: "Your postback URL has been updated." });
+          refetchConfig();
+        }
+      });
+    }
+  };
+
+  const handleResetWebhook = () => {
+    resetWebhook.mutate(undefined, {
+      onSuccess: () => {
+        toast({ title: "Webhook Reset", description: "Telegram webhook integration refreshed." });
+        refetchWebhook();
+      }
+    });
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copied", description: "URL copied to clipboard." });
+  };
+
   if (isConfigLoading) {
-    return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading configuration...</div>;
+    return <div className="p-8 space-y-6"><Skeleton className="h-10 w-48" /><Skeleton className="h-[400px] w-full" /></div>;
   }
 
   return (
-    <div className="space-y-6 pb-10">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground mt-1">Configure app parameters and integrations</p>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 max-w-4xl">
+      <div className="flex flex-col sm:flex-row justify-between gap-4 sm:items-end">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Settings2 size={24} className="text-primary" /> System Settings
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">Configure app economy, ad networks, and integrations.</p>
+        </div>
+        <Button onClick={handleSave} disabled={updateConfig.isPending} className="gap-2 shrink-0 shadow-sm px-6">
+          <Save size={16} /> {updateConfig.isPending ? 'Saving...' : 'Save All Changes'}
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 space-y-6">
-          <Card className="border shadow-sm">
-            <CardHeader className="bg-muted/20 border-b pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Settings2 size={20} className="text-primary" />
-                App Configuration
-              </CardTitle>
-              <CardDescription>Main parameters governing economy and identity</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onConfigSubmit)} className="space-y-6">
-                  
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-sm text-muted-foreground uppercase tracking-wider">Economy</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="minWithdraw"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Base Minimum Withdraw (৳)</FormLabel>
-                            <FormControl>
-                              <Input type="number" step="0.01" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="referralBonus"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Referral Bonus (৳)</FormLabel>
-                            <FormControl>
-                              <Input type="number" step="0.01" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Economy Settings */}
+        <Card className="border-accent/50 shadow-sm flex flex-col">
+          <CardHeader className="bg-accent/10 border-b border-accent/30 pb-4">
+            <CardTitle className="text-base flex items-center gap-2">
+              <DollarSign size={18} className="text-primary" /> Economy & Rewards
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5 space-y-5 flex-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Min Withdraw</Label>
+                <Input 
+                  type="number" 
+                  value={formData.minWithdraw || 0} 
+                  onChange={e => handleChange('minWithdraw', Number(e.target.value))} 
+                  className="font-mono bg-card"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Referral Bonus</Label>
+                <Input 
+                  type="number" 
+                  value={formData.referralBonus || 0} 
+                  onChange={e => handleChange('referralBonus', Number(e.target.value))}
+                  className="font-mono bg-card"
+                />
+              </div>
+            </div>
+            <Separator className="bg-accent/50" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Ad Reward</Label>
+                <Input 
+                  type="number" 
+                  value={formData.adReward || 0} 
+                  onChange={e => handleChange('adReward', Number(e.target.value))}
+                  className="font-mono bg-card"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Daily Ad Limit</Label>
+                <Input 
+                  type="number" 
+                  value={formData.adDailyLimit || 0} 
+                  onChange={e => handleChange('adDailyLimit', Number(e.target.value))}
+                  className="font-mono bg-card"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Telegram Integrations */}
+        <Card className="border-accent/50 shadow-sm flex flex-col">
+          <CardHeader className="bg-accent/10 border-b border-accent/30 pb-4">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Bot size={18} className="text-primary" /> Telegram Config
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5 space-y-4 flex-1">
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Bot Details</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <Input 
+                  placeholder="App Name"
+                  value={formData.botName || ''} 
+                  onChange={e => handleChange('botName', e.target.value)} 
+                />
+                <Input 
+                  placeholder="@username"
+                  value={formData.botUsername || ''} 
+                  onChange={e => handleChange('botUsername', e.target.value)} 
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Community</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <Input 
+                  placeholder="Channel Username (e.g. @updates)"
+                  value={formData.channelUsername || ''} 
+                  onChange={e => handleChange('channelUsername', e.target.value)} 
+                />
+                <Input 
+                  placeholder="Admin Username (e.g. @owner)"
+                  value={formData.adminUsername || ''} 
+                  onChange={e => handleChange('adminUsername', e.target.value)} 
+                />
+              </div>
+            </div>
+            
+            {/* Webhook Status Mini */}
+            <div className="mt-4 bg-accent/30 p-3 rounded-lg border border-accent/50 flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-foreground">Webhook Status</span>
+                <span className="text-[10px] text-muted-foreground">
+                  {isWebhookLoading ? 'Checking...' : webhookStatus?.lastErrorMessage ? 'Error Detected' : 'Healthy'}
+                </span>
+              </div>
+              <Button variant="outline" size="sm" className="h-7 text-xs px-2" onClick={handleResetWebhook} disabled={resetWebhook.isPending}>
+                <RefreshCw size={12} className={`mr-1 ${resetWebhook.isPending ? 'animate-spin' : ''}`} /> Sync
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Ad Networks */}
+        <Card className="border-accent/50 shadow-sm md:col-span-2">
+          <CardHeader className="bg-accent/10 border-b border-accent/30 pb-4">
+            <CardTitle className="text-base flex items-center gap-2">
+              <PlaySquare size={18} className="text-primary" /> Monetization & Ads
+            </CardTitle>
+            <CardDescription>Configure rewarded video networks and security.</CardDescription>
+          </CardHeader>
+          <CardContent className="p-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Networks */}
+              <div className="space-y-6">
+                <div className="flex items-start justify-between border-b pb-4">
+                  <div className="space-y-1 pr-4">
+                    <Label className="text-sm font-bold text-foreground">Monetag</Label>
+                    <p className="text-xs text-muted-foreground">Enable Monetag rewarded ads</p>
+                    <Input 
+                      placeholder="Zone ID"
+                      value={formData.monetagZoneId || ''} 
+                      onChange={e => handleChange('monetagZoneId', e.target.value)} 
+                      className="mt-2 h-8 text-sm max-w-[200px]"
+                    />
                   </div>
-
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-sm text-muted-foreground uppercase tracking-wider">Ads & Limits</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="adReward"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Ad Watch Reward (৳)</FormLabel>
-                            <FormControl>
-                              <Input type="number" step="0.01" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="adDailyLimit"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Daily Ad Limit (per user)</FormLabel>
-                            <FormControl>
-                              <Input type="number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="adDurationSeconds"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Ad Countdown (seconds)</FormLabel>
-                            <FormControl>
-                              <Input type="number" min={1} {...field} />
-                            </FormControl>
-                            <p className="text-[10px] text-muted-foreground">
-                              User must wait this long after starting an ad before the reward is credited.
-                            </p>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="monetagZoneId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Monetag Zone ID (optional)</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g. 1234567" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="adsgramBlockId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Adsgram Block ID (optional)</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g. block-123" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="monetagEnabled"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-muted/20">
-                            <div className="space-y-0.5">
-                              <FormLabel>Monetag Ads</FormLabel>
-                              <p className="text-[10px] text-muted-foreground">
-                                Turn off to hide the Monetag "Server 1" button from users.
-                              </p>
-                            </div>
-                            <FormControl>
-                              <Switch checked={field.value} onCheckedChange={field.onChange} data-testid="switch-monetag-enabled" />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="adsgramEnabled"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-muted/20">
-                            <div className="space-y-0.5">
-                              <FormLabel>Adsgram Ads</FormLabel>
-                              <p className="text-[10px] text-muted-foreground">
-                                Turn off to hide the Adsgram "Server 2" button from users.
-                              </p>
-                            </div>
-                            <FormControl>
-                              <Switch checked={field.value} onCheckedChange={field.onChange} data-testid="switch-adsgram-enabled" />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                  <Switch 
+                    checked={formData.monetagEnabled} 
+                    onCheckedChange={c => handleChange('monetagEnabled', c)} 
+                  />
+                </div>
+                
+                <div className="flex items-start justify-between border-b pb-4">
+                  <div className="space-y-1 pr-4">
+                    <Label className="text-sm font-bold text-foreground">Adsgram</Label>
+                    <p className="text-xs text-muted-foreground">Enable Adsgram rewarded ads</p>
+                    <Input 
+                      placeholder="Block ID"
+                      value={formData.adsgramBlockId || ''} 
+                      onChange={e => handleChange('adsgramBlockId', e.target.value)} 
+                      className="mt-2 h-8 text-sm max-w-[200px]"
+                    />
                   </div>
+                  <Switch 
+                    checked={formData.adsgramEnabled} 
+                    onCheckedChange={c => handleChange('adsgramEnabled', c)} 
+                  />
+                </div>
+              </div>
 
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-sm text-muted-foreground uppercase tracking-wider">Ad Postback Verification</h3>
-                    <p className="text-xs text-muted-foreground -mt-2">
-                      By default, a reward is credited as soon as the ad SDK reports "watched" — which a user could fake via devtools.
-                      For fraud-proof crediting, paste the URL below as the <strong>Postback URL</strong> in your Monetag/Adsgram dashboard
-                      for each zone, then enable the toggle below once you've confirmed test postbacks are arriving.
-                    </p>
-                    <div className="rounded-lg border bg-muted/20 p-3 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <code className="flex-1 text-xs break-all bg-background border rounded px-2 py-1.5 font-mono">
-                          {config?.postbackUrl || 'Loading...'}
-                        </code>
-                        <Button type="button" size="sm" variant="outline" onClick={handleCopyPostbackUrl}>
-                          <Copy size={14} className="mr-1.5" /> {copied ? 'Copied' : 'Copy'}
-                        </Button>
-                      </div>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="text-orange-600 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                        onClick={handleRegenerateSecret}
-                        disabled={regenerateSecretMutation.isPending}
-                      >
-                        <KeyRound size={14} className={`mr-1.5 ${regenerateSecretMutation.isPending ? 'animate-spin' : ''}`} />
-                        Regenerate Secret
-                      </Button>
-                      <FormField
-                        control={form.control}
-                        name="requireAdPostback"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background">
-                            <div className="space-y-0.5 flex items-start gap-2">
-                              <ShieldCheck size={18} className="text-emerald-600 shrink-0 mt-0.5" />
-                              <div>
-                                <FormLabel>Require Postback Verification</FormLabel>
-                                <p className="text-[10px] text-muted-foreground">
-                                  When on, ad rewards are only credited after the ad network's server confirms the view — not the browser.
-                                </p>
-                              </div>
-                            </div>
-                            <FormControl>
-                              <Switch checked={field.value} onCheckedChange={field.onChange} />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+              {/* Postback Settings */}
+              <div className="bg-muted/40 p-4 rounded-xl border border-accent/50 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm font-bold text-foreground">Secure Postback</Label>
+                    <p className="text-xs text-muted-foreground">Require S2S verification</p>
                   </div>
-
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-sm text-muted-foreground uppercase tracking-wider">Identity</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="botName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Bot Name</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="botUsername"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Bot Username (without @)</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="channelUsername"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Channel Username (with @)</FormLabel>
-                            <FormControl>
-                              <Input placeholder="@mychannel" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="adminUsername"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Admin Contact Username (with @)</FormLabel>
-                            <FormControl>
-                              <Input placeholder="@admin" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t flex justify-end">
-                    <Button type="submit" size="lg" disabled={updateConfigMutation.isPending} className="font-bold min-w-[150px]">
-                      {updateConfigMutation.isPending ? <RefreshCw className="animate-spin mr-2" size={18} /> : <Save className="mr-2" size={18} />}
-                      Save Settings
+                  <Switch 
+                    checked={formData.requireAdPostback} 
+                    onCheckedChange={c => handleChange('requireAdPostback', c)} 
+                  />
+                </div>
+                
+                <div className="space-y-2 pt-2 border-t">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Postback URL (For Ad Networks)</Label>
+                  <div className="flex items-center gap-2">
+                    <code className="text-[10px] sm:text-xs bg-card p-2 rounded flex-1 border truncate font-mono text-muted-foreground">
+                      {config?.postbackUrl}
+                    </code>
+                    <Button variant="secondary" size="icon" onClick={() => copyToClipboard(config?.postbackUrl || '')} className="shrink-0">
+                      <Copy size={14} />
                     </Button>
                   </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card className="border shadow-sm">
-            <CardHeader className="bg-muted/20 border-b pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Megaphone size={20} className="text-blue-500" />
-                Broadcast Message
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <Form {...broadcastForm}>
-                <form onSubmit={broadcastForm.handleSubmit(onBroadcastSubmit)} className="space-y-4">
-                  <FormField
-                    control={broadcastForm.control}
-                    name="message"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">Message Text</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Type a message to send to all users..." 
-                            className="min-h-[120px] resize-none"
-                            {...field} 
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full" disabled={broadcastMutation.isPending || !broadcastForm.watch('message')}>
-                    {broadcastMutation.isPending ? <RefreshCw className="animate-spin mr-2" size={16} /> : <Send className="mr-2" size={16} />}
-                    Send to All Users
+                  <Button variant="outline" size="sm" onClick={handleRegenSecret} disabled={regenSecret.isPending} className="w-full mt-2 text-xs h-8">
+                    <RefreshCw size={12} className={`mr-2 ${regenSecret.isPending ? 'animate-spin' : ''}`} /> Regenerate Secret Key
                   </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-
-          <Card className="border shadow-sm">
-            <CardHeader className="bg-muted/20 border-b pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <ServerCog size={20} className="text-orange-500" />
-                Webhook Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-4">
-              {isWebhookLoading ? (
-                <div className="h-20 animate-pulse bg-muted rounded" />
-              ) : webhookStatus ? (
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-start gap-2">
-                    <Link2 size={16} className="text-muted-foreground shrink-0 mt-0.5" />
-                    <span className="break-all font-mono text-xs text-muted-foreground">{webhookStatus.url || 'Not set'}</span>
-                  </div>
-                  <div className="flex items-center justify-between bg-muted/50 p-2 rounded">
-                    <span className="text-muted-foreground">Pending Updates:</span>
-                    <span className="font-bold">{webhookStatus.pendingUpdateCount}</span>
-                  </div>
-                  {webhookStatus.lastErrorMessage && (
-                    <div className="bg-destructive/10 text-destructive p-2 rounded text-xs flex gap-2">
-                      <AlertCircle size={14} className="shrink-0 mt-0.5" />
-                      <span>{webhookStatus.lastErrorMessage}</span>
-                    </div>
-                  )}
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Status unavailable.</p>
-              )}
-              
-              <Button 
-                variant="outline" 
-                className="w-full text-orange-600 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                onClick={handleResetWebhook}
-                disabled={resetWebhookMutation.isPending}
-              >
-                <RefreshCw size={16} className={`mr-2 ${resetWebhookMutation.isPending ? 'animate-spin' : ''}`} />
-                Reset Webhook
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

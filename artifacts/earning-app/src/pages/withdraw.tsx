@@ -1,197 +1,142 @@
-import { useState } from 'react';
-import { 
-  useGetMe, 
-  useGetPublicConfig, 
-  useListWithdrawals, 
-  useRequestWithdrawal,
-  getListWithdrawalsQueryKey,
-  getGetMeQueryKey,
-  WithdrawalMethod
-} from '@workspace/api-client-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { Wallet, AlertCircle, Clock, CheckCircle2, XCircle, ArrowDownToLine, Loader2, ChevronDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { useGetMe, useGetPublicConfig, useListWithdrawals, useRequestWithdrawal } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { formatCurrency, formatDate, formatTime } from '../lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import * as z from 'zod';
+import { Wallet, Info, Clock, CheckCircle2, XCircle, ChevronDown, ArrowRight } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 const withdrawSchema = z.object({
-  method: z.enum(['bkash', 'nagad'] as const),
+  method: z.enum(['bkash', 'nagad']),
   accountNumber: z.string().min(11, 'Enter a valid 11-digit number').max(11, 'Enter a valid 11-digit number'),
-  amount: z.coerce.number().min(1, 'Amount must be at least 1'),
+  amount: z.coerce.number().min(1, 'Amount required')
 });
 
-type WithdrawFormValues = z.infer<typeof withdrawSchema>;
+type WithdrawValues = z.infer<typeof withdrawSchema>;
 
 export default function Withdraw() {
   const { data: user } = useGetMe();
   const { data: config } = useGetPublicConfig();
   const { data: withdrawals, isLoading: withdrawalsLoading } = useListWithdrawals();
-  const requestMutation = useRequestWithdrawal();
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-  const [expandedReasons, setExpandedReasons] = useState<Set<number>>(new Set());
+  const withdrawMutation = useRequestWithdrawal();
 
-  const toggleReason = (id: number) => {
-    setExpandedReasons((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
+  const [activeTab, setActiveTab] = useState<'request' | 'history'>('request');
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  const form = useForm<WithdrawFormValues>({
+  const minWithdraw = config?.minWithdraw || 50;
+
+  const form = useForm<WithdrawValues>({
     resolver: zodResolver(withdrawSchema),
     defaultValues: {
       method: 'bkash',
       accountNumber: '',
-      amount: config?.minWithdraw || 0,
-    },
+      amount: minWithdraw
+    }
   });
 
-  // Watch amount to trigger re-validation when config loads
-  const amount = form.watch('amount');
-  const minWithdraw = config?.minWithdraw || 0;
-
-  const onSubmit = (data: WithdrawFormValues) => {
+  const onSubmit = async (data: WithdrawValues) => {
     if (!user) return;
     if (data.amount < minWithdraw) {
-      form.setError('amount', { message: `Minimum withdrawal is ${formatCurrency(minWithdraw)}` });
+      form.setError('amount', { message: `Minimum withdrawal is ৳${minWithdraw}` });
       return;
     }
     if (data.amount > user.balance) {
-      form.setError('amount', { message: `Insufficient balance. You have ${formatCurrency(user.balance)}` });
+      form.setError('amount', { message: 'Insufficient balance' });
       return;
     }
 
-    requestMutation.mutate(
-      { data },
-      {
-        onSuccess: () => {
-          toast({ 
-            title: 'Request Submitted', 
-            description: 'Your withdrawal request is pending approval.' 
-          });
-          form.reset({ method: data.method, accountNumber: '', amount: minWithdraw });
-          queryClient.invalidateQueries({ queryKey: getListWithdrawalsQueryKey() });
-          queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
-        },
-        onError: (err: any) => {
-          toast({ 
-            title: 'Request Failed', 
-            description: err.message || 'Could not submit request.', 
-            variant: 'destructive' 
-          });
-        }
-      }
-    );
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'paid': return <CheckCircle2 className="text-primary" size={18} />;
-      case 'rejected': return <XCircle className="text-destructive" size={18} />;
-      default: return <Clock className="text-orange-500" size={18} />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid': return 'text-primary bg-primary/10';
-      case 'rejected': return 'text-destructive bg-destructive/10';
-      default: return 'text-orange-600 bg-orange-100 dark:bg-orange-900/20';
+    try {
+      await withdrawMutation.mutateAsync({ data });
+      queryClient.invalidateQueries({ queryKey: ['/api/withdrawals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/me'] });
+      toast.success('Withdrawal request submitted successfully!');
+      form.reset({ ...data, amount: minWithdraw });
+      setActiveTab('history');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to submit request');
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-muted/20 overflow-y-auto">
-      <div className="bg-card border-b px-6 py-4 sticky top-0 z-10 shadow-sm">
-        <h1 className="text-xl font-bold text-foreground">Withdraw</h1>
-        <p className="text-sm text-muted-foreground mt-1">Cash out your earnings</p>
-      </div>
+    <div className="flex flex-col min-h-full pb-6">
+      <header className="px-6 pt-10 pb-6 bg-card border-b border-border z-10 sticky top-0 animate-fade-in">
+        <h1 className="text-2xl font-bold text-foreground mb-1">Withdraw Funds</h1>
+        <p className="text-sm text-muted-foreground font-medium">Transfer your balance securely to your wallet.</p>
+        
+        <div className="mt-6 flex bg-muted p-1 rounded-2xl border border-border/50">
+          <button
+            onClick={() => setActiveTab('request')}
+            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${
+              activeTab === 'request' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            New Request
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${
+              activeTab === 'history' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            History
+          </button>
+        </div>
+      </header>
 
-      <div className="p-6 space-y-6">
-        {/* Balance Card */}
-        <Card className="border shadow-sm bg-card overflow-hidden">
-          <div className="bg-primary/5 p-4 border-b flex justify-between items-center">
-            <span className="text-sm font-medium text-muted-foreground">Available Balance</span>
-            <Wallet className="text-primary opacity-50" size={20} />
-          </div>
-          <CardContent className="p-6">
-            <p className="text-4xl font-black text-foreground" data-testid="text-withdraw-balance">
-              {formatCurrency(user?.balance || 0)}
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Withdrawal Form */}
-        <Card className="border shadow-sm bg-card">
-          <CardContent className="p-6">
-            <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
-              <ArrowDownToLine size={18} className="text-primary" />
-              Request Payout
-            </h2>
-
-            {config && user && user.rejectedWithdrawCount > 0 && (
-              <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800 rounded-lg p-3 flex gap-3 items-start mb-6">
-                <AlertCircle className="text-orange-500 shrink-0 mt-0.5" size={18} />
+      <div className="px-6 pt-6">
+        {activeTab === 'request' ? (
+          <div className="space-y-6 animate-fade-up">
+            {/* Balance Card */}
+            <div className="bg-primary text-primary-foreground rounded-3xl p-6 shadow-md relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white opacity-5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3"></div>
+              <div className="relative z-10 flex justify-between items-end">
                 <div>
-                  <p className="text-sm font-bold text-orange-800 dark:text-orange-400">Notice</p>
-                  <p className="text-xs text-orange-700 dark:text-orange-300 mt-0.5 leading-relaxed">
-                    Due to previous rejected requests, your minimum withdrawal amount has increased. 
-                    Ensure all your tasks and referrals are genuine.
-                  </p>
+                  <p className="text-primary-foreground/80 font-medium text-sm mb-1">Available to Withdraw</p>
+                  <span className="text-3xl font-extrabold tracking-tight font-mono">৳{user?.balance?.toFixed(2) || '0.00'}</span>
                 </div>
+                <Wallet size={32} className="opacity-50" />
               </div>
-            )}
+            </div>
 
+            {/* Form */}
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 bg-card border border-border p-6 rounded-3xl shadow-sm">
                 <FormField
                   control={form.control}
                   name="method"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Payment Method</FormLabel>
-                      <div className="grid grid-cols-2 gap-3 mt-1">
-                        <Button
-                          type="button"
-                          variant={field.value === 'bkash' ? 'default' : 'outline'}
-                          className={`w-full justify-start h-12 px-4 ${field.value === 'bkash' ? 'bg-[#E2136E] hover:bg-[#C1105C] text-white border-transparent' : ''}`}
-                          onClick={() => field.onChange('bkash')}
-                          data-testid="select-method-bkash"
-                        >
-                          <div className="w-6 h-6 rounded-full bg-white/20 mr-2 flex items-center justify-center font-bold text-xs">b</div>
-                          bKash
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={field.value === 'nagad' ? 'default' : 'outline'}
-                          className={`w-full justify-start h-12 px-4 ${field.value === 'nagad' ? 'bg-[#EC1C24] hover:bg-[#C9181F] text-white border-transparent' : ''}`}
-                          onClick={() => field.onChange('nagad')}
-                          data-testid="select-method-nagad"
-                        >
-                          <div className="w-6 h-6 rounded-full bg-white/20 mr-2 flex items-center justify-center font-bold text-xs">n</div>
-                          Nagad
-                        </Button>
-                      </div>
+                    <FormItem className="space-y-3">
+                      <FormLabel className="text-foreground font-bold">Select Method</FormLabel>
+                      <FormControl>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => field.onChange('bkash')}
+                            className={`p-4 border rounded-2xl flex flex-col items-center gap-2 transition-all active-scale ${
+                              field.value === 'bkash' 
+                                ? 'border-[#E2136E] bg-[#E2136E]/5 text-[#E2136E]' 
+                                : 'border-border bg-card text-muted-foreground hover:border-[#E2136E]/30'
+                            }`}
+                          >
+                            <span className="font-extrabold text-sm tracking-wide">bKash</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => field.onChange('nagad')}
+                            className={`p-4 border rounded-2xl flex flex-col items-center gap-2 transition-all active-scale ${
+                              field.value === 'nagad' 
+                                ? 'border-[#F7931E] bg-[#F7931E]/5 text-[#F7931E]' 
+                                : 'border-border bg-card text-muted-foreground hover:border-[#F7931E]/30'
+                            }`}
+                          >
+                            <span className="font-extrabold text-sm tracking-wide">Nagad</span>
+                          </button>
+                        </div>
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -202,15 +147,13 @@ export default function Withdraw() {
                   name="accountNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Account Number</FormLabel>
+                      <FormLabel className="text-foreground font-bold">Account Number</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="01XXXXXXXXX" 
-                          type="tel"
-                          maxLength={11}
-                          className="h-12 bg-muted/50" 
-                          data-testid="input-account-number"
-                          {...field} 
+                        <input
+                          {...field}
+                          type="number"
+                          placeholder="e.g. 01700000000"
+                          className="flex h-14 w-full rounded-2xl border border-input bg-background px-4 py-2 text-sm font-mono font-medium ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 transition-shadow"
                         />
                       </FormControl>
                       <FormMessage />
@@ -223,21 +166,17 @@ export default function Withdraw() {
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="flex justify-between items-end mb-1">
-                        <FormLabel>Amount</FormLabel>
-                        <span className="text-xs text-muted-foreground font-medium">
-                          Min: {formatCurrency(minWithdraw)}
-                        </span>
+                      <div className="flex justify-between items-center mb-2">
+                        <FormLabel className="text-foreground font-bold m-0">Amount (৳)</FormLabel>
+                        <span className="text-xs text-muted-foreground font-medium">Min: ৳{minWithdraw}</span>
                       </div>
                       <FormControl>
                         <div className="relative">
                           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">৳</span>
-                          <Input 
+                          <input
+                            {...field}
                             type="number"
-                            step="0.01"
-                            className="h-12 pl-8 font-bold text-lg bg-muted/50" 
-                            data-testid="input-amount"
-                            {...field} 
+                            className="flex h-14 w-full rounded-2xl border border-input bg-background pl-8 pr-4 py-2 text-lg font-mono font-bold ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 transition-shadow"
                           />
                         </div>
                       </FormControl>
@@ -246,96 +185,87 @@ export default function Withdraw() {
                   )}
                 />
 
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 font-bold text-lg mt-2" 
-                  disabled={requestMutation.isPending || !user || user.balance < minWithdraw}
-                  data-testid="button-submit-withdrawal"
+                <button
+                  type="submit"
+                  disabled={withdrawMutation.isPending || !user || user.balance < minWithdraw}
+                  className="w-full bg-primary text-primary-foreground h-14 rounded-2xl font-bold shadow-md hover:bg-opacity-90 active-scale disabled:opacity-50 disabled:pointer-events-none flex justify-center items-center gap-2 transition-all mt-4"
                 >
-                  {requestMutation.isPending ? (
-                    <Loader2 className="animate-spin mr-2" />
-                  ) : null}
-                  Request {formatCurrency(amount || 0)}
-                </Button>
+                  Submit Request
+                  <ArrowRight size={18} />
+                </button>
               </form>
             </Form>
-          </CardContent>
-        </Card>
-
-        {/* History */}
-        <section>
-          <h3 className="font-bold text-lg mb-3">Recent Transactions</h3>
-          
-          {withdrawalsLoading ? (
-            <div className="space-y-3">
-              {[1, 2].map(i => (
-                <div key={i} className="h-20 bg-muted animate-pulse rounded-xl border border-border" />
-              ))}
-            </div>
-          ) : withdrawals && withdrawals.length > 0 ? (
-            <div className="space-y-3">
-              {withdrawals.map((w) => (
-                <Card key={w.id} className="border shadow-sm bg-card">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${w.method === 'bkash' ? 'bg-[#E2136E]' : 'bg-[#EC1C24]'}`}>
-                          {w.method === 'bkash' ? 'b' : 'n'}
+          </div>
+        ) : (
+          <div className="space-y-4 animate-fade-up">
+            {withdrawalsLoading ? (
+              [1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-2xl" />)
+            ) : !withdrawals || withdrawals.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-muted text-muted-foreground rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Wallet size={32} />
+                </div>
+                <h3 className="text-lg font-bold text-foreground">No history yet</h3>
+                <p className="text-muted-foreground text-sm mt-2">Your withdrawal records will appear here.</p>
+              </div>
+            ) : (
+              withdrawals.map((w: any, index: number) => {
+                const isPending = w.status === 'pending';
+                const isPaid = w.status === 'paid';
+                const isRejected = w.status === 'rejected';
+                
+                return (
+                  <div 
+                    key={w.id} 
+                    className={`bg-card border border-border rounded-2xl shadow-sm overflow-hidden transition-all stagger-${(index % 5) + 1} ${isRejected ? 'cursor-pointer hover:border-destructive/30' : ''}`}
+                    onClick={() => isRejected && setExpandedId(expandedId === w.id ? null : w.id)}
+                  >
+                    <div className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                          isPaid ? 'bg-success/10 text-success' :
+                          isPending ? 'bg-warning/10 text-warning' :
+                          'bg-destructive/10 text-destructive'
+                        }`}>
+                          {isPaid ? <CheckCircle2 size={24} /> :
+                           isPending ? <Clock size={24} /> :
+                           <XCircle size={24} />}
                         </div>
                         <div>
-                          <p className="font-bold text-sm text-foreground capitalize">{w.method}</p>
-                          <p className="text-xs text-muted-foreground">{w.accountNumber}</p>
+                          <p className="font-bold text-sm uppercase tracking-wide">{w.method}</p>
+                          <p className="text-xs text-muted-foreground font-mono mt-0.5">{w.accountNumber}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">{new Date(w.requestedAt).toLocaleDateString()}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-foreground">{formatCurrency(w.amount)}</p>
-                        <div className={`mt-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-sm ${getStatusColor(w.status)}`}>
-                          {getStatusIcon(w.status)}
+                      <div className="text-right flex flex-col items-end">
+                        <span className="font-bold font-mono text-lg text-foreground">৳{w.amount}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase mt-1 ${
+                          isPaid ? 'bg-success/10 text-success' :
+                          isPending ? 'bg-warning/10 text-warning' :
+                          'bg-destructive/10 text-destructive'
+                        }`}>
                           {w.status}
-                        </div>
+                        </span>
+                        {isRejected && (
+                          <ChevronDown size={14} className={`text-muted-foreground mt-1 transition-transform ${expandedId === w.id ? 'rotate-180' : ''}`} />
+                        )}
                       </div>
                     </div>
-                    
-                    <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
-                      <span>{formatDate(w.requestedAt)} • {formatTime(w.requestedAt)}</span>
-                    </div>
-
-                    {w.note && w.status === 'rejected' && (
-                      <button
-                        type="button"
-                        onClick={() => toggleReason(w.id)}
-                        className="w-full mt-2 text-left"
-                        data-testid={`button-reason-${w.id}`}
-                      >
-                        <div className="flex items-start gap-1.5">
-                          <p
-                            className={`text-destructive font-medium text-xs flex-1 ${
-                              expandedReasons.has(w.id) ? '' : 'truncate'
-                            }`}
-                          >
-                            Reason: {w.note}
-                          </p>
-                          <ChevronDown
-                            size={14}
-                            className={`text-destructive shrink-0 mt-0.5 transition-transform ${
-                              expandedReasons.has(w.id) ? 'rotate-180' : ''
-                            }`}
-                          />
+                    {isRejected && expandedId === w.id && (
+                      <div className="bg-destructive/5 px-4 py-3 border-t border-destructive/10 text-sm text-destructive-foreground animate-fade-in flex items-start gap-2">
+                        <Info size={16} className="text-destructive shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="font-bold block text-destructive mb-0.5">Rejection Reason:</strong>
+                          <span className="text-destructive/90">{w.note || 'Account issue or policy violation.'}</span>
                         </div>
-                      </button>
+                      </div>
                     )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="border shadow-sm bg-card border-dashed">
-              <CardContent className="p-8 text-center text-muted-foreground text-sm">
-                No withdrawal history yet.
-              </CardContent>
-            </Card>
-          )}
-        </section>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
