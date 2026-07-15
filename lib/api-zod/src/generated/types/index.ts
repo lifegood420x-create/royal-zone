@@ -25,6 +25,8 @@ export * from './claimAdResult';
 export * from './configUpdate';
 export * from './flaggedUser';
 export * from './healthStatus';
+export * from './leaderboardEntry';
+export * from './leaderboardResponse';
 export * from './listAdminUsersParams';
 export * from './postbackUrlInfo';
 export * from './publicConfig';

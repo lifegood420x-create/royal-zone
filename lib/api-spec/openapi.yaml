@@ -76,6 +76,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/PublicConfig"
 
+  /leaderboard:
+    get:
+      operationId: getReferralLeaderboard
+      tags: [user]
+      summary: Get top referrers leaderboard
+      responses:
+        "200":
+          description: Top referrers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaderboardResponse"
+
   /tasks:
     get:
       operationId: listTasks
@@ -885,6 +898,26 @@ components:
         processedAt: { type: ["string", "null"], format: date-time }
         note: { type: ["string", "null"] }
         user: { $ref: "#/components/schemas/AdminWithdrawalUser" }
+
+    LeaderboardEntry:
+      type: object
+      required: [rank, userId, firstName, referralCount]
+      properties:
+        rank: { type: integer }
+        userId: { type: integer }
+        firstName: { type: string }
+        username: { type: ["string", "null"] }
+        photoUrl: { type: ["string", "null"] }
+        referralCount: { type: integer }
+
+    LeaderboardResponse:
+      type: object
+      required: [entries]
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeaderboardEntry"
 
     RejectPayoutInput:
       type: object

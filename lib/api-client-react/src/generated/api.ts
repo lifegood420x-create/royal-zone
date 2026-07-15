@@ -35,6 +35,7 @@ import type {
   ClaimAdResult,
   ConfigUpdate,
   HealthStatus,
+  LeaderboardResponse,
   ListAdminUsersParams,
   PostbackUrlInfo,
   PublicConfig,
@@ -371,6 +372,83 @@ export function useGetPublicConfig<TData = Awaited<ReturnType<typeof getPublicCo
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetPublicConfigQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetReferralLeaderboardUrl = () => {
+
+
+
+
+  return `/api/leaderboard`
+}
+
+/**
+ * @summary Get top referrers leaderboard
+ */
+export const getReferralLeaderboard = async ( options?: RequestInit): Promise<LeaderboardResponse> => {
+
+  return customFetch<LeaderboardResponse>(getGetReferralLeaderboardUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetReferralLeaderboardQueryKey = () => {
+    return [
+    `/api/leaderboard`
+    ] as const;
+    }
+
+
+export const getGetReferralLeaderboardQueryOptions = <TData = Awaited<ReturnType<typeof getReferralLeaderboard>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getReferralLeaderboard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetReferralLeaderboardQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getReferralLeaderboard>>> = ({ signal }) => getReferralLeaderboard({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getReferralLeaderboard>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetReferralLeaderboardQueryResult = NonNullable<Awaited<ReturnType<typeof getReferralLeaderboard>>>
+export type GetReferralLeaderboardQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get top referrers leaderboard
+ */
+
+export function useGetReferralLeaderboard<TData = Awaited<ReturnType<typeof getReferralLeaderboard>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getReferralLeaderboard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetReferralLeaderboardQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

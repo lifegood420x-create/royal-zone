@@ -265,6 +265,21 @@ export interface AdminWithdrawal {
   user: AdminWithdrawalUser;
 }
 
+export interface LeaderboardEntry {
+  rank: number;
+  userId: number;
+  firstName: string;
+  /** @nullable */
+  username?: string | null;
+  /** @nullable */
+  photoUrl?: string | null;
+  referralCount: number;
+}
+
+export interface LeaderboardResponse {
+  entries: LeaderboardEntry[];
+}
+
 export interface RejectPayoutInput {
   /** @nullable */
   note?: string | null;

@@ -1,21 +1,23 @@
 import { useState } from 'react';
-import { useGetMe, useGetPublicConfig, useListReferrals } from '@workspace/api-client-react';
+import { useGetMe, useGetPublicConfig, useListReferrals, useGetReferralLeaderboard } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Copy, Share2, Check, UserPlus } from 'lucide-react';
+import { Users, Copy, Share2, Check, UserPlus, Trophy } from 'lucide-react';
 import { formatCurrency, formatDate } from '../lib/utils';
 
 export default function Refer() {
   const { data: user } = useGetMe();
   const { data: config } = useGetPublicConfig();
   const { data: referralsData, isLoading } = useListReferrals();
+  const { data: leaderboard, isLoading: isLoadingLeaderboard } = useGetReferralLeaderboard();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   // Telegram photo URLs sometimes fail to load (expired, CORS, deleted) —
   // track which referral ids failed so we can fall back to the initial
   // avatar instead of the browser's broken-image icon.
   const [failedPhotoIds, setFailedPhotoIds] = useState<Set<number>>(new Set());
+  const [failedLeaderboardIds, setFailedLeaderboardIds] = useState<Set<number>>(new Set());
 
   // Fallback to botUsername from config, or generic default if missing
   const botUsername = config?.botUsername || 'as_earning_bot';
@@ -37,7 +39,7 @@ export default function Refer() {
 
   const handleShare = () => {
     if (!referralLink) return;
-    const text = `Join me on ${config?.botName || 'Bangla Task Hub'} and get rewarded! Use my link: ${referralLink}`;
+    const text = `Join me on Bangla Task Hub and get rewarded! Use my link: ${referralLink}`;
     const url = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
@@ -114,6 +116,86 @@ export default function Refer() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Leaderboard */}
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <Trophy size={18} className="text-secondary-foreground" />
+            <h3 className="font-bold text-lg">Top রেফারেল লিডারবোর্ড</h3>
+          </div>
+
+          {isLoadingLeaderboard ? (
+            <div className="space-y-2">
+              {[1,2,3].map(i => (
+                <div key={i} className="h-16 bg-muted animate-pulse rounded-xl border border-border" />
+              ))}
+            </div>
+          ) : (leaderboard?.entries?.length ?? 0) > 0 ? (
+            <div className="space-y-2">
+              {leaderboard!.entries.map((entry) => {
+                const rankColors: Record<number, string> = {
+                  1: 'bg-yellow-400/20 border-yellow-400/40 text-yellow-700',
+                  2: 'bg-gray-300/20 border-gray-300/40 text-gray-600',
+                  3: 'bg-orange-400/20 border-orange-400/40 text-orange-700',
+                };
+                const rankEmoji: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
+                const isTop3 = entry.rank <= 3;
+                const rowClass = isTop3
+                  ? `bg-card border ${rankColors[entry.rank]} rounded-xl p-3 flex items-center gap-3 shadow-sm`
+                  : 'bg-card border rounded-xl p-3 flex items-center gap-3 shadow-sm';
+
+                return (
+                  <div key={entry.userId} className={rowClass}>
+                    {/* Rank */}
+                    <div className="w-7 shrink-0 text-center">
+                      {isTop3 ? (
+                        <span className="text-xl leading-none">{rankEmoji[entry.rank]}</span>
+                      ) : (
+                        <span className="text-sm font-bold text-muted-foreground">#{entry.rank}</span>
+                      )}
+                    </div>
+
+                    {/* Avatar */}
+                    {entry.photoUrl && !failedLeaderboardIds.has(entry.userId) ? (
+                      <img
+                        src={entry.photoUrl}
+                        alt={entry.firstName}
+                        className="w-10 h-10 rounded-full border border-border shadow-sm object-cover shrink-0"
+                        referrerPolicy="no-referrer"
+                        onError={() => setFailedLeaderboardIds(prev => new Set(prev).add(entry.userId))}
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
+                        {entry.firstName.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+
+                    {/* Name */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-foreground truncate">{entry.firstName}</p>
+                      {entry.username && (
+                        <p className="text-xs text-muted-foreground truncate">@{entry.username}</p>
+                      )}
+                    </div>
+
+                    {/* Count */}
+                    <div className="shrink-0 text-right">
+                      <p className="text-sm font-black text-primary">{entry.referralCount}</p>
+                      <p className="text-[10px] text-muted-foreground">রেফারেল</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <Card className="border shadow-sm bg-card border-dashed">
+              <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+                <Trophy size={32} className="text-muted-foreground/30 mb-2" />
+                <p className="text-sm text-muted-foreground">এখনো কেউ লিডারবোর্ডে নেই</p>
+              </CardContent>
+            </Card>
+          )}
+        </section>
 
         {/* Referrals List */}
         <section>

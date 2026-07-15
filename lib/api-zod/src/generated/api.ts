@@ -98,6 +98,21 @@ export const GetPublicConfigResponse = zod.object({
 
 
 /**
+ * @summary Get top referrers leaderboard
+ */
+export const GetReferralLeaderboardResponse = zod.object({
+  "entries": zod.array(zod.object({
+  "rank": zod.number(),
+  "userId": zod.number(),
+  "firstName": zod.string(),
+  "username": zod.string().nullish(),
+  "photoUrl": zod.string().nullish(),
+  "referralCount": zod.number()
+}))
+})
+
+
+/**
  * @summary List active tasks with the current user's completion status
  */
 export const ListTasksResponseItem = zod.object({
