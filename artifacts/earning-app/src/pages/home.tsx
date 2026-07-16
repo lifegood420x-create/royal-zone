@@ -109,21 +109,38 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Watch Ads CTA */}
+        {/* Watch Ads CTA — gradient card */}
         <button
           onClick={() => setLocation('/earn')}
-          className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 shadow-sm border border-purple-100 active:scale-95 transition-transform"
+          className="w-full rounded-2xl p-5 text-left shadow-md active:scale-95 transition-transform"
+          style={{ background: 'linear-gradient(135deg, #6C21E8 0%, #E8347A 70%, #FF7B4A 100%)' }}
           data-testid="button-home-watch-ad"
         >
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
-            <Play size={22} color="white" fill="white" />
+          {/* Top row */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                <Play size={20} color="white" fill="white" />
+              </div>
+              <div>
+                <p className="text-white font-black text-base leading-tight">Watch Ads & Earn</p>
+                <p className="text-white/70 text-xs mt-0.5">{formatCurrency(config.adReward)} per ad · {config.adDailyLimit} max/day</p>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl px-4 py-2 font-black text-sm shrink-0" style={{ color: '#6C21E8' }}>
+              Start
+            </div>
           </div>
-          <div className="flex-1 text-left">
-            <p className="font-bold text-foreground">Watch Ads & Earn</p>
-            <p className="text-sm text-muted-foreground">Get {formatCurrency(config.adReward)} per ad · up to {config.adDailyLimit}/day</p>
+          {/* Progress bar */}
+          <div className="bg-white/20 rounded-full h-2 overflow-hidden">
+            <div
+              className="h-full bg-white rounded-full transition-all"
+              style={{ width: `${Math.min(100, ((currentUser.todayAdsWatched || 0) / (config.adDailyLimit || 1)) * 100)}%` }}
+            />
           </div>
-          <div className="shrink-0 px-4 py-2 rounded-xl font-bold text-sm text-white" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
-            Start
+          <div className="flex justify-between mt-1.5">
+            <span className="text-white/70 text-xs">{currentUser.todayAdsWatched || 0} watched today</span>
+            <span className="text-white/70 text-xs">{Math.max(0, config.adDailyLimit - (currentUser.todayAdsWatched || 0))} remaining</span>
           </div>
         </button>
 
