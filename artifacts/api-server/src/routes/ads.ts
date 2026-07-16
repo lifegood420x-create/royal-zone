@@ -6,6 +6,7 @@ import { requireAuth } from "../middlewares/auth";
 import { toApiUser } from "../lib/serialize";
 import { getAppConfig } from "../lib/config";
 import { todaysAdCount, recordAdWatch } from "../lib/users";
+import { checkIpForVpn } from "../lib/vpn-check";
 
 const router: IRouter = Router();
 
@@ -19,6 +20,17 @@ router.post("/ads/watch", requireAuth, async (req, res): Promise<void> => {
   const user = req.currentUser!;
 
   if (user.isFlagged) {
+    res.status(403).json({ error: "Ad rewards are disabled for this account." });
+    return;
+  }
+
+  // Real-time VPN check — flag and block even if they passed signup clean
+  const requestIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.ip;
+  const vpnResult = await checkIpForVpn(requestIp);
+  if (vpnResult.isVpn) {
+    await db.update(usersTable)
+      .set({ isFlagged: true, flagReason: vpnResult.reason })
+      .where(eq(usersTable.id, user.id));
     res.status(403).json({ error: "Ad rewards are disabled for this account." });
     return;
   }
@@ -80,6 +92,17 @@ router.post("/ads/claim", requireAuth, async (req, res): Promise<void> => {
   const user = req.currentUser!;
 
   if (user.isFlagged) {
+    res.status(403).json({ error: "Ad rewards are disabled for this account." });
+    return;
+  }
+
+  // Real-time VPN check
+  const claimIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.ip;
+  const claimVpn = await checkIpForVpn(claimIp);
+  if (claimVpn.isVpn) {
+    await db.update(usersTable)
+      .set({ isFlagged: true, flagReason: claimVpn.reason })
+      .where(eq(usersTable.id, user.id));
     res.status(403).json({ error: "Ad rewards are disabled for this account." });
     return;
   }

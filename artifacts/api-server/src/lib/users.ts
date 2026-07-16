@@ -2,6 +2,7 @@ import { usersTable, db, type User } from "@workspace/db";
 import { and, eq, gte, sql } from "drizzle-orm";
 import { getAppConfig } from "./config";
 import type { TelegramUserInfo } from "./telegram";
+import { checkIpForVpn } from "./vpn-check";
 
 function generateReferralCode(): string {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase();
@@ -81,6 +82,18 @@ export async function upsertTelegramUser(
   const isFakeReferralChain = hasSiblingWithSameDevice;
   const isSuspiciousFirstSignup = isSameDeviceAsReferrer && !hasSiblingWithSameDevice;
 
+  // VPN / proxy check on first signup
+  const vpnResult = await checkIpForVpn(opts.ip);
+
+  const shouldFlag = isFakeReferralChain || isSuspiciousFirstSignup || vpnResult.isVpn;
+  const flagReason = isFakeReferralChain
+    ? "Fake referral chain: same device reused under the same referrer. Referral bonus denied and ad rewards blocked."
+    : isSuspiciousFirstSignup
+      ? "Self/fake referral (same device as referrer). Referral bonus denied and ad rewards blocked."
+      : vpnResult.isVpn
+        ? vpnResult.reason
+        : null;
+
   let created: User;
   try {
     const [inserted] = await db
@@ -95,12 +108,8 @@ export async function upsertTelegramUser(
         registrationIp: opts.ip ?? null,
         registrationDevice: opts.deviceId ?? null,
         isBanned: false,
-        isFlagged: isFakeReferralChain || isSuspiciousFirstSignup,
-        flagReason: isFakeReferralChain
-          ? "Fake referral chain: same device reused under the same referrer. Referral bonus denied and ad rewards blocked."
-          : isSuspiciousFirstSignup
-            ? "Self/fake referral (same device as referrer). Referral bonus denied and ad rewards blocked."
-            : null,
+        isFlagged: shouldFlag,
+        flagReason,
       })
       .returning();
     created = inserted;
