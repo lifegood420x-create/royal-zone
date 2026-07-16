@@ -42,10 +42,10 @@ export default function Home() {
         <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full opacity-10 bg-white" />
         <div className="absolute bottom-0 left-4 w-28 h-28 rounded-full opacity-10 bg-white" />
 
-        <div className="relative flex justify-between items-start mb-6">
-          <div>
-            <p className="text-white/70 text-sm font-medium mb-1">Welcome back 👋</p>
-            <h1 className="text-white text-2xl font-black tracking-tight" data-testid="text-greeting">
+        <div className="relative flex justify-between items-center mb-6 gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-white/70 text-sm font-medium mb-0.5">Welcome back 👋</p>
+            <h1 className="text-white text-xl font-black tracking-tight truncate" data-testid="text-greeting">
               {currentUser.firstName}
             </h1>
           </div>
@@ -53,12 +53,12 @@ export default function Home() {
             <img
               src={currentUser.photoUrl}
               alt="Profile"
-              className="w-12 h-12 rounded-full border-2 border-white/30 shadow-lg"
+              className="w-11 h-11 rounded-full border-2 border-white/30 shadow-lg shrink-0"
               referrerPolicy="no-referrer"
               onError={() => setPhotoFailed(true)}
             />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center font-black text-xl border-2 border-white/30 shadow-lg">
+            <div className="w-11 h-11 rounded-full bg-white/20 text-white flex items-center justify-center font-black text-lg border-2 border-white/30 shadow-lg shrink-0">
               {currentUser.firstName.charAt(0)}
             </div>
           )}
