@@ -12,6 +12,7 @@
   "engines": {
     "node": "24.x"
   },
+  "packageManager": "pnpm@10.15.0",
   "private": true,
   "dependencies": {
     "@replit/connectors-sdk": "^0.4.1"
