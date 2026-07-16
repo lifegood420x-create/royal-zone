@@ -8,10 +8,6 @@ import {
   getGetMeQueryKey,
   WithdrawalMethod
 } from '@workspace/api-client-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Wallet, AlertCircle, Clock, CheckCircle2, XCircle, ArrowDownToLine, Loader2, ChevronDown } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -27,6 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
 const withdrawSchema = z.object({
   method: z.enum(['bkash', 'nagad'] as const),
@@ -48,11 +45,8 @@ export default function Withdraw() {
   const toggleReason = (id: number) => {
     setExpandedReasons((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
@@ -66,7 +60,6 @@ export default function Withdraw() {
     },
   });
 
-  // Watch amount to trigger re-validation when config loads
   const amount = form.watch('amount');
   const minWithdraw = config?.minWithdraw || 0;
 
@@ -80,206 +73,189 @@ export default function Withdraw() {
       form.setError('amount', { message: `Insufficient balance. You have ${formatCurrency(user.balance)}` });
       return;
     }
-
     requestMutation.mutate(
       { data },
       {
         onSuccess: () => {
-          toast({ 
-            title: 'Request Submitted', 
-            description: 'Your withdrawal request is pending approval.' 
-          });
+          toast({ title: 'Request Submitted', description: 'Your withdrawal request is pending approval.' });
           form.reset({ method: data.method, accountNumber: '', amount: minWithdraw });
           queryClient.invalidateQueries({ queryKey: getListWithdrawalsQueryKey() });
           queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
         },
         onError: (err: any) => {
-          toast({ 
-            title: 'Request Failed', 
-            description: err.message || 'Could not submit request.', 
-            variant: 'destructive' 
-          });
+          toast({ title: 'Request Failed', description: err.message || 'Could not submit request.', variant: 'destructive' });
         }
       }
     );
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusStyle = (status: string) => {
     switch (status) {
-      case 'paid': return <CheckCircle2 className="text-primary" size={18} />;
-      case 'rejected': return <XCircle className="text-destructive" size={18} />;
-      default: return <Clock className="text-orange-500" size={18} />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid': return 'text-primary bg-primary/10';
-      case 'rejected': return 'text-destructive bg-destructive/10';
-      default: return 'text-orange-600 bg-orange-100 dark:bg-orange-900/20';
+      case 'paid': return { color: '#16A34A', bg: '#F0FDF4', border: '#86EFAC' };
+      case 'rejected': return { color: '#DC2626', bg: '#FEF2F2', border: '#FCA5A5' };
+      default: return { color: '#D97706', bg: '#FFFBEB', border: '#FCD34D' };
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-muted/20 overflow-y-auto">
-      <div className="bg-card border-b px-6 py-4 sticky top-0 z-10 shadow-sm">
-        <h1 className="text-xl font-bold text-foreground">Withdraw</h1>
-        <p className="text-sm text-muted-foreground mt-1">Cash out your earnings</p>
-      </div>
-
-      <div className="p-6 space-y-6">
-        {/* Balance Card */}
-        <Card className="border shadow-sm bg-card overflow-hidden">
-          <div className="bg-primary/5 p-4 border-b flex justify-between items-center">
-            <span className="text-sm font-medium text-muted-foreground">Available Balance</span>
-            <Wallet className="text-primary opacity-50" size={20} />
-          </div>
-          <CardContent className="p-6">
-            <p className="text-4xl font-black text-foreground" data-testid="text-withdraw-balance">
+    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F8F4FF' }}>
+      {/* Gradient Hero */}
+      <div
+        className="relative overflow-hidden px-5 pt-10 pb-12"
+        style={{ background: 'linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%)' }}
+      >
+        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-10 bg-white" />
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Available Balance</p>
+            <p className="text-white text-4xl font-black tracking-tight" data-testid="text-withdraw-balance">
               {formatCurrency(user?.balance || 0)}
             </p>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+            <Wallet size={22} color="white" />
+          </div>
+        </div>
+        <p className="text-white/60 text-xs mt-3">Min. withdrawal: {formatCurrency(minWithdraw)}</p>
+      </div>
 
-        {/* Withdrawal Form */}
-        <Card className="border shadow-sm bg-card">
-          <CardContent className="p-6">
-            <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
-              <ArrowDownToLine size={18} className="text-primary" />
-              Request Payout
-            </h2>
+      <div className="px-4 pb-6 -mt-4 space-y-5">
+        {/* Form Card */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-purple-100">
+          <div className="flex items-center gap-2 mb-5">
+            <ArrowDownToLine size={18} style={{ color: '#6C21E8' }} />
+            <h2 className="font-black text-foreground">Request Payout</h2>
+          </div>
 
-            {config && user && user.rejectedWithdrawCount > 0 && (
-              <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800 rounded-lg p-3 flex gap-3 items-start mb-6">
-                <AlertCircle className="text-orange-500 shrink-0 mt-0.5" size={18} />
-                <div>
-                  <p className="text-sm font-bold text-orange-800 dark:text-orange-400">নোটিশ</p>
-                  <p className="text-xs text-orange-700 dark:text-orange-300 mt-0.5 leading-relaxed">
-                    আগের রিজেক্টেড রিকোয়েস্টের কারণে আপনার সর্বনিম্ন উইথড্র পরিমাণ বাড়ানো হয়েছে।
-                    অনুগ্রহ করে নিশ্চিত করুন আপনার সকল টাস্ক ও রেফারেল সঠিক এবং বৈধ।
-                  </p>
-                </div>
+          {config && user && user.rejectedWithdrawCount > 0 && (
+            <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 flex gap-3 items-start mb-5">
+              <AlertCircle className="text-orange-500 shrink-0 mt-0.5" size={18} />
+              <div>
+                <p className="text-sm font-bold text-orange-800">নোটিশ</p>
+                <p className="text-xs text-orange-700 mt-0.5 leading-relaxed">
+                  আগের রিজেক্টেড রিকোয়েস্টের কারণে আপনার সর্বনিম্ন উইথড্র পরিমাণ বাড়ানো হয়েছে।
+                </p>
               </div>
-            )}
+            </div>
+          )}
 
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="method"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Payment Method</FormLabel>
-                      <div className="grid grid-cols-2 gap-3 mt-1">
-                        <Button
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Method */}
+              <FormField
+                control={form.control}
+                name="method"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-bold text-foreground text-sm">Payment Method</FormLabel>
+                    <div className="grid grid-cols-2 gap-3 mt-1.5">
+                      {(['bkash', 'nagad'] as const).map((m) => (
+                        <button
+                          key={m}
                           type="button"
-                          variant={field.value === 'bkash' ? 'default' : 'outline'}
-                          className={`w-full justify-start h-12 px-4 ${field.value === 'bkash' ? 'bg-[#E2136E] hover:bg-[#C1105C] text-white border-transparent' : ''}`}
-                          onClick={() => field.onChange('bkash')}
-                          data-testid="select-method-bkash"
+                          onClick={() => field.onChange(m)}
+                          className="h-12 px-4 rounded-xl flex items-center gap-2 font-bold text-sm border-2 transition-all active:scale-95"
+                          style={field.value === m
+                            ? { background: m === 'bkash' ? '#E2136E' : '#EC1C24', color: 'white', borderColor: 'transparent' }
+                            : { background: '#F8F4FF', color: '#1A0533', borderColor: '#E8E0F0' }
+                          }
+                          data-testid={`select-method-${m}`}
                         >
-                          <div className="w-6 h-6 rounded-full bg-white/20 mr-2 flex items-center justify-center font-bold text-xs">b</div>
-                          bKash
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={field.value === 'nagad' ? 'default' : 'outline'}
-                          className={`w-full justify-start h-12 px-4 ${field.value === 'nagad' ? 'bg-[#EC1C24] hover:bg-[#C9181F] text-white border-transparent' : ''}`}
-                          onClick={() => field.onChange('nagad')}
-                          data-testid="select-method-nagad"
-                        >
-                          <div className="w-6 h-6 rounded-full bg-white/20 mr-2 flex items-center justify-center font-bold text-xs">n</div>
-                          Nagad
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs">
+                            {m === 'bkash' ? 'b' : 'n'}
+                          </div>
+                          {m === 'bkash' ? 'bKash' : 'Nagad'}
+                        </button>
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={form.control}
-                  name="accountNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Account Number</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="01XXXXXXXXX" 
-                          type="tel"
-                          maxLength={11}
-                          className="h-12 bg-muted/50" 
-                          data-testid="input-account-number"
-                          {...field} 
+              {/* Account Number */}
+              <FormField
+                control={form.control}
+                name="accountNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-bold text-foreground text-sm">Account Number</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="01XXXXXXXXX"
+                        type="tel"
+                        maxLength={11}
+                        className="h-12 bg-muted/50 rounded-xl border-purple-100 focus:border-primary"
+                        data-testid="input-account-number"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Amount */}
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between items-end mb-1">
+                      <FormLabel className="font-bold text-foreground text-sm">Amount</FormLabel>
+                      <span className="text-xs text-muted-foreground font-medium">Min: {formatCurrency(minWithdraw)}</span>
+                    </div>
+                    <FormControl>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-lg">৳</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          className="h-12 pl-9 font-black text-xl bg-muted/50 rounded-xl border-purple-100 focus:border-primary"
+                          data-testid="input-amount"
+                          {...field}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex justify-between items-end mb-1">
-                        <FormLabel>Amount</FormLabel>
-                        <span className="text-xs text-muted-foreground font-medium">
-                          Min: {formatCurrency(minWithdraw)}
-                        </span>
                       </div>
-                      <FormControl>
-                        <div className="relative">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">৳</span>
-                          <Input 
-                            type="number"
-                            step="0.01"
-                            className="h-12 pl-8 font-bold text-lg bg-muted/50" 
-                            data-testid="input-amount"
-                            {...field} 
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 font-bold text-lg mt-2" 
-                  disabled={requestMutation.isPending || !user || user.balance < minWithdraw}
-                  data-testid="button-submit-withdrawal"
-                >
-                  {requestMutation.isPending ? (
-                    <Loader2 className="animate-spin mr-2" />
-                  ) : null}
-                  Request {formatCurrency(amount || 0)}
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+              <button
+                type="submit"
+                className="w-full h-12 rounded-xl font-black text-base text-white disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A, #FF7B4A)' }}
+                disabled={requestMutation.isPending || !user || user.balance < minWithdraw}
+                data-testid="button-submit-withdrawal"
+              >
+                {requestMutation.isPending && <Loader2 className="animate-spin" size={18} />}
+                Request {formatCurrency(amount || 0)}
+              </button>
+            </form>
+          </Form>
+        </div>
 
         {/* History */}
-        <section>
-          <h3 className="font-bold text-lg mb-3">Recent Transactions</h3>
-          
+        <div>
+          <h3 className="font-black text-foreground text-base mb-3 px-1">Recent Transactions</h3>
+
           {withdrawalsLoading ? (
             <div className="space-y-3">
-              {[1, 2].map(i => (
-                <div key={i} className="h-20 bg-muted animate-pulse rounded-xl border border-border" />
-              ))}
+              {[1, 2].map(i => <div key={i} className="h-20 bg-white animate-pulse rounded-2xl border border-purple-100" />)}
             </div>
           ) : withdrawals && withdrawals.length > 0 ? (
             <div className="space-y-3">
-              {withdrawals.map((w) => (
-                <Card key={w.id} className="border shadow-sm bg-card">
-                  <CardContent className="p-4">
+              {withdrawals.map((w) => {
+                const s = getStatusStyle(w.status);
+                return (
+                  <div key={w.id} className="bg-white rounded-2xl p-4 shadow-sm border border-purple-100">
                     <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${w.method === 'bkash' ? 'bg-[#E2136E]' : 'bg-[#EC1C24]'}`}>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black text-white shrink-0"
+                          style={{ background: w.method === 'bkash' ? '#E2136E' : '#EC1C24' }}
+                        >
                           {w.method === 'bkash' ? 'b' : 'n'}
                         </div>
                         <div>
@@ -288,18 +264,21 @@ export default function Withdraw() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-foreground">{formatCurrency(w.amount)}</p>
-                        <div className={`mt-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-sm ${getStatusColor(w.status)}`}>
-                          {getStatusIcon(w.status)}
+                        <p className="font-black text-foreground">{formatCurrency(w.amount)}</p>
+                        <div
+                          className="mt-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-lg"
+                          style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}` }}
+                        >
+                          {w.status === 'paid' && <CheckCircle2 size={10} />}
+                          {w.status === 'rejected' && <XCircle size={10} />}
+                          {w.status === 'pending' && <Clock size={10} />}
                           {w.status}
                         </div>
                       </div>
                     </div>
-                    
-                    <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
-                      <span>{formatDate(w.requestedAt)} • {formatTime(w.requestedAt)}</span>
+                    <div className="pt-2 border-t border-purple-50 text-xs text-muted-foreground">
+                      {formatDate(w.requestedAt)} · {formatTime(w.requestedAt)}
                     </div>
-
                     {w.note && w.status === 'rejected' && (
                       <button
                         type="button"
@@ -308,34 +287,23 @@ export default function Withdraw() {
                         data-testid={`button-reason-${w.id}`}
                       >
                         <div className="flex items-start gap-1.5">
-                          <p
-                            className={`text-destructive font-medium text-xs flex-1 ${
-                              expandedReasons.has(w.id) ? '' : 'truncate'
-                            }`}
-                          >
+                          <p className={`text-destructive font-medium text-xs flex-1 ${expandedReasons.has(w.id) ? '' : 'truncate'}`}>
                             Reason: {w.note}
                           </p>
-                          <ChevronDown
-                            size={14}
-                            className={`text-destructive shrink-0 mt-0.5 transition-transform ${
-                              expandedReasons.has(w.id) ? 'rotate-180' : ''
-                            }`}
-                          />
+                          <ChevronDown size={14} className={`text-destructive shrink-0 mt-0.5 transition-transform ${expandedReasons.has(w.id) ? 'rotate-180' : ''}`} />
                         </div>
                       </button>
                     )}
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           ) : (
-            <Card className="border shadow-sm bg-card border-dashed">
-              <CardContent className="p-8 text-center text-muted-foreground text-sm">
-                No withdrawal history yet.
-              </CardContent>
-            </Card>
+            <div className="bg-white rounded-2xl border border-dashed border-purple-200 p-8 text-center shadow-sm">
+              <p className="text-sm text-muted-foreground">No withdrawal history yet.</p>
+            </div>
           )}
-        </section>
+        </div>
       </div>
     </div>
   );

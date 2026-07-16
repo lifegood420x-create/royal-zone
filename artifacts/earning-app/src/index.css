@@ -61,44 +61,44 @@
 }
 
 :root {
-  --button-outline: rgba(0, 0, 0, 0.1);
+  --button-outline: rgba(0, 0, 0, 0.08);
   --badge-outline: rgba(0, 0, 0, 0.05);
   --opaque-button-border-intensity: -8;
 
-  /* Premium Deep Emerald — warm, confident, trustworthy */
-  --background: 46 28% 97%;           /* warm ivory, not cold white */
-  --foreground: 155 55% 9%;           /* near-black with green undertone */
+  /* Sunrise Fintech — violet × coral × orange */
+  --background: 267 60% 99%;
+  --foreground: 277 84% 11%;
 
-  --border: 145 22% 88%;
-  --input: 145 22% 90%;
-  --ring: 156 74% 30%;
+  --border: 267 25% 90%;
+  --input: 267 25% 91%;
+  --ring: 267 76% 52%;
 
   --card: 0 0% 100%;
-  --card-foreground: 155 55% 9%;
-  --card-border: 145 22% 91%;
+  --card-foreground: 277 84% 11%;
+  --card-border: 267 25% 92%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 155 55% 9%;
-  --popover-border: 145 22% 88%;
+  --popover-foreground: 277 84% 11%;
+  --popover-border: 267 25% 90%;
 
-  /* Forest Emerald — rich, deep, premium */
-  --primary: 156 74% 20%;
+  /* Violet — brand primary */
+  --primary: 267 76% 52%;
   --primary-foreground: 0 0% 100%;
 
-  /* Burnished Gold — warm, confident reward colour */
-  --secondary: 36 100% 47%;
-  --secondary-foreground: 36 100% 10%;
+  /* Coral-pink — accent / reward */
+  --secondary: 337 79% 55%;
+  --secondary-foreground: 0 0% 100%;
 
-  --muted: 145 18% 93%;
-  --muted-foreground: 150 22% 42%;
+  --muted: 267 30% 95%;
+  --muted-foreground: 267 20% 52%;
 
-  --accent: 148 32% 90%;
-  --accent-foreground: 156 74% 20%;
+  --accent: 267 50% 94%;
+  --accent-foreground: 267 76% 52%;
 
   --destructive: 0 80% 56%;
   --destructive-foreground: 0 0% 100%;
 
-  --success: 156 74% 20%;
+  --success: 142 71% 42%;
   --success-foreground: 0 0% 100%;
 
   --warning: 36 100% 47%;
@@ -107,13 +107,15 @@
   --app-font-sans: 'Plus Jakarta Sans', sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: 'Spline Sans Mono', monospace;
-  --radius: 1.25rem;
+  --radius: 1rem;
 
-  /* Richer, warmer shadows */
-  --shadow-sm:  0 2px 8px -2px rgba(8, 48, 24, 0.09);
-  --shadow-md:  0 8px 28px -4px rgba(8, 48, 24, 0.13);
-  --shadow-lg:  0 20px 48px -8px rgba(8, 48, 24, 0.18);
-  --shadow-xl:  0 28px 64px -12px rgba(8, 48, 24, 0.24);
+  --shadow-sm:  0 2px 8px -2px rgba(108, 33, 232, 0.08);
+  --shadow-md:  0 8px 28px -4px rgba(108, 33, 232, 0.12);
+  --shadow-lg:  0 20px 48px -8px rgba(108, 33, 232, 0.16);
+  --shadow-xl:  0 28px 64px -12px rgba(108, 33, 232, 0.22);
+
+  /* Brand gradient — used as inline style or via utility */
+  --grad-brand: linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%);
 }
 
 .dark {

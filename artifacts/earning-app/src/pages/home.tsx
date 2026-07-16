@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useGetMe, useGetPublicConfig, useListReferrals } from '@workspace/api-client-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Play, Wallet, Gift, Users, Trophy } from 'lucide-react';
-import { Link, useLocation } from 'wouter';
+import { Play, Wallet, Gift, Users, Trophy, ChevronRight, TrendingUp } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { formatCurrency } from '../lib/utils';
 import { useAuth } from '../components/auth-provider';
 
@@ -12,151 +11,166 @@ export default function Home() {
   const { data: config, isLoading: isLoadingConfig } = useGetPublicConfig();
   const { data: referralsData } = useListReferrals();
   const [, setLocation] = useLocation();
-  const { user: authUser } = useAuth(); // just to be safe if useGetMe is slow
-  // Falls back to the initial avatar if the Telegram photo URL fails to
-  // load (expired, CORS, deleted), instead of showing a broken-image icon.
+  const { user: authUser } = useAuth();
   const [photoFailed, setPhotoFailed] = useState(false);
 
   const currentUser = user || authUser;
 
   if (isLoadingMe || isLoadingConfig || !currentUser || !config) {
     return (
-      <div className="flex-1 flex flex-col p-6 space-y-6">
-        <div className="space-y-2">
-          <div className="h-8 w-48 bg-muted animate-pulse rounded-lg" />
-          <div className="h-4 w-32 bg-muted animate-pulse rounded-lg" />
-        </div>
-        <div className="h-40 w-full bg-muted animate-pulse rounded-2xl" />
-        <div className="grid grid-cols-2 gap-4">
-          <div className="h-24 bg-muted animate-pulse rounded-2xl" />
-          <div className="h-24 bg-muted animate-pulse rounded-2xl" />
+      <div className="flex-1 flex flex-col">
+        <div className="h-56 animate-pulse" style={{ background: 'linear-gradient(150deg, #6C21E8, #E8347A, #FF7B4A)' }} />
+        <div className="p-5 space-y-4 -mt-6">
+          <div className="h-32 bg-white rounded-2xl animate-pulse shadow-sm" />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="h-24 bg-white rounded-2xl animate-pulse shadow-sm" />
+            <div className="h-24 bg-white rounded-2xl animate-pulse shadow-sm" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-muted/20 overflow-y-auto">
-      {/* Header section with gradient */}
-      <div className="bg-gradient-to-b from-primary/10 to-transparent pt-8 pb-4 px-6">
-        <div className="flex justify-between items-start mb-6">
+    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F8F4FF' }}>
+      {/* Gradient Hero */}
+      <div
+        className="relative overflow-hidden px-5 pt-10 pb-12"
+        style={{ background: 'linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%)' }}
+      >
+        {/* Decorative circles */}
+        <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full opacity-10 bg-white" />
+        <div className="absolute bottom-0 left-4 w-28 h-28 rounded-full opacity-10 bg-white" />
+
+        <div className="relative flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground" data-testid="text-greeting">
-              Hi, {currentUser.firstName}!
+            <p className="text-white/70 text-sm font-medium mb-1">Welcome back 👋</p>
+            <h1 className="text-white text-2xl font-black tracking-tight" data-testid="text-greeting">
+              {currentUser.firstName}
             </h1>
-            <p className="text-muted-foreground text-sm font-medium mt-1">Ready to earn today?</p>
           </div>
           {currentUser.photoUrl && !photoFailed ? (
-            <img 
-              src={currentUser.photoUrl} 
-              alt="Profile" 
-              className="w-12 h-12 rounded-full border-2 border-background shadow-sm"
+            <img
+              src={currentUser.photoUrl}
+              alt="Profile"
+              className="w-12 h-12 rounded-full border-2 border-white/30 shadow-lg"
               referrerPolicy="no-referrer"
               onError={() => setPhotoFailed(true)}
             />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-lg border-2 border-background shadow-sm">
+            <div className="w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center font-black text-xl border-2 border-white/30 shadow-lg">
               {currentUser.firstName.charAt(0)}
             </div>
           )}
         </div>
 
-        {/* Balance Card */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-primary to-primary/90 text-primary-foreground overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <Wallet size={80} />
+        <div className="relative">
+          <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Total Balance</p>
+          <div className="flex items-end gap-2" data-testid="text-balance">
+            <span className="text-white text-4xl font-black tracking-tight">{formatCurrency(currentUser.balance)}</span>
           </div>
-          <CardContent className="p-6 relative z-10">
-            <p className="text-primary-foreground/80 font-medium text-sm mb-1">Current Balance</p>
-            <div className="flex items-baseline gap-1" data-testid="text-balance">
-              <span className="text-4xl font-black tracking-tight">{formatCurrency(currentUser.balance)}</span>
-            </div>
-            
-            <div className="mt-6 flex gap-3">
-              <Button 
-                variant="secondary" 
-                className="flex-1 font-bold text-secondary-foreground shadow-md active:scale-95 transition-transform"
-                onClick={() => setLocation('/withdraw')}
-                data-testid="button-home-withdraw"
-              >
-                Withdraw
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          <div className="flex items-center gap-1.5 mt-2">
+            <TrendingUp size={13} className="text-white/70" />
+            <span className="text-white/70 text-xs font-medium">Total earned: {formatCurrency(currentUser.totalEarned)}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="px-6 pb-8 space-y-6 flex-1">
-        {/* Call to Action */}
-        <div className="bg-card rounded-2xl p-1 border shadow-sm flex items-center justify-between">
-          <div className="flex items-center gap-4 px-4 py-3">
-            <div className="w-10 h-10 rounded-full bg-secondary/20 text-secondary-foreground flex items-center justify-center shrink-0">
-              <Play size={20} className="ml-0.5 fill-current" />
-            </div>
-            <div>
-              <p className="font-bold text-sm leading-tight text-foreground">Watch Ads & Earn</p>
-              <p className="text-xs text-muted-foreground font-medium mt-0.5">Get {formatCurrency(config.adReward)} per ad</p>
-            </div>
-          </div>
-          <Button 
-            className="rounded-xl mr-2 font-bold px-6" 
-            onClick={() => setLocation('/earn')}
-            data-testid="button-home-watch-ad"
+      {/* Content pulled up over hero */}
+      <div className="px-4 pb-6 -mt-5 space-y-4">
+
+        {/* Action buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => setLocation('/withdraw')}
+            className="bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-purple-100 active:scale-95 transition-transform"
+            data-testid="button-home-withdraw"
           >
-            Start
-          </Button>
-        </div>
-
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="border-0 shadow-sm bg-card hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setLocation('/refer')}>
-            <CardContent className="p-4 flex flex-col gap-2">
-              <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                <Users size={16} />
-              </div>
-              <div>
-                <p className="text-xl font-bold text-foreground" data-testid="text-referral-count">{referralsData?.totalReferrals ?? 0}</p>
-                <p className="text-xs font-medium text-muted-foreground">Total Referrals</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-0 shadow-sm bg-card">
-            <CardContent className="p-4 flex flex-col gap-2">
-              <div className="w-8 h-8 rounded-full bg-green-500/10 text-green-600 flex items-center justify-center">
-                <Trophy size={16} />
-              </div>
-              <div>
-                <p className="text-xl font-bold text-foreground">{formatCurrency(currentUser.totalEarned)}</p>
-                <p className="text-xs font-medium text-muted-foreground">Total Earned</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Rules / Info */}
-        <Card className="border shadow-sm bg-card">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Gift className="text-primary" size={20} />
-              <h3 className="font-bold text-foreground">How to earn</h3>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #6C21E8, #9B51E0)' }}>
+              <Wallet size={18} color="white" />
             </div>
-            <ul className="space-y-3">
-              <li className="flex gap-3 items-start">
-                <div className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</div>
-                <p className="text-sm text-muted-foreground">Watch rewarded video ads daily up to the limit.</p>
+            <div className="text-left">
+              <p className="font-bold text-sm text-foreground">Withdraw</p>
+              <p className="text-xs text-muted-foreground">Cash out</p>
+            </div>
+          </button>
+          <button
+            onClick={() => setLocation('/refer')}
+            className="bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-purple-100 active:scale-95 transition-transform"
+          >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #E8347A, #FF7B4A)' }}>
+              <Users size={18} color="white" />
+            </div>
+            <div className="text-left">
+              <p className="font-bold text-sm text-foreground">Refer</p>
+              <p className="text-xs text-muted-foreground">{formatCurrency(config.referralBonus)} / friend</p>
+            </div>
+          </button>
+        </div>
+
+        {/* Watch Ads CTA */}
+        <button
+          onClick={() => setLocation('/earn')}
+          className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 shadow-sm border border-purple-100 active:scale-95 transition-transform"
+          data-testid="button-home-watch-ad"
+        >
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
+            <Play size={22} color="white" fill="white" />
+          </div>
+          <div className="flex-1 text-left">
+            <p className="font-bold text-foreground">Watch Ads & Earn</p>
+            <p className="text-sm text-muted-foreground">Get {formatCurrency(config.adReward)} per ad · up to {config.adDailyLimit}/day</p>
+          </div>
+          <div className="shrink-0 px-4 py-2 rounded-xl font-bold text-sm text-white" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
+            Start
+          </div>
+        </button>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <div
+            className="bg-white rounded-2xl p-4 shadow-sm border border-purple-100 cursor-pointer active:scale-95 transition-transform"
+            onClick={() => setLocation('/refer')}
+          >
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: '#EDE0FF' }}>
+              <Users size={17} style={{ color: '#6C21E8' }} />
+            </div>
+            <p className="text-2xl font-black text-foreground" data-testid="text-referral-count">{referralsData?.totalReferrals ?? 0}</p>
+            <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Referrals</p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-purple-100">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: '#FFF0F5' }}>
+              <Trophy size={17} style={{ color: '#E8347A' }} />
+            </div>
+            <p className="text-2xl font-black text-foreground">{formatCurrency(currentUser.totalEarned)}</p>
+            <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Earned</p>
+          </div>
+        </div>
+
+        {/* How to earn */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-purple-100">
+          <div className="flex items-center gap-2 mb-4">
+            <Gift size={18} style={{ color: '#6C21E8' }} />
+            <h3 className="font-bold text-foreground">How to earn</h3>
+          </div>
+          <ul className="space-y-3">
+            {[
+              'Watch rewarded video ads daily up to the limit.',
+              'Complete simple tasks like joining channels and following pages.',
+              `Invite friends with your referral link and get ${formatCurrency(config.referralBonus)} each.`,
+            ].map((text, i) => (
+              <li key={i} className="flex gap-3 items-start">
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 mt-0.5"
+                  style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}
+                >
+                  {i + 1}
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{text}</p>
               </li>
-              <li className="flex gap-3 items-start">
-                <div className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
-                <p className="text-sm text-muted-foreground">Complete simple tasks like joining channels and following pages.</p>
-              </li>
-              <li className="flex gap-3 items-start">
-                <div className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
-                <p className="text-sm text-muted-foreground">Invite friends with your referral link and get {formatCurrency(config.referralBonus)} each.</p>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

@@ -10,7 +10,6 @@ import {
   getListTasksQueryKey
 } from '@workspace/api-client-react';
 import { showRewardedAd } from '../lib/rewarded-ads';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
@@ -34,12 +33,6 @@ export default function Earn() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  /**
-   * Runs a visible countdown for `seconds` and resolves only once it hits
-   * zero — this is an in-app enforcement layer on top of the ad SDK's own
-   * promise, so the reward can never be credited before the user has
-   * waited out the full ad duration, no matter how fast the SDK resolves.
-   */
   const runCountdown = (seconds: number): Promise<void> => {
     return new Promise((resolve) => {
       const start = Date.now();
@@ -63,50 +56,30 @@ export default function Earn() {
       const durationSeconds = config.adDurationSeconds || 15;
 
       if (config.requireAdPostback) {
-        // Postback-verified flow: reserve the slot first, pass the claimId
-        // into the ad so the network can echo it back on its own server
-        // call, and only refresh balance afterwards — the reward is
-        // credited by /ads/postback, not by anything this tab does.
         const claim = await claimAdMutation.mutateAsync({ data: { network } });
         await Promise.all([showRewardedAd(network, zoneId, claim.claimId), runCountdown(durationSeconds)]);
         toast({
           title: 'Ad watched',
-          description: 'Reward will be credited once the ad network confirms the view (usually within a minute).',
+          description: 'Reward will be credited once the ad network confirms the view.',
         });
         setTimeout(() => queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() }), 5000);
       } else {
-        // Reward is only requested from the server after BOTH the ad SDK's
-        // own promise resolves AND our own countdown finishes — watching
-        // isn't "done" (and no reward request goes out) until the timer
-        // hits zero.
         await Promise.all([showRewardedAd(network, zoneId), runCountdown(durationSeconds)]);
-
         watchAdMutation.mutate(
           { data: { network } },
           {
             onSuccess: (res) => {
-              toast({
-                title: 'Ad Completed!',
-                description: `You earned ${formatCurrency(res.adWatch.reward)}`
-              });
+              toast({ title: 'Ad Completed!', description: `You earned ${formatCurrency(res.adWatch.reward)}` });
               queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
             },
             onError: () => {
-              toast({
-                title: 'Error',
-                description: 'Something went wrong while crediting your reward.',
-                variant: 'destructive'
-              });
+              toast({ title: 'Error', description: 'Something went wrong while crediting your reward.', variant: 'destructive' });
             }
           }
         );
       }
     } catch (err: any) {
-      toast({ 
-        title: 'Ad failed', 
-        description: err.message || 'Could not load ad.', 
-        variant: 'destructive' 
-      });
+      toast({ title: 'Ad failed', description: err.message || 'Could not load ad.', variant: 'destructive' });
     } finally {
       setActiveAd(null);
       setCountdown(null);
@@ -119,20 +92,13 @@ export default function Earn() {
       { id: taskId },
       {
         onSuccess: (res) => {
-          toast({ 
-            title: 'Task Completed!', 
-            description: `You earned ${formatCurrency(res.completion.reward)}` 
-          });
+          toast({ title: 'Task Completed!', description: `You earned ${formatCurrency(res.completion.reward)}` });
           queryClient.invalidateQueries({ queryKey: getListTasksQueryKey() });
           queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
           setVisitingTask(null);
         },
         onError: () => {
-          toast({ 
-            title: 'Error', 
-            description: 'Could not complete task at this time.', 
-            variant: 'destructive' 
-          });
+          toast({ title: 'Error', description: 'Could not complete task at this time.', variant: 'destructive' });
         },
         onSettled: () => setCompletingTask(null)
       }
@@ -145,147 +111,148 @@ export default function Earn() {
   const adProgress = adLimit > 0 ? (adsWatched / adLimit) * 100 : 0;
 
   return (
-    <div className="flex-1 flex flex-col bg-muted/20 overflow-y-auto">
+    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F8F4FF' }}>
+      {/* Countdown overlay */}
       {countdown !== null && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-6" data-testid="overlay-ad-countdown">
-          <Card className="max-w-xs w-full border shadow-lg bg-card">
-            <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-              <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                <Clock size={28} />
-              </div>
-              <p className="font-bold text-foreground">Watching ad...</p>
-              <p className="text-sm text-muted-foreground">
-                Reward unlocks in <span className="font-bold text-foreground" data-testid="text-ad-countdown">{countdown}s</span>
-              </p>
-              <Progress
-                value={config?.adDurationSeconds ? ((config.adDurationSeconds - countdown) / config.adDurationSeconds) * 100 : 0}
-                className="h-2 w-full"
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: 'rgba(26,5,51,0.85)' }} data-testid="overlay-ad-countdown">
+          <div className="bg-white rounded-3xl p-8 max-w-xs w-full flex flex-col items-center text-center gap-4 shadow-2xl">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
+              <Clock size={28} color="white" />
+            </div>
+            <p className="font-black text-foreground text-lg">Watching ad...</p>
+            <p className="text-sm text-muted-foreground">
+              Reward unlocks in <span className="font-black text-foreground text-lg" data-testid="text-ad-countdown">{countdown}s</span>
+            </p>
+            <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  background: 'linear-gradient(90deg, #6C21E8, #E8347A)',
+                  width: `${config?.adDurationSeconds ? ((config.adDurationSeconds - countdown) / config.adDurationSeconds) * 100 : 0}%`
+                }}
               />
-              <p className="text-[11px] text-muted-foreground">
-                Please don't close this — leaving early forfeits the reward.
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+            <p className="text-xs text-muted-foreground">Please don't close this — leaving early forfeits the reward.</p>
+          </div>
         </div>
       )}
 
-      <div className="bg-card border-b px-6 py-4 sticky top-0 z-10 shadow-sm">
-        <h1 className="text-xl font-bold text-foreground">Earn</h1>
-        <p className="text-sm text-muted-foreground mt-1">Complete tasks to earn real cash</p>
+      {/* Gradient header */}
+      <div
+        className="relative overflow-hidden px-5 pt-10 pb-10"
+        style={{ background: 'linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%)' }}
+      >
+        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-10 bg-white" />
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Daily Ads</p>
+            <h1 className="text-white text-2xl font-black tracking-tight">Earn</h1>
+          </div>
+          <div className="text-right">
+            <p className="text-white/70 text-xs font-medium mb-0.5">Today's reward</p>
+            <p className="text-white font-black text-xl">{formatCurrency(config?.adReward || 0)} <span className="text-white/60 text-sm font-medium">/ ad</span></p>
+          </div>
+        </div>
+
+        {/* Progress pill */}
+        <div className="mt-5 bg-white/15 rounded-2xl p-4">
+          <div className="flex justify-between items-center mb-2.5">
+            <span className="text-white/80 text-sm font-semibold">Daily Progress</span>
+            <span className="text-white font-black text-sm">{adsWatched} / {adLimit} watched</span>
+          </div>
+          <div className="bg-white/20 rounded-full h-2.5">
+            <div
+              className="h-full rounded-full bg-white transition-all"
+              style={{ width: `${adProgress}%` }}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="p-6 space-y-8">
-        {/* Watch Ads Section */}
-        <section>
-          <div className="flex justify-between items-end mb-3">
-            <h2 className="text-lg font-bold flex items-center gap-2">
-              <PlayCircle className="text-primary" size={20} />
-              Video Ads
-            </h2>
-            <span className="text-sm font-medium bg-secondary/20 text-secondary-foreground px-2 py-0.5 rounded-full">
-              {formatCurrency(config?.adReward || 0)} / ad
-            </span>
-          </div>
-
-          <Card className="border shadow-sm bg-card overflow-hidden">
-            <CardContent className="p-5">
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-sm font-medium text-muted-foreground">Daily Progress</p>
-                <p className="text-sm font-bold">
-                  {adsWatched} / {adLimit} watched
-                </p>
-              </div>
-              <Progress value={adProgress} className="h-2.5 mb-5" />
-              
-              {(config?.monetagEnabled || config?.adsgramEnabled) ? (
-                <div className="grid grid-cols-2 gap-3">
-                  {config?.monetagEnabled && (
-                    <Button 
-                      disabled={adsLeft === 0 || activeAd !== null}
-                      onClick={() => handleWatchAd('monetag')}
-                      className="w-full font-bold relative overflow-hidden group"
-                      variant="outline"
-                      data-testid="button-ad-monetag"
-                    >
-                      {activeAd === 'monetag' ? (
-                        <Loader2 className="animate-spin" size={18} />
-                      ) : (
-                        <>
-                          <Play className="fill-primary text-primary mr-2" size={16} />
-                          Server 1
-                        </>
-                      )}
-                    </Button>
+      <div className="px-4 pb-6 -mt-4 space-y-5">
+        {/* Ad Buttons */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-purple-100">
+          {(config?.monetagEnabled || config?.adsgramEnabled) ? (
+            <div className="grid grid-cols-2 gap-3">
+              {config?.monetagEnabled && (
+                <button
+                  disabled={adsLeft === 0 || activeAd !== null}
+                  onClick={() => handleWatchAd('monetag')}
+                  className="rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white disabled:opacity-50 active:scale-95 transition-all"
+                  style={{ background: 'linear-gradient(135deg, #6C21E8, #9B51E0)' }}
+                  data-testid="button-ad-monetag"
+                >
+                  {activeAd === 'monetag' ? (
+                    <Loader2 className="animate-spin" size={18} />
+                  ) : (
+                    <><Play size={15} fill="white" color="white" /> Server 1</>
                   )}
-
-                  {config?.adsgramEnabled && (
-                    <Button 
-                      disabled={adsLeft === 0 || activeAd !== null}
-                      onClick={() => handleWatchAd('adsgram')}
-                      className="w-full font-bold relative overflow-hidden group"
-                      variant="outline"
-                      data-testid="button-ad-adsgram"
-                    >
-                      {activeAd === 'adsgram' ? (
-                        <Loader2 className="animate-spin" size={18} />
-                      ) : (
-                        <>
-                          <Play className="fill-primary text-primary mr-2" size={16} />
-                          Server 2
-                        </>
-                      )}
-                    </Button>
+                </button>
+              )}
+              {config?.adsgramEnabled && (
+                <button
+                  disabled={adsLeft === 0 || activeAd !== null}
+                  onClick={() => handleWatchAd('adsgram')}
+                  className="rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white disabled:opacity-50 active:scale-95 transition-all"
+                  style={{ background: 'linear-gradient(135deg, #E8347A, #FF7B4A)' }}
+                  data-testid="button-ad-adsgram"
+                >
+                  {activeAd === 'adsgram' ? (
+                    <Loader2 className="animate-spin" size={18} />
+                  ) : (
+                    <><Play size={15} fill="white" color="white" /> Server 2</>
                   )}
-                </div>
-              ) : (
-                <p className="text-sm text-center text-muted-foreground py-4 font-medium" data-testid="text-ads-unavailable">
-                  Video ads are temporarily unavailable. Please check back later.
-                </p>
+                </button>
               )}
-              
-              {adsLeft === 0 && (config?.monetagEnabled || config?.adsgramEnabled) && (
-                <p className="text-xs text-center text-muted-foreground mt-3 font-medium">
-                  You've reached your daily limit. Come back tomorrow!
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </section>
+            </div>
+          ) : (
+            <p className="text-sm text-center text-muted-foreground py-3 font-medium" data-testid="text-ads-unavailable">
+              Video ads are temporarily unavailable. Please check back later.
+            </p>
+          )}
+          {adsLeft === 0 && (config?.monetagEnabled || config?.adsgramEnabled) && (
+            <p className="text-xs text-center text-muted-foreground mt-3 font-medium">
+              🎉 You've reached your daily limit. Come back tomorrow!
+            </p>
+          )}
+        </div>
 
         {/* Tasks Section */}
-        <section>
-          <div className="flex justify-between items-end mb-3">
-            <h2 className="text-lg font-bold flex items-center gap-2">
-              <CheckCircle2 className="text-primary" size={20} />
-              Tasks
-            </h2>
+        <div>
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <CheckCircle2 size={18} style={{ color: '#6C21E8' }} />
+            <h2 className="font-black text-foreground text-base">Tasks</h2>
           </div>
 
           {tasksLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-24 bg-muted animate-pulse rounded-xl border border-border" />
+                <div key={i} className="h-24 bg-white animate-pulse rounded-2xl border border-purple-100" />
               ))}
             </div>
           ) : tasks && tasks.length > 0 ? (
             <div className="space-y-3">
               {tasks.map((task) => (
-                <Card 
-                  key={task.id} 
-                  className={`border shadow-sm transition-colors ${task.completed ? 'bg-muted/50 opacity-75' : 'bg-card'}`}
+                <div
+                  key={task.id}
+                  className={`bg-white rounded-2xl border border-purple-100 shadow-sm transition-opacity ${task.completed ? 'opacity-55' : 'opacity-100'}`}
                 >
-                  <CardContent className="p-4 flex gap-4 items-center">
-                    <div className={`w-12 h-12 rounded-full ${getTaskIconConfig(task.type).bgClassName} flex items-center justify-center shrink-0`}>
+                  <div className="p-4 flex gap-4 items-center">
+                    <div
+                      className={`w-12 h-12 rounded-xl ${getTaskIconConfig(task.type).bgClassName} flex items-center justify-center shrink-0`}
+                    >
                       <TaskIcon type={task.type} size={24} />
                     </div>
-                    
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-foreground truncate">{task.title}</h3>
+                      <h3 className="font-bold text-foreground truncate text-sm">{task.title}</h3>
                       {task.description && (
                         <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{task.description}</p>
                       )}
                       <div className="flex items-center gap-2 mt-2">
-                        <span className="text-xs font-bold text-secondary-foreground bg-secondary/20 px-2 py-0.5 rounded">
+                        <span
+                          className="text-xs font-bold px-2 py-0.5 rounded-lg text-white"
+                          style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}
+                        >
                           +{formatCurrency(task.reward)}
                         </span>
                         <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
@@ -293,51 +260,47 @@ export default function Earn() {
                         </span>
                       </div>
                     </div>
-
                     <div className="shrink-0 flex flex-col justify-center">
                       {task.completed ? (
-                        <div className="flex items-center text-primary font-bold text-sm bg-primary/10 px-3 py-1.5 rounded-lg">
-                          <CheckCircle2 size={16} className="mr-1.5" /> Done
+                        <div className="flex items-center text-sm font-bold px-3 py-1.5 rounded-xl" style={{ color: '#6C21E8', background: '#EDE0FF' }}>
+                          <CheckCircle2 size={15} className="mr-1.5" /> Done
                         </div>
                       ) : visitingTask === task.id ? (
-                        <Button 
-                          size="sm"
-                          className="font-bold rounded-lg px-4"
+                        <button
+                          className="font-bold text-sm rounded-xl px-4 py-2 text-white active:scale-95 transition-transform disabled:opacity-50"
+                          style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}
                           onClick={() => handleClaimTask(task.id)}
                           disabled={completingTask === task.id}
                           data-testid={`button-claim-task-${task.id}`}
                         >
                           {completingTask === task.id ? <Loader2 className="animate-spin" size={16} /> : 'Claim'}
-                        </Button>
+                        </button>
                       ) : (
-                        <Button 
-                          size="sm"
-                          variant="outline"
-                          className="font-bold rounded-lg px-4"
+                        <button
+                          className="font-bold text-sm rounded-xl px-4 py-2 border border-purple-200 flex items-center gap-1.5 active:scale-95 transition-transform"
+                          style={{ color: '#6C21E8', background: '#F8F4FF' }}
                           onClick={() => {
                             if (task.link) window.open(task.link, '_blank');
                             setVisitingTask(task.id);
                           }}
                           data-testid={`button-do-task-${task.id}`}
                         >
-                          Join <ExternalLink size={14} className="ml-1" />
-                        </Button>
+                          Join <ExternalLink size={13} />
+                        </button>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
-            <Card className="border shadow-sm bg-card border-dashed">
-              <CardContent className="p-8 flex flex-col items-center justify-center text-center">
-                <CheckCircle2 size={48} className="text-muted-foreground/30 mb-3" />
-                <p className="font-bold text-foreground mb-1">No tasks available</p>
-                <p className="text-sm text-muted-foreground">Check back later for new earning opportunities.</p>
-              </CardContent>
-            </Card>
+            <div className="bg-white rounded-2xl border border-purple-100 border-dashed p-8 flex flex-col items-center text-center shadow-sm">
+              <CheckCircle2 size={40} className="text-muted-foreground/25 mb-3" />
+              <p className="font-bold text-foreground mb-1">No tasks available</p>
+              <p className="text-sm text-muted-foreground">Check back later for new earning opportunities.</p>
+            </div>
           )}
-        </section>
+        </div>
       </div>
     </div>
   );

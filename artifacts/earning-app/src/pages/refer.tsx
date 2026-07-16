@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { useGetMe, useGetPublicConfig, useListReferrals, useGetReferralLeaderboard } from '@workspace/api-client-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Users, Copy, Share2, Check, UserPlus, Trophy } from 'lucide-react';
 import { formatCurrency, formatDate } from '../lib/utils';
@@ -19,7 +17,7 @@ export default function Refer() {
   const [failedPhotoIds, setFailedPhotoIds] = useState<Set<number>>(new Set());
   const [failedLeaderboardIds, setFailedLeaderboardIds] = useState<Set<number>>(new Set());
 
-  const botUsername = config?.botUsername || 'as_earning_bot';
+  const botUsername = config?.botUsername || 'Bangla_TaskHub_bot';
   const referralLink = user ? `https://t.me/${botUsername}?start=${user.referralCode}` : '';
 
   const handleCopy = () => {
@@ -40,104 +38,102 @@ export default function Refer() {
   const referrals = referralsData?.referrals || [];
 
   return (
-    <div className="flex-1 flex flex-col bg-muted/20 overflow-y-auto">
-      <div className="bg-card border-b px-6 py-4 sticky top-0 z-10 shadow-sm">
-        <h1 className="text-xl font-bold text-foreground">Refer Friends</h1>
-        <p className="text-sm text-muted-foreground mt-1">Earn bonuses together</p>
+    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F8F4FF' }}>
+      {/* Gradient Hero */}
+      <div
+        className="relative overflow-hidden px-5 pt-10 pb-12 text-center"
+        style={{ background: 'linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%)' }}
+      >
+        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-10 bg-white" />
+        <div className="absolute bottom-0 left-6 w-24 h-24 rounded-full opacity-10 bg-white" />
+
+        <div className="relative">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <UserPlus size={30} color="white" />
+          </div>
+          <h1 className="text-white text-2xl font-black mb-1">Invite & Earn</h1>
+          <p className="text-white/75 text-sm mb-6">
+            Get <span className="text-white font-black">{formatCurrency(config?.referralBonus || 0)}</span> for every friend who joins
+          </p>
+
+          {/* Referral link box */}
+          <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-1 flex items-center border border-white/25">
+            <div className="flex-1 text-sm font-mono truncate px-3 py-2 text-white text-left">
+              {referralLink || 'Loading...'}
+            </div>
+            <div className="flex gap-1 shrink-0 bg-white/20 p-1 rounded-xl">
+              <button
+                className="h-9 w-9 flex items-center justify-center rounded-lg text-white hover:bg-white/20 active:scale-95 transition-all"
+                onClick={handleCopy}
+                data-testid="button-copy-referral"
+              >
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+              </button>
+              <button
+                className="h-9 w-9 flex items-center justify-center rounded-lg text-white hover:bg-white/20 active:scale-95 transition-all"
+                onClick={handleShare}
+                data-testid="button-share-referral"
+              >
+                <Share2 size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="p-6 space-y-6">
-        {/* Hero Card */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-primary to-primary/90 text-primary-foreground overflow-hidden relative">
-          <div className="absolute -right-6 -bottom-6 opacity-10">
-            <Users size={120} />
-          </div>
-          <CardContent className="p-6 relative z-10 text-center">
-            <div className="w-16 h-16 bg-primary-foreground/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-              <UserPlus size={32} className="text-primary-foreground" />
-            </div>
-            <h2 className="text-2xl font-bold mb-2">Invite & Earn</h2>
-            <p className="text-primary-foreground/80 text-sm mb-6 max-w-[250px] mx-auto leading-relaxed">
-              Get <span className="font-bold text-white">{formatCurrency(config?.referralBonus || 0)}</span> for every friend who joins using your link.
+      <div className="px-4 pb-6 -mt-4 space-y-4">
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-purple-100 text-center">
+            <p className="text-xs font-semibold text-muted-foreground mb-1">Total Referrals</p>
+            <p className="text-3xl font-black text-foreground" data-testid="text-total-referrals">
+              {referralsData?.totalReferrals || 0}
             </p>
-            <div className="bg-background/10 backdrop-blur-md rounded-xl p-1 flex items-center border border-white/20">
-              <div className="flex-1 text-sm font-mono truncate px-3 py-2 text-white text-left">
-                {referralLink || 'Loading...'}
-              </div>
-              <div className="flex gap-1 shrink-0 bg-background/20 p-1 rounded-lg">
-                <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-white/20 text-white rounded-md" onClick={handleCopy} data-testid="button-copy-referral">
-                  {copied ? <Check size={16} /> : <Copy size={16} />}
-                </Button>
-                <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-white/20 text-white rounded-md" onClick={handleShare} data-testid="button-share-referral">
-                  <Share2 size={16} />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="border shadow-sm bg-card">
-            <CardContent className="p-4 text-center">
-              <p className="text-sm font-medium text-muted-foreground mb-1">Total Referrals</p>
-              <p className="text-2xl font-black text-foreground" data-testid="text-total-referrals">
-                {referralsData?.totalReferrals || 0}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border shadow-sm bg-card">
-            <CardContent className="p-4 text-center">
-              <p className="text-sm font-medium text-muted-foreground mb-1">Total Earned</p>
-              <p className="text-2xl font-black text-foreground text-primary" data-testid="text-referral-earnings">
-                {formatCurrency(referralsData?.totalReferralEarnings || 0)}
-              </p>
-            </CardContent>
-          </Card>
+          </div>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-purple-100 text-center">
+            <p className="text-xs font-semibold text-muted-foreground mb-1">Total Earned</p>
+            <p className="text-3xl font-black" style={{ color: '#6C21E8' }} data-testid="text-referral-earnings">
+              {formatCurrency(referralsData?.totalReferralEarnings || 0)}
+            </p>
+          </div>
         </div>
 
         {/* Tab Switcher */}
-        <div className="bg-muted rounded-xl p-1 flex gap-1">
-          <button
-            onClick={() => setActiveTab('leaderboard')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${
-              activeTab === 'leaderboard'
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Trophy size={15} />
-            Leaderboard
-          </button>
-          <button
-            onClick={() => setActiveTab('my-referrals')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${
-              activeTab === 'my-referrals'
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Users size={15} />
-            Your Referral
-          </button>
+        <div className="bg-white rounded-2xl p-1.5 flex gap-1.5 shadow-sm border border-purple-100">
+          {([
+            { key: 'leaderboard', label: 'Leaderboard', icon: Trophy },
+            { key: 'my-referrals', label: 'Your Referrals', icon: Users },
+          ] as const).map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all"
+              style={activeTab === key
+                ? { background: 'linear-gradient(135deg, #6C21E8, #E8347A)', color: 'white' }
+                : { color: '#9B8AB3' }
+              }
+            >
+              <Icon size={14} /> {label}
+            </button>
+          ))}
         </div>
 
-        {/* Leaderboard Tab */}
+        {/* Leaderboard */}
         {activeTab === 'leaderboard' && (
-          <section>
+          <div>
             {isLoadingLeaderboard ? (
               <div className="space-y-2">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="h-16 bg-muted animate-pulse rounded-xl border border-border" />
+                  <div key={i} className="h-16 bg-white animate-pulse rounded-2xl border border-purple-100" />
                 ))}
               </div>
             ) : (leaderboard?.entries?.length ?? 0) > 0 ? (
               <div className="space-y-2">
                 {leaderboard!.entries.map((entry) => {
-                  const rankColors: Record<number, string> = {
-                    1: 'bg-yellow-400/20 border-yellow-400/40',
-                    2: 'bg-gray-300/20 border-gray-300/40',
-                    3: 'bg-orange-400/20 border-orange-400/40',
+                  const rankBg: Record<number, string> = {
+                    1: 'linear-gradient(135deg, #FFF8E1, #FFF3CD)',
+                    2: 'linear-gradient(135deg, #F5F5F5, #ECECEC)',
+                    3: 'linear-gradient(135deg, #FFF0E8, #FFE4D0)',
                   };
                   const rankEmoji: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
                   const isTop3 = entry.rank <= 3;
@@ -145,42 +141,34 @@ export default function Refer() {
                   return (
                     <div
                       key={entry.userId}
-                      className={`border rounded-xl p-3 flex items-center gap-3 shadow-sm ${
-                        isTop3 ? `${rankColors[entry.rank]} bg-card` : 'bg-card'
-                      }`}
+                      className="rounded-2xl p-3.5 flex items-center gap-3 shadow-sm border border-purple-100"
+                      style={{ background: isTop3 ? rankBg[entry.rank] : 'white' }}
                     >
-                      {/* Rank */}
-                      <div className="w-7 shrink-0 text-center">
+                      <div className="w-8 shrink-0 text-center">
                         {isTop3 ? (
-                          <span className="text-xl leading-none">{rankEmoji[entry.rank]}</span>
+                          <span className="text-xl">{rankEmoji[entry.rank]}</span>
                         ) : (
                           <span className="text-sm font-bold text-muted-foreground">#{entry.rank}</span>
                         )}
                       </div>
-
-                      {/* Avatar */}
                       {entry.photoUrl && !failedLeaderboardIds.has(entry.userId) ? (
                         <img
                           src={entry.photoUrl}
                           alt={entry.firstName}
-                          className="w-10 h-10 rounded-full border border-border shadow-sm object-cover shrink-0"
+                          className="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover shrink-0"
                           referrerPolicy="no-referrer"
                           onError={() => setFailedLeaderboardIds(prev => new Set(prev).add(entry.userId))}
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
                           {entry.firstName.charAt(0).toUpperCase()}
                         </div>
                       )}
-
-                      {/* Name */}
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm text-foreground truncate">{entry.firstName}</p>
                       </div>
-
-                      {/* Count */}
                       <div className="shrink-0 text-right">
-                        <p className="text-sm font-black text-primary">{entry.referralCount}</p>
+                        <p className="text-sm font-black" style={{ color: '#6C21E8' }}>{entry.referralCount}</p>
                         <p className="text-[10px] text-muted-foreground">Referrals</p>
                       </div>
                     </div>
@@ -188,40 +176,38 @@ export default function Refer() {
                 })}
               </div>
             ) : (
-              <Card className="border shadow-sm bg-card border-dashed">
-                <CardContent className="p-8 flex flex-col items-center justify-center text-center">
-                  <Trophy size={32} className="text-muted-foreground/30 mb-2" />
-                  <p className="text-sm text-muted-foreground">No one on the leaderboard yet</p>
-                </CardContent>
-              </Card>
+              <div className="bg-white rounded-2xl border border-dashed border-purple-200 p-8 flex flex-col items-center text-center shadow-sm">
+                <Trophy size={32} className="text-muted-foreground/25 mb-2" />
+                <p className="text-sm text-muted-foreground">No one on the leaderboard yet</p>
+              </div>
             )}
-          </section>
+          </div>
         )}
 
-        {/* My Referrals Tab */}
+        {/* My Referrals */}
         {activeTab === 'my-referrals' && (
-          <section>
+          <div>
             {isLoading ? (
               <div className="space-y-3">
                 {[1, 2].map(i => (
-                  <div key={i} className="h-16 bg-muted animate-pulse rounded-xl border border-border" />
+                  <div key={i} className="h-16 bg-white animate-pulse rounded-2xl border border-purple-100" />
                 ))}
               </div>
             ) : referrals.length > 0 ? (
               <div className="space-y-3">
                 {referrals.map((ref) => (
-                  <div key={ref.id} className="bg-card border rounded-xl p-3 flex items-center justify-between shadow-sm">
+                  <div key={ref.id} className="bg-white rounded-2xl p-3.5 flex items-center justify-between shadow-sm border border-purple-100">
                     <div className="flex items-center gap-3">
                       {ref.photoUrl && !failedPhotoIds.has(ref.id) ? (
                         <img
                           src={ref.photoUrl}
                           alt={ref.firstName}
-                          className="w-10 h-10 rounded-full border border-border shadow-sm object-cover"
+                          className="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover"
                           referrerPolicy="no-referrer"
                           onError={() => setFailedPhotoIds((prev) => new Set(prev).add(ref.id))}
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
                           {ref.firstName.charAt(0).toUpperCase()}
                         </div>
                       )}
@@ -230,28 +216,24 @@ export default function Refer() {
                         <p className="text-xs text-muted-foreground">Joined {formatDate(ref.joinedAt)}</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <span className="text-xs font-bold text-secondary-foreground bg-secondary/20 px-2 py-1 rounded">
-                        +{formatCurrency(config?.referralBonus || 0)}
-                      </span>
-                    </div>
+                    <span className="text-xs font-bold text-white px-3 py-1 rounded-lg" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
+                      +{formatCurrency(config?.referralBonus || 0)}
+                    </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <Card className="border shadow-sm bg-card border-dashed">
-                <CardContent className="p-8 flex flex-col items-center justify-center text-center">
-                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                    <Users size={24} className="text-muted-foreground/50" />
-                  </div>
-                  <p className="font-bold text-foreground mb-1">No referrals yet</p>
-                  <p className="text-sm text-muted-foreground max-w-[200px]">
-                    Share your link with friends to start earning passive income.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="bg-white rounded-2xl border border-dashed border-purple-200 p-8 flex flex-col items-center text-center shadow-sm">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ background: '#EDE0FF' }}>
+                  <Users size={24} style={{ color: '#6C21E8' }} />
+                </div>
+                <p className="font-bold text-foreground mb-1">No referrals yet</p>
+                <p className="text-sm text-muted-foreground max-w-[200px]">
+                  Share your link with friends to start earning.
+                </p>
+              </div>
             )}
-          </section>
+          </div>
         )}
       </div>
     </div>

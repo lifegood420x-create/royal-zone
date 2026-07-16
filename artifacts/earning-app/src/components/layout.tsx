@@ -30,7 +30,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-[100dvh] bg-background pb-20 md:pb-0 md:pl-20">
-      <main className="w-full max-w-md mx-auto min-h-[100dvh] bg-card shadow-2xl relative overflow-hidden flex flex-col">
+      <main className="w-full max-w-md mx-auto min-h-[100dvh] bg-background shadow-2xl relative overflow-hidden flex flex-col">
         {children}
       </main>
       <BottomNav />
@@ -50,7 +50,7 @@ function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t shadow-[0_-4px_24px_rgba(0,0,0,0.04)] pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border/60 shadow-[0_-4px_24px_rgba(108,33,232,0.08)] pb-[env(safe-area-inset-bottom)] md:hidden">
       <div className="max-w-md mx-auto flex items-center justify-between px-2 h-16">
         {navItems.map((item) => {
           const isActive = location === item.href;
@@ -59,18 +59,26 @@ function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-16 h-full space-y-1 rounded-xl transition-all duration-200 active:scale-95 ${
-                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-              }`}
+              className={`flex flex-col items-center justify-center w-16 h-full space-y-1 rounded-xl transition-all duration-200 active:scale-95`}
               data-testid={`nav-${item.label.toLowerCase()}`}
             >
-              <div className={`relative ${isActive ? 'translate-y-[-2px]' : ''} transition-transform`}>
-                <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+              <div className={`relative transition-transform ${isActive ? 'translate-y-[-2px]' : ''}`}>
+                <Icon
+                  size={22}
+                  strokeWidth={isActive ? 2.5 : 2}
+                  style={isActive ? { color: '#6C21E8' } : { color: '#9B8AB3' }}
+                />
                 {isActive && (
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full" />
+                  <div
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full"
+                    style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}
+                  />
                 )}
               </div>
-              <span className={`text-[10px] font-medium transition-all ${isActive ? 'opacity-100' : 'opacity-70'}`}>
+              <span
+                className="text-[10px] font-semibold transition-all"
+                style={isActive ? { color: '#6C21E8' } : { color: '#9B8AB3' }}
+              >
                 {item.label}
               </span>
             </Link>
