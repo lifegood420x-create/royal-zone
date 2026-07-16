@@ -38,13 +38,22 @@ export function effectiveMinWithdraw(baseMinWithdraw: number, rejectedWithdrawCo
 }
 
 /**
- * Public postback URL to register in the ad network's dashboard (as the
- * "Postback URL" for a zone/block), including the auth secret and the
- * {claim_id}-style macro placeholder the network should substitute.
+ * Public postback URL for Monetag — uses {click_id} macro.
  */
 export function buildPostbackUrl(secret: string): string {
   const domains = (process.env.REPLIT_DOMAINS ?? "").split(",").filter(Boolean);
   const domain = domains[0];
   const base = domain ? `https://${domain}` : "";
   return `${base}/api/ads/postback?secret=${secret}&claim_id={click_id}`;
+}
+
+/**
+ * Public postback URL for AdsGram — uses {subid} macro (AdsGram echoes
+ * the value passed to controller.show({ subid }) back via this macro).
+ */
+export function buildAdsgramPostbackUrl(secret: string): string {
+  const domains = (process.env.REPLIT_DOMAINS ?? "").split(",").filter(Boolean);
+  const domain = domains[0];
+  const base = domain ? `https://${domain}` : "";
+  return `${base}/api/ads/postback?secret=${secret}&claim_id={subid}`;
 }

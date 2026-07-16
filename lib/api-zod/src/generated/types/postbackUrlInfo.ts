@@ -8,4 +8,5 @@
 
 export interface PostbackUrlInfo {
   postbackUrl: string;
+  adsgramPostbackUrl: string;
 }

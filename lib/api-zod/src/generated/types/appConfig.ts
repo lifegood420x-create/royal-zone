@@ -25,4 +25,5 @@ export interface AppConfig {
   adsgramEnabled: boolean;
   requireAdPostback: boolean;
   postbackUrl: string;
+  adsgramPostbackUrl: string;
 }

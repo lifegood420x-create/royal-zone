@@ -10,14 +10,21 @@ import {
   RegeneratePostbackSecretResponse,
 } from "@workspace/api-zod";
 import { requireAuth, requireAdmin } from "../../middlewares/auth";
-import { getAppConfig, buildPostbackUrl } from "../../lib/config";
+import { getAppConfig, buildPostbackUrl, buildAdsgramPostbackUrl } from "../../lib/config";
 import { broadcastMessage } from "../../lib/telegram";
 
 const router: IRouter = Router();
 
+function buildUrls(secret: string) {
+  return {
+    postbackUrl: buildPostbackUrl(secret),
+    adsgramPostbackUrl: buildAdsgramPostbackUrl(secret),
+  };
+}
+
 router.get("/admin/config", requireAuth, requireAdmin, async (_req, res): Promise<void> => {
   const config = await getAppConfig();
-  res.json(GetAdminConfigResponse.parse({ ...config, postbackUrl: buildPostbackUrl(config.postbackSecret!) }));
+  res.json(GetAdminConfigResponse.parse({ ...config, ...buildUrls(config.postbackSecret!) }));
 });
 
 router.patch("/admin/config", requireAuth, requireAdmin, async (req, res): Promise<void> => {
@@ -34,7 +41,7 @@ router.patch("/admin/config", requireAuth, requireAdmin, async (req, res): Promi
     .where(eq(appConfigTable.id, 1))
     .returning();
 
-  res.json(UpdateAdminConfigResponse.parse({ ...updated, postbackUrl: buildPostbackUrl(updated.postbackSecret!) }));
+  res.json(UpdateAdminConfigResponse.parse({ ...updated, ...buildUrls(updated.postbackSecret!) }));
 });
 
 router.post("/admin/config/postback-secret", requireAuth, requireAdmin, async (_req, res): Promise<void> => {
@@ -46,7 +53,7 @@ router.post("/admin/config/postback-secret", requireAuth, requireAdmin, async (_
     .where(eq(appConfigTable.id, 1))
     .returning();
 
-  res.json(RegeneratePostbackSecretResponse.parse({ postbackUrl: buildPostbackUrl(updated.postbackSecret!) }));
+  res.json(RegeneratePostbackSecretResponse.parse(buildUrls(updated.postbackSecret!)));
 });
 
 router.post("/admin/broadcast", requireAuth, requireAdmin, async (req, res): Promise<void> => {

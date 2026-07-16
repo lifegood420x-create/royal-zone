@@ -621,7 +621,8 @@ export const GetAdminConfigResponse = zod.object({
   "monetagEnabled": zod.boolean(),
   "adsgramEnabled": zod.boolean(),
   "requireAdPostback": zod.boolean(),
-  "postbackUrl": zod.string()
+  "postbackUrl": zod.string(),
+  "adsgramPostbackUrl": zod.string()
 })
 
 
@@ -671,7 +672,8 @@ export const UpdateAdminConfigResponse = zod.object({
   "monetagEnabled": zod.boolean(),
   "adsgramEnabled": zod.boolean(),
   "requireAdPostback": zod.boolean(),
-  "postbackUrl": zod.string()
+  "postbackUrl": zod.string(),
+  "adsgramPostbackUrl": zod.string()
 })
 
 
@@ -679,7 +681,8 @@ export const UpdateAdminConfigResponse = zod.object({
  * @summary Regenerate the shared secret used to authenticate incoming ad postback calls
  */
 export const RegeneratePostbackSecretResponse = zod.object({
-  "postbackUrl": zod.string()
+  "postbackUrl": zod.string(),
+  "adsgramPostbackUrl": zod.string()
 })
 
 

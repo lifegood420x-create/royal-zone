@@ -57,6 +57,7 @@ export default function AdminConfig() {
   const resetWebhookMutation = useResetWebhook();
   const regenerateSecretMutation = useRegeneratePostbackSecret();
   const [copied, setCopied] = useState(false);
+  const [copiedAdsgram, setCopiedAdsgram] = useState(false);
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -164,6 +165,13 @@ export default function AdminConfig() {
     navigator.clipboard.writeText(config.postbackUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyAdsgramPostbackUrl = () => {
+    if (!config?.adsgramPostbackUrl) return;
+    navigator.clipboard.writeText(config.adsgramPostbackUrl);
+    setCopiedAdsgram(true);
+    setTimeout(() => setCopiedAdsgram(false), 2000);
   };
 
   const handleRegenerateSecret = () => {
@@ -355,13 +363,29 @@ export default function AdminConfig() {
                       for each zone, then enable the toggle below once you've confirmed test postbacks are arriving.
                     </p>
                     <div className="rounded-lg border bg-muted/20 p-3 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <code className="flex-1 text-xs break-all bg-background border rounded px-2 py-1.5 font-mono">
-                          {config?.postbackUrl || 'Loading...'}
-                        </code>
-                        <Button type="button" size="sm" variant="outline" onClick={handleCopyPostbackUrl}>
-                          <Copy size={14} className="mr-1.5" /> {copied ? 'Copied' : 'Copy'}
-                        </Button>
+                      {/* Monetag postback URL */}
+                      <div className="space-y-1">
+                        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">Monetag (Server 1)</p>
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 text-xs break-all bg-background border rounded px-2 py-1.5 font-mono">
+                            {config?.postbackUrl || 'Loading...'}
+                          </code>
+                          <Button type="button" size="sm" variant="outline" onClick={handleCopyPostbackUrl}>
+                            <Copy size={14} className="mr-1.5" /> {copied ? 'Copied' : 'Copy'}
+                          </Button>
+                        </div>
+                      </div>
+                      {/* AdsGram postback URL */}
+                      <div className="space-y-1">
+                        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">AdsGram (Server 2)</p>
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 text-xs break-all bg-background border rounded px-2 py-1.5 font-mono">
+                            {config?.adsgramPostbackUrl || 'Loading...'}
+                          </code>
+                          <Button type="button" size="sm" variant="outline" onClick={handleCopyAdsgramPostbackUrl}>
+                            <Copy size={14} className="mr-1.5" /> {copiedAdsgram ? 'Copied' : 'Copy'}
+                          </Button>
+                        </div>
                       </div>
                       <Button
                         type="button"

@@ -953,6 +953,7 @@ components:
         - adsgramEnabled
         - requireAdPostback
         - postbackUrl
+        - adsgramPostbackUrl
       properties:
         minWithdraw: { type: number }
         referralBonus: { type: number }
@@ -969,6 +970,7 @@ components:
         adsgramEnabled: { type: boolean }
         requireAdPostback: { type: boolean }
         postbackUrl: { type: string }
+        adsgramPostbackUrl: { type: string }
 
     ConfigUpdate:
       type: object
@@ -990,9 +992,10 @@ components:
 
     PostbackUrlInfo:
       type: object
-      required: [postbackUrl]
+      required: [postbackUrl, adsgramPostbackUrl]
       properties:
         postbackUrl: { type: string }
+        adsgramPostbackUrl: { type: string }
 
     ClaimAdInput:
       type: object

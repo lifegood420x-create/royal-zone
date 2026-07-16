@@ -312,6 +312,7 @@ export interface AppConfig {
   adsgramEnabled: boolean;
   requireAdPostback: boolean;
   postbackUrl: string;
+  adsgramPostbackUrl: string;
 }
 
 export interface ConfigUpdate {
@@ -338,6 +339,7 @@ export interface ConfigUpdate {
 
 export interface PostbackUrlInfo {
   postbackUrl: string;
+  adsgramPostbackUrl: string;
 }
 
 export interface ClaimAdInput {
