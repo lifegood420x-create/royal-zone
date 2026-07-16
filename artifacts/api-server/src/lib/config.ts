@@ -1,5 +1,6 @@
 import { appConfigTable, db, type AppConfig } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { getPublicDomain } from "./public-domain";
 
 /**
  * The app configuration is a single row (id = 1). Ensures it exists and
@@ -41,8 +42,7 @@ export function effectiveMinWithdraw(baseMinWithdraw: number, rejectedWithdrawCo
  * Public postback URL for Monetag — uses {click_id} macro.
  */
 export function buildPostbackUrl(secret: string): string {
-  const domains = (process.env.REPLIT_DOMAINS ?? "").split(",").filter(Boolean);
-  const domain = domains[0];
+  const domain = getPublicDomain();
   const base = domain ? `https://${domain}` : "";
   return `${base}/api/ads/postback?secret=${secret}&claim_id={click_id}`;
 }
@@ -52,8 +52,7 @@ export function buildPostbackUrl(secret: string): string {
  * the value passed to controller.show({ subid }) back via this macro).
  */
 export function buildAdsgramPostbackUrl(secret: string): string {
-  const domains = (process.env.REPLIT_DOMAINS ?? "").split(",").filter(Boolean);
-  const domain = domains[0];
+  const domain = getPublicDomain();
   const base = domain ? `https://${domain}` : "";
   return `${base}/api/ads/postback?secret=${secret}&claim_id={subid}`;
 }

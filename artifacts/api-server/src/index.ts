@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { getPublicDomain } from "./lib/public-domain";
 import { getWebhookInfo, setWebhook } from "./lib/telegram";
 
 const rawPort = process.env["PORT"];
@@ -47,10 +48,9 @@ async function ensureWebhookRegistered(): Promise<void> {
     return;
   }
   try {
-    const domains = (process.env.REPLIT_DOMAINS ?? "").split(",").filter(Boolean);
-    const domain = domains[0];
+    const domain = getPublicDomain();
     if (!domain) {
-      logger.warn("No REPLIT_DOMAINS available; skipping Telegram webhook registration.");
+      logger.warn("No public domain available; skipping Telegram webhook registration.");
       return;
     }
 

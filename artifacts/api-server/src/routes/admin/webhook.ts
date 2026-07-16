@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { GetWebhookStatusResponse, ResetWebhookResponse } from "@workspace/api-zod";
 import { requireAuth, requireAdmin } from "../../middlewares/auth";
+import { getPublicDomain } from "../../lib/public-domain";
 import { getWebhookInfo, setWebhook } from "../../lib/telegram";
 import { logger } from "../../lib/logger";
 
@@ -18,8 +19,7 @@ router.get("/admin/webhook/status", requireAuth, requireAdmin, async (_req, res)
 });
 
 router.post("/admin/webhook/reset", requireAuth, requireAdmin, async (req, res): Promise<void> => {
-  const domains = (process.env.REPLIT_DOMAINS ?? "").split(",").filter(Boolean);
-  const domain = domains[0];
+  const domain = getPublicDomain();
   if (!domain) {
     res.status(500).json({ error: "No public domain available to register the webhook." });
     return;

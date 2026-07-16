@@ -3,6 +3,7 @@ import { logger } from "../lib/logger";
 import { sendMessage } from "../lib/telegram";
 import { upsertTelegramUser } from "../lib/users";
 import { getAppConfig } from "../lib/config";
+import { getPublicDomain } from "../lib/public-domain";
 
 const router: IRouter = Router();
 
@@ -29,13 +30,13 @@ router.post("/telegram/webhook", async (req, res): Promise<void> => {
   const startParam = message.text.split(" ")[1]?.trim() || null;
   const ip = null; // Telegram never carries a client IP for bot updates.
   const telegramId = String(message.from.id);
-  const domains = (process.env.REPLIT_DOMAINS ?? "").split(",").filter(Boolean);
+  const domain = getPublicDomain();
   // Telegram never includes a photo URL on bot chat updates (only Mini App
   // initData does). Point at our own lazy avatar proxy instead, which
   // fetches the real photo from the Bot API on demand — this keeps
   // referred friends' avatars from being permanently blank just because
   // they registered via /start instead of opening the Mini App first.
-  const photoUrl = domains[0] ? `https://${domains[0]}/api/media/avatar/${telegramId}` : null;
+  const photoUrl = domain ? `https://${domain}/api/media/avatar/${telegramId}` : null;
 
   await upsertTelegramUser(
     {
@@ -48,7 +49,7 @@ router.post("/telegram/webhook", async (req, res): Promise<void> => {
   );
 
   const config = await getAppConfig();
-  const appUrl = domains[0] ? `https://${domains[0]}/` : null;
+  const appUrl = domain ? `https://${domain}/` : null;
 
   try {
     await sendMessage(
