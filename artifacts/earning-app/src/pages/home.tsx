@@ -42,18 +42,19 @@ export default function Home() {
         <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full opacity-10 bg-white" />
         <div className="absolute bottom-0 left-4 w-28 h-28 rounded-full opacity-10 bg-white" />
 
-        <div className="relative flex justify-between items-center mb-6 gap-3">
+        <div className="relative flex justify-between items-center gap-3 mb-5">
           <div className="min-w-0 flex-1">
-            <p className="text-white/70 text-sm font-medium mb-0.5">Welcome back 👋</p>
-            <h1 className="text-white text-xl font-black tracking-tight truncate" data-testid="text-greeting">
-              {currentUser.firstName}
+            <p className="text-white/70 text-xs font-semibold mb-0.5">Welcome back 👋</p>
+            <h1 className="text-white text-lg font-black tracking-tight truncate" data-testid="text-greeting">
+              {/* Show only the first segment before " | " to avoid long display names wrapping */}
+              {currentUser.firstName.split(/\s*[|·•—]\s*/)[0].trim()}
             </h1>
           </div>
           {currentUser.photoUrl && !photoFailed ? (
             <img
               src={currentUser.photoUrl}
               alt="Profile"
-              className="w-11 h-11 rounded-full border-2 border-white/30 shadow-lg shrink-0"
+              className="w-11 h-11 rounded-full border-2 border-white/30 shadow-lg shrink-0 object-cover"
               referrerPolicy="no-referrer"
               onError={() => setPhotoFailed(true)}
             />
@@ -66,11 +67,11 @@ export default function Home() {
 
         <div className="relative">
           <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Total Balance</p>
-          <div className="flex items-end gap-2" data-testid="text-balance">
+          <div data-testid="text-balance">
             <span className="text-white text-4xl font-black tracking-tight">{formatCurrency(currentUser.balance)}</span>
           </div>
-          <div className="flex items-center gap-1.5 mt-2">
-            <TrendingUp size={13} className="text-white/70" />
+          <div className="flex items-center gap-1.5 mt-1.5">
+            <TrendingUp size={12} className="text-white/70" />
             <span className="text-white/70 text-xs font-medium">Total earned: {formatCurrency(currentUser.totalEarned)}</span>
           </div>
         </div>
