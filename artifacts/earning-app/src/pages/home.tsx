@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useGetMe, useGetPublicConfig, useListReferrals } from '@workspace/api-client-react';
+import { useGetMe, useGetPublicConfig, useListReferrals, useListTasks } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
-import { Play, Wallet, Gift, Users, Trophy, ChevronRight, TrendingUp } from 'lucide-react';
+import { Wallet, Gift, Users, Trophy, TrendingUp, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { formatCurrency } from '../lib/utils';
 import { useAuth } from '../components/auth-provider';
@@ -10,6 +10,7 @@ export default function Home() {
   const { data: user, isLoading: isLoadingMe } = useGetMe();
   const { data: config, isLoading: isLoadingConfig } = useGetPublicConfig();
   const { data: referralsData } = useListReferrals();
+  const { data: tasks } = useListTasks();
   const [, setLocation] = useLocation();
   const { user: authUser } = useAuth();
   const [photoFailed, setPhotoFailed] = useState(false);
@@ -109,40 +110,50 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Watch Ads CTA — gradient card */}
-        <button
-          onClick={() => setLocation('/earn')}
-          className="w-full rounded-2xl p-5 text-left shadow-md active:scale-95 transition-transform"
-          style={{ background: 'linear-gradient(135deg, #6C21E8 0%, #E8347A 70%, #FF7B4A 100%)' }}
-          data-testid="button-home-watch-ad"
-        >
-          {/* Top row */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                <Play size={20} color="white" fill="white" />
+        {/* Daily Tasks card */}
+        {(() => {
+          const pending = tasks ? tasks.filter(t => !t.completed).length : 0;
+          const done = tasks ? tasks.filter(t => t.completed).length : 0;
+          const total = tasks ? tasks.length : 0;
+          const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+          return (
+            <button
+              onClick={() => setLocation('/earn')}
+              className="w-full rounded-2xl p-5 text-left shadow-md active:scale-95 transition-transform"
+              style={{ background: 'linear-gradient(135deg, #6C21E8 0%, #E8347A 70%, #FF7B4A 100%)' }}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                    <CheckCircle2 size={20} color="white" />
+                  </div>
+                  <div>
+                    <p className="text-white font-black text-base leading-tight">Daily Tasks</p>
+                    <p className="text-white/70 text-xs mt-0.5">
+                      {pending > 0 ? `${pending} task${pending > 1 ? 's' : ''} pending` : total === 0 ? 'No tasks yet' : '🎉 All done!'}
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-white/20 border border-white/30 rounded-xl px-3 py-2 flex items-center gap-1.5 shrink-0">
+                  <span className="text-white font-black text-xs">View</span>
+                  <ArrowRight size={13} color="white" />
+                </div>
               </div>
-              <div>
-                <p className="text-white font-black text-base leading-tight">Watch Ads & Earn</p>
-                <p className="text-white/70 text-xs mt-0.5">{formatCurrency(config.adReward)} per ad · {config.adDailyLimit} max/day</p>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl px-4 py-2 font-black text-sm shrink-0" style={{ color: '#6C21E8' }}>
-              Start
-            </div>
-          </div>
-          {/* Progress bar */}
-          <div className="bg-white/20 rounded-full h-2 overflow-hidden">
-            <div
-              className="h-full bg-white rounded-full transition-all"
-              style={{ width: `${Math.min(100, ((currentUser.todayAdsWatched || 0) / (config.adDailyLimit || 1)) * 100)}%` }}
-            />
-          </div>
-          <div className="flex justify-between mt-1.5">
-            <span className="text-white/70 text-xs">{currentUser.todayAdsWatched || 0} watched today</span>
-            <span className="text-white/70 text-xs">{Math.max(0, config.adDailyLimit - (currentUser.todayAdsWatched || 0))} remaining</span>
-          </div>
-        </button>
+
+              {total > 0 && (
+                <>
+                  <div className="bg-white/20 rounded-full h-2 overflow-hidden">
+                    <div className="h-full bg-white rounded-full transition-all" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="flex justify-between mt-1.5">
+                    <span className="text-white/70 text-xs">{done} completed</span>
+                    <span className="text-white/70 text-xs">{pct}%</span>
+                  </div>
+                </>
+              )}
+            </button>
+          );
+        })()}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
