@@ -623,6 +623,8 @@ components:
         - isBanned
         - isFlagged
         - flagReason
+        - vpnStrikeCount
+        - vpnBlockedUntil
         - todayAdsWatched
         - todayTasksCount
         - totalTasksCount
@@ -643,6 +645,8 @@ components:
         isBanned: { type: boolean }
         isFlagged: { type: boolean }
         flagReason: { type: ["string", "null"] }
+        vpnStrikeCount: { type: integer }
+        vpnBlockedUntil: { type: ["string", "null"], format: date-time }
         todayAdsWatched: { type: integer }
         todayTasksCount: { type: integer }
         totalTasksCount: { type: integer }

@@ -31,6 +31,8 @@ export const usersTable = pgTable("users", {
   isBanned: boolean("is_banned").notNull().default(false),
   isFlagged: boolean("is_flagged").notNull().default(false),
   flagReason: text("flag_reason"),
+  vpnStrikeCount: integer("vpn_strike_count").notNull().default(0),
+  vpnBlockUntil: timestamp("vpn_block_until", { withTimezone: true }),
   registrationIp: text("registration_ip"),
   registrationDevice: text("registration_device"),
   rejectedWithdrawCount: integer("rejected_withdraw_count").notNull().default(0),

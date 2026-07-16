@@ -27,6 +27,8 @@ export async function toApiUser(user: User) {
     isBanned: user.isBanned,
     isFlagged: user.isFlagged,
     flagReason: user.flagReason,
+    vpnStrikeCount: user.vpnStrikeCount,
+    vpnBlockedUntil: user.vpnBlockUntil ?? null,
     todayAdsWatched: todaysAdCount(user),
     todayTasksCount: await getTodayTasksCount(user.id),
     totalTasksCount: user.totalTasksCount,
