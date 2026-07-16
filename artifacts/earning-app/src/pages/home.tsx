@@ -35,7 +35,7 @@ export default function Home() {
     <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F8F4FF' }}>
       {/* Gradient Hero */}
       <div
-        className="relative overflow-hidden px-5 pt-10 pb-12"
+        className="relative overflow-hidden px-5 pt-10 pb-6"
         style={{ background: 'linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%)' }}
       >
         {/* Decorative circles */}
@@ -78,7 +78,7 @@ export default function Home() {
       </div>
 
       {/* Content pulled up over hero */}
-      <div className="px-4 pb-6 -mt-5 space-y-4">
+      <div className="px-4 pb-6 pt-5 space-y-4">
 
         {/* Action buttons */}
         <div className="grid grid-cols-2 gap-3">

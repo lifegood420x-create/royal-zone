@@ -139,7 +139,7 @@ export default function Earn() {
 
       {/* Gradient header */}
       <div
-        className="relative overflow-hidden px-5 pt-10 pb-10"
+        className="relative overflow-hidden px-5 pt-10 pb-6"
         style={{ background: 'linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%)' }}
       >
         <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-10 bg-white" />
@@ -169,7 +169,7 @@ export default function Earn() {
         </div>
       </div>
 
-      <div className="px-4 pb-6 -mt-4 space-y-5">
+      <div className="px-4 pb-6 pt-5 space-y-5">
         {/* Ad Buttons */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-purple-100">
           {(config?.monetagEnabled || config?.adsgramEnabled) ? (

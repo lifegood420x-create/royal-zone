@@ -101,7 +101,7 @@ export default function Withdraw() {
     <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F8F4FF' }}>
       {/* Gradient Hero */}
       <div
-        className="relative overflow-hidden px-5 pt-10 pb-12"
+        className="relative overflow-hidden px-5 pt-10 pb-6"
         style={{ background: 'linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%)' }}
       >
         <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-10 bg-white" />
@@ -119,7 +119,7 @@ export default function Withdraw() {
         <p className="text-white/60 text-xs mt-3">Min. withdrawal: {formatCurrency(minWithdraw)}</p>
       </div>
 
-      <div className="px-4 pb-6 -mt-4 space-y-5">
+      <div className="px-4 pb-6 pt-5 space-y-5">
         {/* Form Card */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-purple-100">
           <div className="flex items-center gap-2 mb-5">
