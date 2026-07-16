@@ -153,68 +153,71 @@ export default function Earn() {
             <p className="text-white font-black text-xl">{formatCurrency(config?.adReward || 0)} <span className="text-white/60 text-sm font-medium">/ ad</span></p>
           </div>
         </div>
-
-        {/* Progress pill */}
-        <div className="mt-5 bg-white/15 rounded-2xl p-4">
-          <div className="flex justify-between items-center mb-2.5">
-            <span className="text-white/80 text-sm font-semibold">Daily Progress</span>
-            <span className="text-white font-black text-sm">{adsWatched} / {adLimit} watched</span>
-          </div>
-          <div className="bg-white/20 rounded-full h-2.5">
-            <div
-              className="h-full rounded-full bg-white transition-all"
-              style={{ width: `${adProgress}%` }}
-            />
-          </div>
-        </div>
       </div>
 
       <div className="px-4 pb-6 pt-5 space-y-5">
-        {/* Ad Buttons */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-purple-100">
-          {(config?.monetagEnabled || config?.adsgramEnabled) ? (
-            <div className="grid grid-cols-2 gap-3">
-              {config?.monetagEnabled && (
-                <button
-                  disabled={adsLeft === 0 || activeAd !== null}
-                  onClick={() => handleWatchAd('monetag')}
-                  className="rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white disabled:opacity-50 active:scale-95 transition-all"
-                  style={{ background: 'linear-gradient(135deg, #6C21E8, #9B51E0)' }}
-                  data-testid="button-ad-monetag"
-                >
-                  {activeAd === 'monetag' ? (
-                    <Loader2 className="animate-spin" size={18} />
-                  ) : (
-                    <><Play size={15} fill="white" color="white" /> Server 1</>
-                  )}
-                </button>
-              )}
-              {config?.adsgramEnabled && (
-                <button
-                  disabled={adsLeft === 0 || activeAd !== null}
-                  onClick={() => handleWatchAd('adsgram')}
-                  className="rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white disabled:opacity-50 active:scale-95 transition-all"
-                  style={{ background: 'linear-gradient(135deg, #E8347A, #FF7B4A)' }}
-                  data-testid="button-ad-adsgram"
-                >
-                  {activeAd === 'adsgram' ? (
-                    <Loader2 className="animate-spin" size={18} />
-                  ) : (
-                    <><Play size={15} fill="white" color="white" /> Server 2</>
-                  )}
-                </button>
-              )}
+        {/* Ad Card — Progress + Buttons একসাথে */}
+        <div className="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
+          {/* Progress section */}
+          <div className="px-5 pt-5 pb-4 border-b border-purple-50">
+            <div className="flex justify-between items-center mb-2.5">
+              <span className="text-sm font-bold text-foreground">Daily Progress</span>
+              <span className="font-black text-sm" style={{ color: '#6C21E8' }}>{adsWatched} / {adLimit} watched</span>
             </div>
-          ) : (
-            <p className="text-sm text-center text-muted-foreground py-3 font-medium" data-testid="text-ads-unavailable">
-              Video ads are temporarily unavailable. Please check back later.
-            </p>
-          )}
-          {adsLeft === 0 && (config?.monetagEnabled || config?.adsgramEnabled) && (
-            <p className="text-xs text-center text-muted-foreground mt-3 font-medium">
-              🎉 You've reached your daily limit. Come back tomorrow!
-            </p>
-          )}
+            <div className="bg-muted rounded-full h-2.5 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${adProgress}%`, background: 'linear-gradient(90deg, #6C21E8, #E8347A)' }}
+              />
+            </div>
+            {adsLeft === 0 && (config?.monetagEnabled || config?.adsgramEnabled) && (
+              <p className="text-xs text-center text-muted-foreground mt-3 font-medium">
+                🎉 You've reached your daily limit. Come back tomorrow!
+              </p>
+            )}
+          </div>
+
+          {/* Buttons section */}
+          <div className="px-5 py-4">
+            {(config?.monetagEnabled || config?.adsgramEnabled) ? (
+              <div className="grid grid-cols-2 gap-3">
+                {config?.monetagEnabled && (
+                  <button
+                    disabled={adsLeft === 0 || activeAd !== null}
+                    onClick={() => handleWatchAd('monetag')}
+                    className="rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white disabled:opacity-50 active:scale-95 transition-all"
+                    style={{ background: 'linear-gradient(135deg, #6C21E8, #9B51E0)' }}
+                    data-testid="button-ad-monetag"
+                  >
+                    {activeAd === 'monetag' ? (
+                      <Loader2 className="animate-spin" size={18} />
+                    ) : (
+                      <><Play size={15} fill="white" color="white" /> Server 1</>
+                    )}
+                  </button>
+                )}
+                {config?.adsgramEnabled && (
+                  <button
+                    disabled={adsLeft === 0 || activeAd !== null}
+                    onClick={() => handleWatchAd('adsgram')}
+                    className="rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white disabled:opacity-50 active:scale-95 transition-all"
+                    style={{ background: 'linear-gradient(135deg, #E8347A, #FF7B4A)' }}
+                    data-testid="button-ad-adsgram"
+                  >
+                    {activeAd === 'adsgram' ? (
+                      <Loader2 className="animate-spin" size={18} />
+                    ) : (
+                      <><Play size={15} fill="white" color="white" /> Server 2</>
+                    )}
+                  </button>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-center text-muted-foreground py-3 font-medium" data-testid="text-ads-unavailable">
+                Video ads are temporarily unavailable. Please check back later.
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Tasks Section */}
