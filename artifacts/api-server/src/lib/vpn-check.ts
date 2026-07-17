@@ -29,7 +29,7 @@ export async function checkIpForVpn(
 
   try {
     const res = await fetch(
-      `http://ip-api.com/json/${encodeURIComponent(cleanIp)}?fields=status,proxy,hosting`,
+      `http://ip-api.com/json/${encodeURIComponent(cleanIp)}?fields=status,proxy`,
       { signal: AbortSignal.timeout(4_000) },
     );
 
@@ -38,16 +38,17 @@ export async function checkIpForVpn(
     const data = (await res.json()) as {
       status: string;
       proxy: boolean;
-      hosting: boolean;
     };
 
-    if (data.status === 'success' && (data.proxy || data.hosting)) {
-      const tags: string[] = [];
-      if (data.proxy) tags.push('proxy/VPN');
-      if (data.hosting) tags.push('datacenter/hosting');
+    // Only block confirmed proxy/VPN IPs.
+    // NOTE: We intentionally skip the "hosting" flag — mobile carrier NAT
+    // gateways in Bangladesh (Grameenphone, Robi, Banglalink, etc.) are
+    // classified as "hosting" by ip-api.com even though they are legitimate
+    // mobile users. Blocking on "hosting" would lock out most of the user base.
+    if (data.status === 'success' && data.proxy) {
       return {
         isVpn: true,
-        reason: `Suspicious IP detected (${tags.join(', ')}). Ad rewards blocked.`,
+        reason: 'VPN বা প্রক্সি সংযোগ শনাক্ত হয়েছে। Ad rewards বন্ধ।',
       };
     }
   } catch (err) {

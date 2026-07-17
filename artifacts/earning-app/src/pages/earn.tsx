@@ -7,7 +7,7 @@ import {
   useClaimAd,
   useCompleteTask,
   getGetMeQueryKey,
-  getListTasksQueryKey
+  getListTasksQueryKey,
 } from '@workspace/api-client-react';
 import { showRewardedAd } from '../lib/rewarded-ads';
 import { Button } from '@/components/ui/button';
@@ -96,23 +96,24 @@ export default function Earn() {
               queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
             },
             onError: (err: any) => {
-              const data = err?.response?.data;
-              if (data?.error === 'vpn_block') {
+              const body = err?.data as any;
+              if (body?.error === 'vpn_block') {
                 queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
               } else {
-                toast({ title: 'Error', description: 'Something went wrong while crediting your reward.', variant: 'destructive' });
+                const msg = body?.error || err?.message || 'Something went wrong while crediting your reward.';
+                toast({ title: 'Error', description: msg, variant: 'destructive' });
               }
             }
           }
         );
       }
     } catch (err: any) {
-      const data = err?.response?.data;
-      if (data?.error === 'vpn_block') {
-        // VPN detected — refresh user so vpnBlockedUntil is picked up
+      const body = err?.data as any;
+      if (body?.error === 'vpn_block') {
         queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
       } else {
-        toast({ title: 'Ad failed', description: err.message || 'Could not load ad.', variant: 'destructive' });
+        const msg = body?.error || err?.message || 'Could not load ad.';
+        toast({ title: 'Ad failed', description: msg, variant: 'destructive' });
       }
     } finally {
       setActiveAd(null);

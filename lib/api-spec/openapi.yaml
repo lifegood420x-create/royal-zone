@@ -123,6 +123,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/TaskCompletionResult"
 
+  /ad-networks:
+    get:
+      operationId: listPublicAdNetworks
+      tags: [user]
+      summary: List enabled ad networks
+      responses:
+        "200":
+          description: Enabled ad networks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PublicAdNetwork"
+
   /ads/watch:
     post:
       operationId: watchAd
@@ -485,6 +500,76 @@ paths:
         "204":
           description: Task deleted (or, if it already has completions, hidden from the admin list to preserve reward history)
 
+  /admin/ad-networks:
+    get:
+      operationId: listAdminAdNetworks
+      tags: [admin]
+      summary: List all ad networks
+      responses:
+        "200":
+          description: All ad networks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminAdNetwork"
+    post:
+      operationId: createAdNetwork
+      tags: [admin]
+      summary: Create a new ad network
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdNetworkInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAdNetwork"
+
+  /admin/ad-networks/{id}:
+    put:
+      operationId: updateAdNetwork
+      tags: [admin]
+      summary: Update an ad network
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdNetworkInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAdNetwork"
+    delete:
+      operationId: deleteAdNetwork
+      tags: [admin]
+      summary: Delete an ad network
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   /admin/config:
     get:
       operationId: getAdminConfig
@@ -598,6 +683,48 @@ components:
     AdNetwork:
       type: string
       enum: [monetag, adsgram]
+
+    AdNetworkSdkType:
+      type: string
+      enum: [monetag, adsgram, custom]
+
+    PublicAdNetwork:
+      type: object
+      required: [id, name, sdkType, zoneId, sdkUrl, callTemplate, sortOrder]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        sdkType: { $ref: "#/components/schemas/AdNetworkSdkType" }
+        zoneId: { type: string }
+        sdkUrl: { type: ["string", "null"] }
+        callTemplate: { type: ["string", "null"] }
+        sortOrder: { type: integer }
+
+    AdminAdNetwork:
+      type: object
+      required: [id, name, sdkType, zoneId, sdkUrl, callTemplate, isEnabled, sortOrder, createdAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        sdkType: { $ref: "#/components/schemas/AdNetworkSdkType" }
+        zoneId: { type: string }
+        sdkUrl: { type: ["string", "null"] }
+        callTemplate: { type: ["string", "null"] }
+        isEnabled: { type: boolean }
+        sortOrder: { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    AdNetworkInput:
+      type: object
+      required: [name, sdkType, zoneId]
+      properties:
+        name: { type: string }
+        sdkType: { $ref: "#/components/schemas/AdNetworkSdkType" }
+        zoneId: { type: string }
+        sdkUrl: { type: ["string", "null"] }
+        callTemplate: { type: ["string", "null"] }
+        isEnabled: { type: boolean }
+        sortOrder: { type: integer }
 
     AuthInput:
       type: object

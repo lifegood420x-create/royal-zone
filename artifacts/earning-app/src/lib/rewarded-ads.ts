@@ -1,15 +1,5 @@
 /**
- * Rewarded ad loading for Monetag and Adsgram.
- *
- * Zone/block IDs are NOT hardcoded — they come from the public app config
- * (`GET /config/public`, fields `monetagZoneId` / `adsgramBlockId`), which
- * the admin sets from the Config tab. If a zone ID is not configured yet,
- * `showRewardedAd` throws so the caller can show a friendly "ads not set up
- * yet" message instead of a broken button.
- *
- * NOTE: The exact Monetag/Adsgram snippet may be swapped in later once the
- * final SDK script is provided. This implements the documented public
- * in-app interstitial APIs for both networks.
+ * Rewarded ad loading — supports Monetag and Adsgram.
  */
 
 export type AdNetwork = 'monetag' | 'adsgram';
@@ -46,13 +36,6 @@ declare global {
   }
 }
 
-/**
- * `requestVar`, when provided, is our own claimId from `/ads/claim` — we
- * pass it as a best-effort request var so it's available for the network
- * to echo back on its postback call (via a `{click_id}`-style macro
- * configured on the postback URL in the network's dashboard). Networks
- * that ignore extra args simply behave exactly as before.
- */
 async function showMonetagAd(zoneId: string, requestVar?: string): Promise<void> {
   const fnName = `show_${zoneId}` as const;
   await loadScript('https://libtl.com/sdk.js', {
@@ -78,14 +61,7 @@ async function showAdsgramAd(blockId: string, requestVar?: string): Promise<void
 }
 
 /**
- * Shows a rewarded ad for the given network and resolves once the viewer
- * has watched it. Throws if the network isn't configured or the SDK fails
- * to load/show.
- *
- * IMPORTANT: this promise resolving is NOT proof of a real view by
- * itself (a user could fake it via devtools) — reward crediting should
- * rely on server-side postback confirmation (see `/ads/claim` +
- * `/ads/postback`) whenever that's configured, not on this resolving.
+ * Show a rewarded ad. Resolves when the user finishes watching. Throws on failure.
  */
 export async function showRewardedAd(
   network: AdNetwork,
@@ -99,7 +75,6 @@ export async function showRewardedAd(
         : 'Adsgram block ID is not configured yet.',
     );
   }
-
   if (network === 'monetag') {
     await showMonetagAd(zoneId, requestVar);
   } else {

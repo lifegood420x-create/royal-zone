@@ -8,7 +8,7 @@ import {
   CreditCard,
   ListTodo,
   LogOut,
-  ChevronLeft
+  ChevronLeft,
 } from 'lucide-react';
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {

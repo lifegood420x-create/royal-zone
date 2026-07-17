@@ -381,4 +381,3 @@ claim_id: string;
 export type ListAdminUsersParams = {
 search?: string;
 };
-
