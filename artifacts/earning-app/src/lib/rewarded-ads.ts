@@ -60,8 +60,23 @@ async function showAdsgramAd(blockId: string, requestVar?: string): Promise<void
   await controller.show(requestVar ? { subid: requestVar } : undefined);
 }
 
+/** Wraps a Promise with a timeout — rejects if it doesn't resolve in time. */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(`${label} timed out after ${ms / 1000}s. Please try again.`)),
+      ms,
+    );
+    promise.then(
+      (v) => { clearTimeout(timer); resolve(v); },
+      (e) => { clearTimeout(timer); reject(e); },
+    );
+  });
+}
+
 /**
  * Show a rewarded ad. Resolves when the user finishes watching. Throws on failure.
+ * Times out after 3 minutes to prevent the UI from freezing forever.
  */
 export async function showRewardedAd(
   network: AdNetwork,
@@ -71,13 +86,13 @@ export async function showRewardedAd(
   if (!zoneId) {
     throw new Error(
       network === 'monetag'
-        ? 'Monetag zone ID is not configured yet.'
-        : 'Adsgram block ID is not configured yet.',
+        ? 'Monetag Zone ID এখনো সেট করা হয়নি।'
+        : 'Adsgram Block ID এখনো সেট করা হয়নি।',
     );
   }
-  if (network === 'monetag') {
-    await showMonetagAd(zoneId, requestVar);
-  } else {
-    await showAdsgramAd(zoneId, requestVar);
-  }
+  const adPromise = network === 'monetag'
+    ? showMonetagAd(zoneId, requestVar)
+    : showAdsgramAd(zoneId, requestVar);
+
+  await withTimeout(adPromise, 3 * 60 * 1000, `${network} ad`);
 }

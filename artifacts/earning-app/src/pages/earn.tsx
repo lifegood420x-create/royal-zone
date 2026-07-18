@@ -45,8 +45,8 @@ export default function Earn() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // VPN block countdown ticker
-  const vpnBlockUntil = (user as any)?.vpnBlockedUntil as string | null | undefined;
+  // VPN block countdown ticker — vpnBlockedUntil is a Date object from the schema
+  const vpnBlockUntil = user?.vpnBlockedUntil ?? null;
   useEffect(() => {
     if (!vpnBlockUntil) { setVpnBlockMs(0); return; }
     const target = new Date(vpnBlockUntil).getTime();
@@ -147,16 +147,19 @@ export default function Earn() {
 
   return (
     <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F8F4FF' }}>
-      {/* Countdown overlay */}
-      {countdown !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: 'rgba(26,5,51,0.85)' }} data-testid="overlay-ad-countdown">
+      {/* Countdown overlay — only shown while the minimum watch timer is active.
+           Intentionally NOT shown when countdown === 0 so the Monetag/Adsgram
+           ad overlay can remain visible and the user can dismiss it without
+           our UI blocking the ad's close button. */}
+      {countdown !== null && countdown > 0 && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-6" style={{ background: 'rgba(26,5,51,0.75)' }} data-testid="overlay-ad-countdown">
           <div className="bg-white rounded-3xl p-8 max-w-xs w-full flex flex-col items-center text-center gap-4 shadow-2xl">
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
               <Clock size={28} color="white" />
             </div>
-            <p className="font-black text-foreground text-lg">Watching ad...</p>
+            <p className="font-black text-foreground text-lg">এড দেখছেন...</p>
             <p className="text-sm text-muted-foreground">
-              Reward unlocks in <span className="font-black text-foreground text-lg" data-testid="text-ad-countdown">{countdown}s</span>
+              Reward পেতে আরো <span className="font-black text-foreground text-lg" data-testid="text-ad-countdown">{countdown}s</span>
             </p>
             <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
               <div
@@ -167,7 +170,7 @@ export default function Earn() {
                 }}
               />
             </div>
-            <p className="text-xs text-muted-foreground">Please don't close this — leaving early forfeits the reward.</p>
+            <p className="text-xs text-muted-foreground">এখন বন্ধ করবেন না — আগে বন্ধ করলে reward পাবেন না।</p>
           </div>
         </div>
       )}
@@ -229,9 +232,9 @@ export default function Earn() {
                   </div>
                 </div>
                 {/* reason */}
-                {user && (user as any).flagReason && (
+                {user?.flagReason && (
                   <div className="rounded-lg px-3 py-2 text-xs" style={{ background: '#FFE8D4', color: '#7A3010' }}>
-                    <span className="font-bold">কারণ: </span>{(user as any).flagReason}
+                    <span className="font-bold">কারণ: </span>{user.flagReason}
                   </div>
                 )}
                 {/* countdown */}

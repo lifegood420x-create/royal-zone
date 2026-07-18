@@ -18,6 +18,7 @@ router.post("/ads/watch", requireAuth, async (req, res): Promise<void> => {
   }
 
   const user = req.currentUser!;
+  const logCtx = { userId: user.id, username: user.username, network: parsed.data.network };
 
   if (user.isFlagged) {
     res.status(403).json({ error: "Ad rewards are disabled for this account." });
@@ -92,10 +93,19 @@ router.post("/ads/watch", requireAuth, async (req, res): Promise<void> => {
     .where(eq(usersTable.id, user.id))
     .returning();
 
-  const data = WatchAdResponse.parse({
-    user: await toApiUser(updatedUser),
-    adWatch,
-  });
+  let data;
+  try {
+    data = WatchAdResponse.parse({
+      user: await toApiUser(updatedUser),
+      adWatch,
+    });
+  } catch (parseErr) {
+    console.error('[ads/watch] WatchAdResponse.parse failed', { ...logCtx, parseErr, adWatch, updatedUser });
+    res.status(500).json({ error: 'Response serialization failed. Reward was credited — please refresh.' });
+    return;
+  }
+
+  console.info('[ads/watch] reward credited', { ...logCtx, reward: config.adReward, newBalance: updatedUser.balance });
   res.json(data);
 });
 

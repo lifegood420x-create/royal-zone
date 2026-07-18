@@ -71,6 +71,8 @@ export interface User {
   isFlagged: boolean;
   /** @nullable */
   flagReason: string | null;
+  /** @nullable */
+  vpnBlockedUntil: string | null;
   todayAdsWatched: number;
   todayTasksCount: number;
   totalTasksCount: number;

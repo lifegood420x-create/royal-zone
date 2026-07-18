@@ -3,6 +3,7 @@ import {
   useListAdminUsers, 
   useBanUser, 
   useUnbanUser,
+  useClearFlaggedUser,
   getListAdminUsersQueryKey,
 } from '@workspace/api-client-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { Search, Ban, CheckCircle, ShieldAlert, AlertTriangle } from 'lucide-react';
+import { Search, Ban, CheckCircle, ShieldAlert, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import { useDebounce } from '../../lib/use-debounce';
 
@@ -25,8 +26,27 @@ export default function AdminUsers() {
   
   const banMutation = useBanUser();
   const unbanMutation = useUnbanUser();
+  const clearFlagMutation = useClearFlaggedUser();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  const handleClearFlag = (id: number) => {
+    clearFlagMutation.mutate(
+      { id },
+      {
+        onSuccess: () => {
+          toast({ title: 'Flag Cleared', description: 'User can now watch ads again.' });
+          queryClient.invalidateQueries({ queryKey: getListAdminUsersQueryKey() });
+          if (debouncedSearch) {
+            queryClient.invalidateQueries({ queryKey: getListAdminUsersQueryKey({ search: debouncedSearch }) });
+          }
+        },
+        onError: () => {
+          toast({ title: 'Error', description: 'Could not clear flag.', variant: 'destructive' });
+        }
+      }
+    );
+  };
 
   const handleToggleBan = (id: number, isBanned: boolean) => {
     const mutation = isBanned ? unbanMutation : banMutation;
@@ -108,6 +128,17 @@ export default function AdminUsers() {
                   </div>
 
                   <div className="shrink-0 flex sm:flex-col gap-2">
+                    {user.isFlagged && !user.isBanned && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="font-bold text-orange-600 border-orange-200 hover:bg-orange-50"
+                        onClick={() => handleClearFlag(user.id)}
+                        disabled={clearFlagMutation.isPending}
+                      >
+                        <ShieldCheck size={16} className="mr-1.5" /> Clear Flag
+                      </Button>
+                    )}
                     <Button 
                       variant={user.isBanned ? "outline" : "destructive"} 
                       size="sm"

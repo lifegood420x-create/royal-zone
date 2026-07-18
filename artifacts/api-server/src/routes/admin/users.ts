@@ -91,7 +91,7 @@ router.post("/admin/flagged/:id/clear", requireAuth, requireAdmin, async (req, r
 
   const [user] = await db
     .update(usersTable)
-    .set({ isFlagged: false, flagReason: null })
+    .set({ isFlagged: false, flagReason: null, vpnStrikeCount: 0, vpnBlockUntil: null })
     .where(eq(usersTable.id, params.data.id))
     .returning();
 
