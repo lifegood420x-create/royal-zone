@@ -28,6 +28,10 @@ export const usersTable = pgTable("users", {
     .default(0),
   referralCode: text("referral_code").notNull().unique(),
   referredBy: integer("referred_by"),
+  // Referral bonus owed but not yet paid: set when the signup came through
+  // the bot webhook, where no IP/device is available for fraud checks.
+  // Settled (paid or denied) on the user's first Mini App open.
+  referralPending: boolean("referral_pending").notNull().default(false),
   isBanned: boolean("is_banned").notNull().default(false),
   isFlagged: boolean("is_flagged").notNull().default(false),
   flagReason: text("flag_reason"),
