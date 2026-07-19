@@ -125,6 +125,7 @@ export const ListTasksResponseItem = zod.object({
   "reward": zod.number(),
   "type": zod.enum(['youtube', 'facebook', 'telegram', 'join_bonus', 'bonus', 'other']),
   "link": zod.string().nullable(),
+  "telegramChatId": zod.string().nullable(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 }).and(zod.object({
@@ -529,6 +530,7 @@ export const ListAdminTasksResponseItem = zod.object({
   "reward": zod.number(),
   "type": zod.enum(['youtube', 'facebook', 'telegram', 'join_bonus', 'bonus', 'other']),
   "link": zod.string().nullable(),
+  "telegramChatId": zod.string().nullable(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 })
@@ -549,6 +551,7 @@ export const CreateTaskBody = zod.object({
   "reward": zod.number().min(createTaskBodyRewardMin),
   "type": zod.enum(['youtube', 'facebook', 'telegram', 'join_bonus', 'bonus', 'other']),
   "link": zod.string().optional(),
+  "telegramChatId": zod.string().optional(),
   "isActive": zod.boolean().optional()
 })
 
@@ -559,6 +562,7 @@ export const CreateTaskResponse = zod.object({
   "reward": zod.number(),
   "type": zod.enum(['youtube', 'facebook', 'telegram', 'join_bonus', 'bonus', 'other']),
   "link": zod.string().nullable(),
+  "telegramChatId": zod.string().nullable(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 })
@@ -582,6 +586,7 @@ export const UpdateTaskBody = zod.object({
   "reward": zod.number().min(updateTaskBodyRewardMin).optional(),
   "type": zod.enum(['youtube', 'facebook', 'telegram', 'join_bonus', 'bonus', 'other']).optional(),
   "link": zod.string().optional(),
+  "telegramChatId": zod.string().optional(),
   "isActive": zod.boolean().optional()
 })
 
@@ -592,6 +597,7 @@ export const UpdateTaskResponse = zod.object({
   "reward": zod.number(),
   "type": zod.enum(['youtube', 'facebook', 'telegram', 'join_bonus', 'bonus', 'other']),
   "link": zod.string().nullable(),
+  "telegramChatId": zod.string().nullable(),
   "isActive": zod.boolean(),
   "createdAt": zod.coerce.date()
 })

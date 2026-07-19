@@ -132,8 +132,14 @@ export default function Earn() {
           queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
           setVisitingTask(null);
         },
-        onError: () => {
-          toast({ title: 'Error', description: 'Could not complete task at this time.', variant: 'destructive' });
+        onError: (err: any) => {
+          const body = err?.data;
+          if (body?.error === 'channel_not_joined') {
+            toast({ title: 'জয়েন করুন', description: 'প্রথমে চ্যানেলে জয়েন করুন, তারপর Claim করুন।', variant: 'destructive' });
+            setVisitingTask(null); // reset so they can re-open the link
+          } else {
+            toast({ title: 'Error', description: 'Could not complete task at this time.', variant: 'destructive' });
+          }
         },
         onSettled: () => setCompletingTask(null)
       }

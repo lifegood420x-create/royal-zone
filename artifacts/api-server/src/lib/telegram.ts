@@ -147,6 +147,64 @@ export async function fetchTelegramAvatar(
   return { buffer, contentType };
 }
 
+export type ChatMemberStatus =
+  | 'creator'
+  | 'administrator'
+  | 'member'
+  | 'restricted'
+  | 'left'
+  | 'kicked';
+
+/**
+ * Checks whether a Telegram user is a member of a public channel or group.
+ * Returns the member status, or null when the chat / user cannot be resolved.
+ *
+ * chatId must be a @username (e.g. "@mychannel") or a numeric chat id.
+ */
+export async function getChatMemberStatus(
+  chatId: string,
+  telegramUserId: string,
+): Promise<ChatMemberStatus | null> {
+  try {
+    const result = await callTelegramApi<{ status: ChatMemberStatus }>(
+      'getChatMember',
+      { chat_id: chatId, user_id: Number(telegramUserId) },
+    );
+    return result.status;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Extracts a @username from common Telegram link formats.
+ * Returns null for private invite links (t.me/joinchat or t.me/+xxx)
+ * that cannot be resolved via getChatMember.
+ *
+ * Examples:
+ *   https://t.me/mychannel   → "@mychannel"
+ *   t.me/mychannel           → "@mychannel"
+ *   @mychannel               → "@mychannel"
+ *   https://t.me/+abc123     → null  (private link)
+ *   https://t.me/joinchat/x  → null  (private link)
+ */
+export function extractTelegramUsername(link: string): string | null {
+  if (!link) return null;
+  const trimmed = link.trim();
+
+  // Already a @username
+  if (/^@\w+$/.test(trimmed)) return trimmed;
+
+  // Private invite links — cannot verify membership
+  if (/t\.me\/(joinchat\/|\+)/.test(trimmed)) return null;
+
+  // https://t.me/username or t.me/username
+  const match = trimmed.match(/t\.me\/([A-Za-z0-9_]{5,})/);
+  if (match) return `@${match[1]}`;
+
+  return null;
+}
+
 /** Sends a message to every user, tolerating individual failures (blocked bot, etc). */
 export async function broadcastMessage(chatIds: string[], text: string) {
   let sentCount = 0;

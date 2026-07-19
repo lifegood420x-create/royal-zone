@@ -19,6 +19,10 @@ export const tasksTable = pgTable("tasks", {
   reward: numeric("reward", { precision: 14, scale: 2, mode: "number" }).notNull(),
   type: text("type", { enum: taskTypeValues }).notNull().default("other"),
   link: text("link"),
+  // For Telegram tasks: channel/group username (@chan) or numeric ID (-100xxx).
+  // Used to verify membership via getChatMember. Required for private invite
+  // links where the username cannot be extracted from the link alone.
+  telegramChatId: text("telegram_chat_id"),
   isActive: boolean("is_active").notNull().default(true),
   // Set when an admin "deletes" a task that already has completions (see
   // admin/tasks.ts) — the row can't be hard-deleted without breaking the

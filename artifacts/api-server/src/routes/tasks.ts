@@ -4,6 +4,7 @@ import { db, tasksTable, taskCompletionsTable, usersTable } from "@workspace/db"
 import { CompleteTaskParams, CompleteTaskResponse, ListTasksResponse } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/auth";
 import { toApiUser } from "../lib/serialize";
+import { getChatMemberStatus, extractTelegramUsername } from "../lib/telegram";
 
 const router: IRouter = Router();
 
@@ -44,6 +45,20 @@ router.post("/tasks/:id/complete", requireAuth, async (req, res): Promise<void> 
   if (existingCompletion) {
     res.status(409).json({ error: "Task already completed." });
     return;
+  }
+
+  // Telegram channel/group join verification
+  if (task.type === 'telegram' && task.link) {
+    const chatUsername = extractTelegramUsername(task.link);
+    if (chatUsername) {
+      const telegramId = req.currentUser!.telegramId;
+      const status = await getChatMemberStatus(chatUsername, telegramId);
+      const isMember = status !== null && ['creator', 'administrator', 'member', 'restricted'].includes(status);
+      if (!isMember) {
+        res.status(403).json({ error: 'channel_not_joined', message: 'প্রথমে চ্যানেলে জয়েন করুন, তারপর বোনাস নিন।' });
+        return;
+      }
+    }
   }
 
   const [completion] = await db
