@@ -26,7 +26,7 @@ export interface User {
   flagReason: string | null;
   vpnStrikeCount: number;
   /** @nullable */
-  vpnBlockedUntil: string | null;
+  vpnBlockedUntil: Date | null;
   todayAdsWatched: number;
   todayTasksCount: number;
   totalTasksCount: number;

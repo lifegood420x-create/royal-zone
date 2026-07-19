@@ -16,6 +16,8 @@ export interface Task {
   type: TaskType;
   /** @nullable */
   link: string | null;
+  /** @nullable */
+  telegramChatId: string | null;
   isActive: boolean;
   createdAt: Date;
 }

@@ -46,6 +46,7 @@ const taskSchema = z.object({
     TaskType.other
   ] as const),
   link: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  telegramChatId: z.string().optional().or(z.literal('')),
   isActive: z.boolean().default(true),
 });
 
@@ -70,6 +71,7 @@ export default function AdminTasks() {
       reward: 0,
       type: TaskType.telegram,
       link: '',
+      telegramChatId: '',
       isActive: true,
     },
   });
@@ -82,6 +84,7 @@ export default function AdminTasks() {
       reward: 0,
       type: TaskType.telegram,
       link: '',
+      telegramChatId: '',
       isActive: true,
     });
     setIsDialogOpen(true);
@@ -95,6 +98,7 @@ export default function AdminTasks() {
       reward: task.reward,
       type: task.type,
       link: task.link || '',
+      telegramChatId: task.telegramChatId || '',
       isActive: task.isActive,
     });
     setIsDialogOpen(true);
@@ -122,6 +126,7 @@ export default function AdminTasks() {
       ...data,
       link: data.link || undefined,
       description: data.description || undefined,
+      telegramChatId: data.telegramChatId?.trim() || null,
     };
 
     if (editingTask) {
@@ -329,6 +334,24 @@ export default function AdminTasks() {
                     <FormControl>
                       <Input placeholder="https://..." type="url" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="telegramChatId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telegram Chat ID (join verify)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="@channelusername or -1001234567890" {...field} />
+                    </FormControl>
+                    <p className="text-[10px] text-muted-foreground">
+                      Set this to verify the user actually joined before paying. Required for
+                      private invite links. The bot must be an admin of that channel/group.
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -6,11 +6,14 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './adminAdNetwork';
 export * from './adminDashboard';
 export * from './adminUser';
 export * from './adminWithdrawal';
 export * from './adminWithdrawalUser';
 export * from './adNetwork';
+export * from './adNetworkInput';
+export * from './adNetworkSdkType';
 export * from './adPostbackParams';
 export * from './adPostbackPostParams';
 export * from './adWatch';
@@ -29,6 +32,7 @@ export * from './leaderboardEntry';
 export * from './leaderboardResponse';
 export * from './listAdminUsersParams';
 export * from './postbackUrlInfo';
+export * from './publicAdNetwork';
 export * from './publicConfig';
 export * from './referralsSummary';
 export * from './referralUser';

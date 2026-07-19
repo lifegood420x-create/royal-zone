@@ -47,17 +47,29 @@ router.post("/tasks/:id/complete", requireAuth, async (req, res): Promise<void> 
     return;
   }
 
-  // Telegram channel/group join verification
-  if (task.type === 'telegram' && task.link) {
-    const chatUsername = extractTelegramUsername(task.link);
-    if (chatUsername) {
-      const telegramId = req.currentUser!.telegramId;
-      const status = await getChatMemberStatus(chatUsername, telegramId);
-      const isMember = status !== null && ['creator', 'administrator', 'member', 'restricted'].includes(status);
-      if (!isMember) {
-        res.status(403).json({ error: 'channel_not_joined', message: 'প্রথমে চ্যানেলে জয়েন করুন, তারপর বোনাস নিন।' });
-        return;
-      }
+  // Telegram channel/group join verification. The chat is resolved from the
+  // admin-configured chat id first (required for private invite links, where
+  // no @username can be read off the link), falling back to the link's
+  // @username. Verification is enforced for:
+  //  - any task with an explicit telegramChatId (regardless of type)
+  //  - every 'telegram' task — unresolvable chats fail closed rather than
+  //    handing out the reward unchecked
+  //  - 'join_bonus'/'other' tasks whose link points at a public t.me chat
+  const configuredChatId = task.telegramChatId?.trim() || null;
+  // Bot deep links (t.me/SomeBot?start=...) are not joinable chats — never
+  // treat their username as a chat to verify.
+  const linkUsername =
+    task.link && !/\?start=/i.test(task.link) ? extractTelegramUsername(task.link) : null;
+  const chatRef = configuredChatId ?? (linkUsername && !/bot$/i.test(linkUsername) ? linkUsername : null);
+  const mustVerify = configuredChatId !== null || task.type === 'telegram' || chatRef !== null;
+
+  if (mustVerify) {
+    const telegramId = req.currentUser!.telegramId;
+    const status = chatRef ? await getChatMemberStatus(chatRef, telegramId) : null;
+    const isMember = status !== null && ['creator', 'administrator', 'member', 'restricted'].includes(status);
+    if (!isMember) {
+      res.status(403).json({ error: 'channel_not_joined', message: 'প্রথমে চ্যানেলে জয়েন করুন, তারপর বোনাস নিন।' });
+      return;
     }
   }
 

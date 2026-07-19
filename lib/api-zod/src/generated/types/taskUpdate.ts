@@ -15,5 +15,7 @@ export interface TaskUpdate {
   reward?: number;
   type?: TaskType;
   link?: string;
+  /** @nullable */
+  telegramChatId?: string | null;
   isActive?: boolean;
 }

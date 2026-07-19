@@ -790,7 +790,7 @@ components:
 
     Task:
       type: object
-      required: [id, title, description, reward, type, link, isActive, createdAt]
+      required: [id, title, description, reward, type, link, telegramChatId, isActive, createdAt]
       properties:
         id: { type: integer }
         title: { type: string }
@@ -798,6 +798,7 @@ components:
         reward: { type: number }
         type: { $ref: "#/components/schemas/TaskType" }
         link: { type: ["string", "null"] }
+        telegramChatId: { type: ["string", "null"] }
         isActive: { type: boolean }
         createdAt: { type: string, format: date-time }
 
@@ -818,6 +819,7 @@ components:
         reward: { type: number, minimum: 0 }
         type: { $ref: "#/components/schemas/TaskType" }
         link: { type: string }
+        telegramChatId: { type: ["string", "null"] }
         isActive: { type: boolean }
 
     TaskUpdate:
@@ -828,6 +830,7 @@ components:
         reward: { type: number, minimum: 0 }
         type: { $ref: "#/components/schemas/TaskType" }
         link: { type: string }
+        telegramChatId: { type: ["string", "null"] }
         isActive: { type: boolean }
 
     TaskCompletion:

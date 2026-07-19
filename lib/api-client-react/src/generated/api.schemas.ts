@@ -46,6 +46,53 @@ export const AdNetwork = {
   adsgram: 'adsgram',
 } as const;
 
+export type AdNetworkSdkType = typeof AdNetworkSdkType[keyof typeof AdNetworkSdkType];
+
+
+export const AdNetworkSdkType = {
+  monetag: 'monetag',
+  adsgram: 'adsgram',
+  custom: 'custom',
+} as const;
+
+export interface PublicAdNetwork {
+  id: number;
+  name: string;
+  sdkType: AdNetworkSdkType;
+  zoneId: string;
+  /** @nullable */
+  sdkUrl: string | null;
+  /** @nullable */
+  callTemplate: string | null;
+  sortOrder: number;
+}
+
+export interface AdminAdNetwork {
+  id: number;
+  name: string;
+  sdkType: AdNetworkSdkType;
+  zoneId: string;
+  /** @nullable */
+  sdkUrl: string | null;
+  /** @nullable */
+  callTemplate: string | null;
+  isEnabled: boolean;
+  sortOrder: number;
+  createdAt: string;
+}
+
+export interface AdNetworkInput {
+  name: string;
+  sdkType: AdNetworkSdkType;
+  zoneId: string;
+  /** @nullable */
+  sdkUrl?: string | null;
+  /** @nullable */
+  callTemplate?: string | null;
+  isEnabled?: boolean;
+  sortOrder?: number;
+}
+
 export interface AuthInput {
   /** @nullable */
   startParam?: string | null;
@@ -71,6 +118,7 @@ export interface User {
   isFlagged: boolean;
   /** @nullable */
   flagReason: string | null;
+  vpnStrikeCount: number;
   /** @nullable */
   vpnBlockedUntil: string | null;
   todayAdsWatched: number;
@@ -95,6 +143,8 @@ export interface Task {
   type: TaskType;
   /** @nullable */
   link: string | null;
+  /** @nullable */
+  telegramChatId: string | null;
   isActive: boolean;
   createdAt: string;
 }
@@ -111,6 +161,8 @@ export interface TaskInput {
   reward: number;
   type: TaskType;
   link?: string;
+  /** @nullable */
+  telegramChatId?: string | null;
   isActive?: boolean;
 }
 
@@ -122,6 +174,8 @@ export interface TaskUpdate {
   reward?: number;
   type?: TaskType;
   link?: string;
+  /** @nullable */
+  telegramChatId?: string | null;
   isActive?: boolean;
 }
 
@@ -383,3 +437,4 @@ claim_id: string;
 export type ListAdminUsersParams = {
 search?: string;
 };
+

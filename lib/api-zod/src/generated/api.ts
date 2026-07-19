@@ -40,6 +40,7 @@ export const AuthenticateResponse = zod.object({
   "isBanned": zod.boolean(),
   "isFlagged": zod.boolean(),
   "flagReason": zod.string().nullable(),
+  "vpnStrikeCount": zod.number(),
   "vpnBlockedUntil": zod.coerce.date().nullable(),
   "todayAdsWatched": zod.number(),
   "todayTasksCount": zod.number(),
@@ -69,6 +70,7 @@ export const GetMeResponse = zod.object({
   "isBanned": zod.boolean(),
   "isFlagged": zod.boolean(),
   "flagReason": zod.string().nullable(),
+  "vpnStrikeCount": zod.number(),
   "vpnBlockedUntil": zod.coerce.date().nullable(),
   "todayAdsWatched": zod.number(),
   "todayTasksCount": zod.number(),
@@ -156,6 +158,7 @@ export const CompleteTaskResponse = zod.object({
   "isBanned": zod.boolean(),
   "isFlagged": zod.boolean(),
   "flagReason": zod.string().nullable(),
+  "vpnStrikeCount": zod.number(),
   "vpnBlockedUntil": zod.coerce.date().nullable(),
   "todayAdsWatched": zod.number(),
   "todayTasksCount": zod.number(),
@@ -172,6 +175,21 @@ export const CompleteTaskResponse = zod.object({
   "completedAt": zod.coerce.date()
 })
 })
+
+
+/**
+ * @summary List enabled ad networks
+ */
+export const ListPublicAdNetworksResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "sdkType": zod.enum(['monetag', 'adsgram', 'custom']),
+  "zoneId": zod.string(),
+  "sdkUrl": zod.string().nullable(),
+  "callTemplate": zod.string().nullable(),
+  "sortOrder": zod.number()
+})
+export const ListPublicAdNetworksResponse = zod.array(ListPublicAdNetworksResponseItem)
 
 
 /**
@@ -196,6 +214,7 @@ export const WatchAdResponse = zod.object({
   "isBanned": zod.boolean(),
   "isFlagged": zod.boolean(),
   "flagReason": zod.string().nullable(),
+  "vpnStrikeCount": zod.number(),
   "vpnBlockedUntil": zod.coerce.date().nullable(),
   "todayAdsWatched": zod.number(),
   "todayTasksCount": zod.number(),
@@ -551,7 +570,7 @@ export const CreateTaskBody = zod.object({
   "reward": zod.number().min(createTaskBodyRewardMin),
   "type": zod.enum(['youtube', 'facebook', 'telegram', 'join_bonus', 'bonus', 'other']),
   "link": zod.string().optional(),
-  "telegramChatId": zod.string().optional(),
+  "telegramChatId": zod.string().nullish(),
   "isActive": zod.boolean().optional()
 })
 
@@ -586,7 +605,7 @@ export const UpdateTaskBody = zod.object({
   "reward": zod.number().min(updateTaskBodyRewardMin).optional(),
   "type": zod.enum(['youtube', 'facebook', 'telegram', 'join_bonus', 'bonus', 'other']).optional(),
   "link": zod.string().optional(),
-  "telegramChatId": zod.string().optional(),
+  "telegramChatId": zod.string().nullish(),
   "isActive": zod.boolean().optional()
 })
 
@@ -611,6 +630,89 @@ export const DeleteTaskParams = zod.object({
 })
 
 export const DeleteTaskResponse = zod.void()
+
+
+/**
+ * @summary List all ad networks
+ */
+export const ListAdminAdNetworksResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "sdkType": zod.enum(['monetag', 'adsgram', 'custom']),
+  "zoneId": zod.string(),
+  "sdkUrl": zod.string().nullable(),
+  "callTemplate": zod.string().nullable(),
+  "isEnabled": zod.boolean(),
+  "sortOrder": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+export const ListAdminAdNetworksResponse = zod.array(ListAdminAdNetworksResponseItem)
+
+
+/**
+ * @summary Create a new ad network
+ */
+export const CreateAdNetworkBody = zod.object({
+  "name": zod.string(),
+  "sdkType": zod.enum(['monetag', 'adsgram', 'custom']),
+  "zoneId": zod.string(),
+  "sdkUrl": zod.string().nullish(),
+  "callTemplate": zod.string().nullish(),
+  "isEnabled": zod.boolean().optional(),
+  "sortOrder": zod.number().optional()
+})
+
+export const CreateAdNetworkResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "sdkType": zod.enum(['monetag', 'adsgram', 'custom']),
+  "zoneId": zod.string(),
+  "sdkUrl": zod.string().nullable(),
+  "callTemplate": zod.string().nullable(),
+  "isEnabled": zod.boolean(),
+  "sortOrder": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update an ad network
+ */
+export const UpdateAdNetworkParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateAdNetworkBody = zod.object({
+  "name": zod.string(),
+  "sdkType": zod.enum(['monetag', 'adsgram', 'custom']),
+  "zoneId": zod.string(),
+  "sdkUrl": zod.string().nullish(),
+  "callTemplate": zod.string().nullish(),
+  "isEnabled": zod.boolean().optional(),
+  "sortOrder": zod.number().optional()
+})
+
+export const UpdateAdNetworkResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "sdkType": zod.enum(['monetag', 'adsgram', 'custom']),
+  "zoneId": zod.string(),
+  "sdkUrl": zod.string().nullable(),
+  "callTemplate": zod.string().nullable(),
+  "isEnabled": zod.boolean(),
+  "sortOrder": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete an ad network
+ */
+export const DeleteAdNetworkParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteAdNetworkResponse = zod.void()
 
 
 /**

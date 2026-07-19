@@ -20,9 +20,11 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdNetworkInput,
   AdPostbackParams,
   AdPostbackPostParams,
   AdWatchResult,
+  AdminAdNetwork,
   AdminDashboard,
   AdminUser,
   AdminWithdrawal,
@@ -38,6 +40,7 @@ import type {
   LeaderboardResponse,
   ListAdminUsersParams,
   PostbackUrlInfo,
+  PublicAdNetwork,
   PublicConfig,
   ReferralsSummary,
   RejectPayoutInput,
@@ -608,6 +611,83 @@ export const useCompleteTask = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getCompleteTaskMutationOptions(options));
     }
+
+export const getListPublicAdNetworksUrl = () => {
+
+
+
+
+  return `/api/ad-networks`
+}
+
+/**
+ * @summary List enabled ad networks
+ */
+export const listPublicAdNetworks = async ( options?: RequestInit): Promise<PublicAdNetwork[]> => {
+
+  return customFetch<PublicAdNetwork[]>(getListPublicAdNetworksUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListPublicAdNetworksQueryKey = () => {
+    return [
+    `/api/ad-networks`
+    ] as const;
+    }
+
+
+export const getListPublicAdNetworksQueryOptions = <TData = Awaited<ReturnType<typeof listPublicAdNetworks>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPublicAdNetworks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListPublicAdNetworksQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPublicAdNetworks>>> = ({ signal }) => listPublicAdNetworks({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPublicAdNetworks>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListPublicAdNetworksQueryResult = NonNullable<Awaited<ReturnType<typeof listPublicAdNetworks>>>
+export type ListPublicAdNetworksQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List enabled ad networks
+ */
+
+export function useListPublicAdNetworks<TData = Awaited<ReturnType<typeof listPublicAdNetworks>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPublicAdNetworks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListPublicAdNetworksQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getWatchAdUrl = () => {
 
@@ -2095,6 +2175,297 @@ export const useDeleteTask = <TError = ErrorType<unknown>,
       return useMutation(getDeleteTaskMutationOptions(options));
     }
 
+export const getListAdminAdNetworksUrl = () => {
+
+
+
+
+  return `/api/admin/ad-networks`
+}
+
+/**
+ * @summary List all ad networks
+ */
+export const listAdminAdNetworks = async ( options?: RequestInit): Promise<AdminAdNetwork[]> => {
+
+  return customFetch<AdminAdNetwork[]>(getListAdminAdNetworksUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAdminAdNetworksQueryKey = () => {
+    return [
+    `/api/admin/ad-networks`
+    ] as const;
+    }
+
+
+export const getListAdminAdNetworksQueryOptions = <TData = Awaited<ReturnType<typeof listAdminAdNetworks>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminAdNetworks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminAdNetworksQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminAdNetworks>>> = ({ signal }) => listAdminAdNetworks({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdminAdNetworks>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdminAdNetworksQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminAdNetworks>>>
+export type ListAdminAdNetworksQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all ad networks
+ */
+
+export function useListAdminAdNetworks<TData = Awaited<ReturnType<typeof listAdminAdNetworks>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminAdNetworks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdminAdNetworksQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateAdNetworkUrl = () => {
+
+
+
+
+  return `/api/admin/ad-networks`
+}
+
+/**
+ * @summary Create a new ad network
+ */
+export const createAdNetwork = async (adNetworkInput: AdNetworkInput, options?: RequestInit): Promise<AdminAdNetwork> => {
+
+  return customFetch<AdminAdNetwork>(getCreateAdNetworkUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(adNetworkInput)
+  }
+);}
+
+
+
+
+
+export const getCreateAdNetworkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAdNetwork>>, TError,{data: BodyType<AdNetworkInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createAdNetwork>>, TError,{data: BodyType<AdNetworkInput>}, TContext> => {
+
+const mutationKey = ['createAdNetwork'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAdNetwork>>, {data: BodyType<AdNetworkInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createAdNetwork(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateAdNetworkMutationResult = NonNullable<Awaited<ReturnType<typeof createAdNetwork>>>
+    export type CreateAdNetworkMutationBody = BodyType<AdNetworkInput>
+    export type CreateAdNetworkMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a new ad network
+ */
+export const useCreateAdNetwork = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAdNetwork>>, TError,{data: BodyType<AdNetworkInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createAdNetwork>>,
+        TError,
+        {data: BodyType<AdNetworkInput>},
+        TContext
+      > => {
+      return useMutation(getCreateAdNetworkMutationOptions(options));
+    }
+
+export const getUpdateAdNetworkUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/ad-networks/${id}`
+}
+
+/**
+ * @summary Update an ad network
+ */
+export const updateAdNetwork = async (id: number,
+    adNetworkInput: AdNetworkInput, options?: RequestInit): Promise<AdminAdNetwork> => {
+
+  return customFetch<AdminAdNetwork>(getUpdateAdNetworkUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(adNetworkInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateAdNetworkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdNetwork>>, TError,{id: number;data: BodyType<AdNetworkInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAdNetwork>>, TError,{id: number;data: BodyType<AdNetworkInput>}, TContext> => {
+
+const mutationKey = ['updateAdNetwork'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAdNetwork>>, {id: number;data: BodyType<AdNetworkInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateAdNetwork(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAdNetworkMutationResult = NonNullable<Awaited<ReturnType<typeof updateAdNetwork>>>
+    export type UpdateAdNetworkMutationBody = BodyType<AdNetworkInput>
+    export type UpdateAdNetworkMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update an ad network
+ */
+export const useUpdateAdNetwork = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdNetwork>>, TError,{id: number;data: BodyType<AdNetworkInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAdNetwork>>,
+        TError,
+        {id: number;data: BodyType<AdNetworkInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateAdNetworkMutationOptions(options));
+    }
+
+export const getDeleteAdNetworkUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/ad-networks/${id}`
+}
+
+/**
+ * @summary Delete an ad network
+ */
+export const deleteAdNetwork = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteAdNetworkUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteAdNetworkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdNetwork>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteAdNetwork>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteAdNetwork'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAdNetwork>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteAdNetwork(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAdNetworkMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAdNetwork>>>
+
+    export type DeleteAdNetworkMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete an ad network
+ */
+export const useDeleteAdNetwork = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdNetwork>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteAdNetwork>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteAdNetworkMutationOptions(options));
+    }
+
 export const getGetAdminConfigUrl = () => {
 
 
@@ -2532,3 +2903,4 @@ export const useResetWebhook = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getResetWebhookMutationOptions(options));
     }
+
