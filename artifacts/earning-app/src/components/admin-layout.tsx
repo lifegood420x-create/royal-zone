@@ -9,6 +9,7 @@ import {
   ListTodo,
   LogOut,
   ChevronLeft,
+  ShieldCheck,
 } from 'lucide-react';
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: '/', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/payouts', label: 'Payouts', icon: CreditCard },
+    { href: '/verifications', label: 'Verify', icon: ShieldCheck },
     { href: '/users', label: 'Users', icon: Users },
     { href: '/tasks', label: 'Tasks', icon: ListTodo },
     { href: '/config', label: 'Settings', icon: Settings },

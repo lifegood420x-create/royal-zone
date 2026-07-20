@@ -44,6 +44,13 @@ const configSchema = z.object({
   monetagEnabled: z.boolean().default(true),
   adsgramEnabled: z.boolean().default(true),
   requireAdPostback: z.boolean(),
+  verificationEnabled: z.boolean().default(false),
+  verificationMode: z.enum(['manual', 'auto'] as const).default('manual'),
+  verificationFee: z.coerce.number().min(0),
+  verificationBkashNumber: z.string().optional().or(z.literal('')),
+  verificationNagadNumber: z.string().optional().or(z.literal('')),
+  verificationAutoUrl: z.string().optional().or(z.literal('')),
+  verificationAutoSecret: z.string().optional().or(z.literal('')),
 });
 
 type ConfigFormValues = z.infer<typeof configSchema>;
@@ -79,6 +86,13 @@ export default function AdminConfig() {
       monetagEnabled: true,
       adsgramEnabled: true,
       requireAdPostback: false,
+      verificationEnabled: false,
+      verificationMode: 'manual',
+      verificationFee: 0,
+      verificationBkashNumber: '',
+      verificationNagadNumber: '',
+      verificationAutoUrl: '',
+      verificationAutoSecret: '',
     },
   });
 
@@ -105,6 +119,13 @@ export default function AdminConfig() {
         monetagEnabled: config.monetagEnabled,
         adsgramEnabled: config.adsgramEnabled,
         requireAdPostback: config.requireAdPostback,
+        verificationEnabled: config.verificationEnabled,
+        verificationMode: config.verificationMode,
+        verificationFee: config.verificationFee,
+        verificationBkashNumber: config.verificationBkashNumber || '',
+        verificationNagadNumber: config.verificationNagadNumber || '',
+        verificationAutoUrl: config.verificationAutoUrl || '',
+        verificationAutoSecret: config.verificationAutoSecret || '',
       });
       initializedRef.current = true;
     }
@@ -419,6 +440,136 @@ export default function AdminConfig() {
                         )}
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="font-bold text-sm text-muted-foreground uppercase tracking-wider">Account Verification</h3>
+                    <FormField
+                      control={form.control}
+                      name="verificationEnabled"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background">
+                          <div className="space-y-0.5">
+                            <FormLabel>Require Paid Verification</FormLabel>
+                            <p className="text-[10px] text-muted-foreground">
+                              When on, every user must pay a one-time verification fee before their first withdrawal.
+                            </p>
+                          </div>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} data-testid="switch-verification-enabled" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    {form.watch('verificationEnabled') && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="verificationMode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Payment Mode</FormLabel>
+                              <div className="grid grid-cols-2 gap-3 mt-1">
+                                {(['manual', 'auto'] as const).map((m) => (
+                                  <button
+                                    key={m}
+                                    type="button"
+                                    onClick={() => field.onChange(m)}
+                                    className={`h-10 rounded-lg font-semibold text-sm border capitalize transition-colors ${
+                                      field.value === m
+                                        ? 'bg-primary text-primary-foreground border-transparent'
+                                        : 'bg-background text-muted-foreground border-border'
+                                    }`}
+                                    data-testid={`select-verification-mode-${m}`}
+                                  >
+                                    {m === 'manual' ? 'Manual (bKash/Nagad)' : 'Auto Payment'}
+                                  </button>
+                                ))}
+                              </div>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="verificationFee"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Verification Fee (৳)</FormLabel>
+                                <FormControl>
+                                  <Input type="number" step="0.01" {...field} data-testid="input-verification-fee" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        {form.watch('verificationMode') === 'manual' ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="verificationBkashNumber"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>bKash Number (receive payments)</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="01XXXXXXXXX" {...field} data-testid="input-verification-bkash" />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="verificationNagadNumber"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Nagad Number (receive payments)</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="01XXXXXXXXX" {...field} data-testid="input-verification-nagad" />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="verificationAutoUrl"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Gateway Payment URL</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="https://your-gateway.com/pay/..." {...field} data-testid="input-verification-auto-url" />
+                                  </FormControl>
+                                  <p className="text-[10px] text-muted-foreground">
+                                    Users are sent here to pay. Configure the gateway to confirm via
+                                    POST /api/verification/postback?secret=&lt;secret&gt;&amp;request_id=&lt;id&gt;
+                                  </p>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="verificationAutoSecret"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Gateway Postback Secret</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="shared secret" {...field} data-testid="input-verification-auto-secret" />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
 
                   <div className="space-y-4">

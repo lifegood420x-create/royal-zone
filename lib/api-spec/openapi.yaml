@@ -255,6 +255,98 @@ paths:
               schema:
                 $ref: "#/components/schemas/Withdrawal"
 
+  /verification/status:
+    get:
+      operationId: getVerificationStatus
+      tags: [user]
+      summary: Get the account verification state for the current user
+      responses:
+        "200":
+          description: Verification status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationStatus"
+
+  /verification/request:
+    post:
+      operationId: submitVerification
+      tags: [user]
+      summary: Submit an account verification payment for review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerificationSubmitInput"
+      responses:
+        "201":
+          description: Verification submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationRequest"
+
+  /admin/verifications:
+    get:
+      operationId: listAdminVerifications
+      tags: [admin]
+      summary: List account verification requests
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+      responses:
+        "200":
+          description: Verification requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminVerification"
+
+  /admin/verifications/{id}/approve:
+    post:
+      operationId: approveVerification
+      tags: [admin]
+      summary: Approve a verification request (also places the parked withdrawal)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Verification approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationDecisionResult"
+
+  /admin/verifications/{id}/reject:
+    post:
+      operationId: rejectVerification
+      tags: [admin]
+      summary: Reject a verification request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Verification rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationDecisionResult"
+
   /admin/dashboard:
     get:
       operationId: getAdminDashboard
@@ -748,6 +840,7 @@ components:
         - referralCode
         - referredBy
         - isBanned
+        - isVerified
         - isFlagged
         - flagReason
         - vpnStrikeCount
@@ -770,6 +863,7 @@ components:
         referralCode: { type: string }
         referredBy: { type: ["integer", "null"] }
         isBanned: { type: boolean }
+        isVerified: { type: boolean }
         isFlagged: { type: boolean }
         flagReason: { type: ["string", "null"] }
         vpnStrikeCount: { type: integer }
@@ -989,6 +1083,7 @@ components:
         - username
         - balance
         - isBanned
+        - isVerified
         - isFlagged
         - flagReason
         - createdAt
@@ -999,6 +1094,7 @@ components:
         username: { type: ["string", "null"] }
         balance: { type: number }
         isBanned: { type: boolean }
+        isVerified: { type: boolean }
         isFlagged: { type: boolean }
         flagReason: { type: ["string", "null"] }
         createdAt: { type: string, format: date-time }
@@ -1088,6 +1184,13 @@ components:
         - requireAdPostback
         - postbackUrl
         - adsgramPostbackUrl
+        - verificationEnabled
+        - verificationMode
+        - verificationFee
+        - verificationBkashNumber
+        - verificationNagadNumber
+        - verificationAutoUrl
+        - verificationAutoSecret
       properties:
         minWithdraw: { type: number }
         referralBonus: { type: number }
@@ -1105,6 +1208,13 @@ components:
         requireAdPostback: { type: boolean }
         postbackUrl: { type: string }
         adsgramPostbackUrl: { type: string }
+        verificationEnabled: { type: boolean }
+        verificationMode: { $ref: "#/components/schemas/VerificationMode" }
+        verificationFee: { type: number }
+        verificationBkashNumber: { type: ["string", "null"] }
+        verificationNagadNumber: { type: ["string", "null"] }
+        verificationAutoUrl: { type: ["string", "null"] }
+        verificationAutoSecret: { type: ["string", "null"] }
 
     ConfigUpdate:
       type: object
@@ -1123,6 +1233,76 @@ components:
         monetagEnabled: { type: boolean }
         adsgramEnabled: { type: boolean }
         requireAdPostback: { type: boolean }
+        verificationEnabled: { type: boolean }
+        verificationMode: { $ref: "#/components/schemas/VerificationMode" }
+        verificationFee: { type: number, minimum: 0 }
+        verificationBkashNumber: { type: string }
+        verificationNagadNumber: { type: string }
+        verificationAutoUrl: { type: string }
+        verificationAutoSecret: { type: string }
+
+    VerificationMode:
+      type: string
+      enum: [manual, auto]
+
+    VerificationRequestStatus:
+      type: string
+      enum: [pending, approved, rejected]
+
+    VerificationRequest:
+      type: object
+      required: [id, fee, method, payerNumber, trxId, status, createdAt]
+      properties:
+        id: { type: integer }
+        fee: { type: number }
+        method: { $ref: "#/components/schemas/WithdrawalMethod" }
+        payerNumber: { type: string }
+        trxId: { type: string }
+        status: { $ref: "#/components/schemas/VerificationRequestStatus" }
+        withdrawAmount: { type: ["number", "null"] }
+        withdrawAccountNumber: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        reviewedAt: { type: ["string", "null"], format: date-time }
+
+    VerificationStatus:
+      type: object
+      required: [enabled, mode, fee, bkashNumber, nagadNumber, autoUrl, isVerified]
+      properties:
+        enabled: { type: boolean }
+        mode: { $ref: "#/components/schemas/VerificationMode" }
+        fee: { type: number }
+        bkashNumber: { type: ["string", "null"] }
+        nagadNumber: { type: ["string", "null"] }
+        autoUrl: { type: ["string", "null"] }
+        isVerified: { type: boolean }
+        request: { $ref: "#/components/schemas/VerificationRequest" }
+
+    VerificationSubmitInput:
+      type: object
+      required: [method, payerNumber, trxId]
+      properties:
+        method: { $ref: "#/components/schemas/WithdrawalMethod" }
+        payerNumber: { type: string, minLength: 5 }
+        trxId: { type: string, minLength: 4 }
+        withdrawAmount: { type: number, minimum: 0 }
+        withdrawMethod: { $ref: "#/components/schemas/WithdrawalMethod" }
+        withdrawAccountNumber: { type: string }
+
+    AdminVerification:
+      allOf:
+        - $ref: "#/components/schemas/VerificationRequest"
+        - type: object
+          required: [user]
+          properties:
+            user:
+              $ref: "#/components/schemas/AdminWithdrawalUser"
+
+    VerificationDecisionResult:
+      type: object
+      required: [request, withdrawalPlaced]
+      properties:
+        request: { $ref: "#/components/schemas/VerificationRequest" }
+        withdrawalPlaced: { type: boolean }
 
     PostbackUrlInfo:
       type: object

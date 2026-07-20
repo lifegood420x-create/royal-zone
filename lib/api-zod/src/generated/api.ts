@@ -38,6 +38,7 @@ export const AuthenticateResponse = zod.object({
   "referralCode": zod.string(),
   "referredBy": zod.number().nullable(),
   "isBanned": zod.boolean(),
+  "isVerified": zod.boolean(),
   "isFlagged": zod.boolean(),
   "flagReason": zod.string().nullable(),
   "vpnStrikeCount": zod.number(),
@@ -68,6 +69,7 @@ export const GetMeResponse = zod.object({
   "referralCode": zod.string(),
   "referredBy": zod.number().nullable(),
   "isBanned": zod.boolean(),
+  "isVerified": zod.boolean(),
   "isFlagged": zod.boolean(),
   "flagReason": zod.string().nullable(),
   "vpnStrikeCount": zod.number(),
@@ -156,6 +158,7 @@ export const CompleteTaskResponse = zod.object({
   "referralCode": zod.string(),
   "referredBy": zod.number().nullable(),
   "isBanned": zod.boolean(),
+  "isVerified": zod.boolean(),
   "isFlagged": zod.boolean(),
   "flagReason": zod.string().nullable(),
   "vpnStrikeCount": zod.number(),
@@ -212,6 +215,7 @@ export const WatchAdResponse = zod.object({
   "referralCode": zod.string(),
   "referredBy": zod.number().nullable(),
   "isBanned": zod.boolean(),
+  "isVerified": zod.boolean(),
   "isFlagged": zod.boolean(),
   "flagReason": zod.string().nullable(),
   "vpnStrikeCount": zod.number(),
@@ -327,6 +331,143 @@ export const RequestWithdrawalResponse = zod.object({
 
 
 /**
+ * @summary Get the account verification state for the current user
+ */
+export const GetVerificationStatusResponse = zod.object({
+  "enabled": zod.boolean(),
+  "mode": zod.enum(['manual', 'auto']),
+  "fee": zod.number(),
+  "bkashNumber": zod.string().nullable(),
+  "nagadNumber": zod.string().nullable(),
+  "autoUrl": zod.string().nullable(),
+  "isVerified": zod.boolean(),
+  "request": zod.object({
+  "id": zod.number(),
+  "fee": zod.number(),
+  "method": zod.enum(['bkash', 'nagad']),
+  "payerNumber": zod.string(),
+  "trxId": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "withdrawAmount": zod.number().nullish(),
+  "withdrawAccountNumber": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "reviewedAt": zod.coerce.date().nullish()
+}).optional()
+})
+
+
+/**
+ * @summary Submit an account verification payment for review
+ */
+export const submitVerificationBodyPayerNumberMin = 5;
+
+export const submitVerificationBodyTrxIdMin = 4;
+
+export const submitVerificationBodyWithdrawAmountMin = 0;
+
+
+
+export const SubmitVerificationBody = zod.object({
+  "method": zod.enum(['bkash', 'nagad']),
+  "payerNumber": zod.string().min(submitVerificationBodyPayerNumberMin),
+  "trxId": zod.string().min(submitVerificationBodyTrxIdMin),
+  "withdrawAmount": zod.number().min(submitVerificationBodyWithdrawAmountMin).optional(),
+  "withdrawMethod": zod.enum(['bkash', 'nagad']).optional(),
+  "withdrawAccountNumber": zod.string().optional()
+})
+
+export const SubmitVerificationResponse = zod.object({
+  "id": zod.number(),
+  "fee": zod.number(),
+  "method": zod.enum(['bkash', 'nagad']),
+  "payerNumber": zod.string(),
+  "trxId": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "withdrawAmount": zod.number().nullish(),
+  "withdrawAccountNumber": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "reviewedAt": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary List account verification requests
+ */
+export const ListAdminVerificationsQueryParams = zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected']).optional()
+})
+
+export const ListAdminVerificationsResponseItem = zod.object({
+  "id": zod.number(),
+  "fee": zod.number(),
+  "method": zod.enum(['bkash', 'nagad']),
+  "payerNumber": zod.string(),
+  "trxId": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "withdrawAmount": zod.number().nullish(),
+  "withdrawAccountNumber": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "reviewedAt": zod.coerce.date().nullish()
+}).and(zod.object({
+  "user": zod.object({
+  "id": zod.number(),
+  "firstName": zod.string(),
+  "username": zod.string().nullable(),
+  "telegramId": zod.string()
+})
+}))
+export const ListAdminVerificationsResponse = zod.array(ListAdminVerificationsResponseItem)
+
+
+/**
+ * @summary Approve a verification request (also places the parked withdrawal)
+ */
+export const ApproveVerificationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ApproveVerificationResponse = zod.object({
+  "request": zod.object({
+  "id": zod.number(),
+  "fee": zod.number(),
+  "method": zod.enum(['bkash', 'nagad']),
+  "payerNumber": zod.string(),
+  "trxId": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "withdrawAmount": zod.number().nullish(),
+  "withdrawAccountNumber": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "reviewedAt": zod.coerce.date().nullish()
+}),
+  "withdrawalPlaced": zod.boolean()
+})
+
+
+/**
+ * @summary Reject a verification request
+ */
+export const RejectVerificationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const RejectVerificationResponse = zod.object({
+  "request": zod.object({
+  "id": zod.number(),
+  "fee": zod.number(),
+  "method": zod.enum(['bkash', 'nagad']),
+  "payerNumber": zod.string(),
+  "trxId": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "withdrawAmount": zod.number().nullish(),
+  "withdrawAccountNumber": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "reviewedAt": zod.coerce.date().nullish()
+}),
+  "withdrawalPlaced": zod.boolean()
+})
+
+
+/**
  * @summary Get admin dashboard summary
  */
 export const GetAdminDashboardResponse = zod.object({
@@ -360,6 +501,7 @@ export const ListAdminUsersResponseItem = zod.object({
   "username": zod.string().nullable(),
   "balance": zod.number(),
   "isBanned": zod.boolean(),
+  "isVerified": zod.boolean(),
   "isFlagged": zod.boolean(),
   "flagReason": zod.string().nullable(),
   "createdAt": zod.coerce.date()
@@ -381,6 +523,7 @@ export const BanUserResponse = zod.object({
   "username": zod.string().nullable(),
   "balance": zod.number(),
   "isBanned": zod.boolean(),
+  "isVerified": zod.boolean(),
   "isFlagged": zod.boolean(),
   "flagReason": zod.string().nullable(),
   "createdAt": zod.coerce.date()
@@ -401,6 +544,7 @@ export const UnbanUserResponse = zod.object({
   "username": zod.string().nullable(),
   "balance": zod.number(),
   "isBanned": zod.boolean(),
+  "isVerified": zod.boolean(),
   "isFlagged": zod.boolean(),
   "flagReason": zod.string().nullable(),
   "createdAt": zod.coerce.date()
@@ -421,6 +565,7 @@ export const ClearFlaggedUserResponse = zod.object({
   "username": zod.string().nullable(),
   "balance": zod.number(),
   "isBanned": zod.boolean(),
+  "isVerified": zod.boolean(),
   "isFlagged": zod.boolean(),
   "flagReason": zod.string().nullable(),
   "createdAt": zod.coerce.date()
@@ -734,7 +879,14 @@ export const GetAdminConfigResponse = zod.object({
   "adsgramEnabled": zod.boolean(),
   "requireAdPostback": zod.boolean(),
   "postbackUrl": zod.string(),
-  "adsgramPostbackUrl": zod.string()
+  "adsgramPostbackUrl": zod.string(),
+  "verificationEnabled": zod.boolean(),
+  "verificationMode": zod.enum(['manual', 'auto']),
+  "verificationFee": zod.number(),
+  "verificationBkashNumber": zod.string().nullable(),
+  "verificationNagadNumber": zod.string().nullable(),
+  "verificationAutoUrl": zod.string().nullable(),
+  "verificationAutoSecret": zod.string().nullable()
 })
 
 
@@ -749,6 +901,8 @@ export const updateAdminConfigBodyAdRewardMin = 0;
 
 export const updateAdminConfigBodyAdDailyLimitMin = 0;
 
+
+export const updateAdminConfigBodyVerificationFeeMin = 0;
 
 
 
@@ -766,7 +920,14 @@ export const UpdateAdminConfigBody = zod.object({
   "adsgramBlockId": zod.string().optional(),
   "monetagEnabled": zod.boolean().optional(),
   "adsgramEnabled": zod.boolean().optional(),
-  "requireAdPostback": zod.boolean().optional()
+  "requireAdPostback": zod.boolean().optional(),
+  "verificationEnabled": zod.boolean().optional(),
+  "verificationMode": zod.enum(['manual', 'auto']).optional(),
+  "verificationFee": zod.number().min(updateAdminConfigBodyVerificationFeeMin).optional(),
+  "verificationBkashNumber": zod.string().optional(),
+  "verificationNagadNumber": zod.string().optional(),
+  "verificationAutoUrl": zod.string().optional(),
+  "verificationAutoSecret": zod.string().optional()
 })
 
 export const UpdateAdminConfigResponse = zod.object({
@@ -785,7 +946,14 @@ export const UpdateAdminConfigResponse = zod.object({
   "adsgramEnabled": zod.boolean(),
   "requireAdPostback": zod.boolean(),
   "postbackUrl": zod.string(),
-  "adsgramPostbackUrl": zod.string()
+  "adsgramPostbackUrl": zod.string(),
+  "verificationEnabled": zod.boolean(),
+  "verificationMode": zod.enum(['manual', 'auto']),
+  "verificationFee": zod.number(),
+  "verificationBkashNumber": zod.string().nullable(),
+  "verificationNagadNumber": zod.string().nullable(),
+  "verificationAutoUrl": zod.string().nullable(),
+  "verificationAutoSecret": zod.string().nullable()
 })
 
 

@@ -8,6 +8,7 @@ import adsPostbackRouter from "./ads-postback";
 import referralsRouter from "./referrals";
 import leaderboardRouter from "./leaderboard";
 import withdrawalsRouter from "./withdrawals";
+import verificationRouter from "./verification";
 import telegramWebhookRouter from "./telegram-webhook";
 import mediaRouter from "./media";
 import adminRouter from "./admin";
@@ -24,6 +25,7 @@ router.use(adsPostbackRouter);
 router.use(referralsRouter);
 router.use(leaderboardRouter);
 router.use(withdrawalsRouter);
+router.use(verificationRouter);
 router.use(mediaRouter);
 router.use(adminRouter);
 

@@ -21,6 +21,7 @@ export interface User {
   /** @nullable */
   referredBy: number | null;
   isBanned: boolean;
+  isVerified: boolean;
   isFlagged: boolean;
   /** @nullable */
   flagReason: string | null;

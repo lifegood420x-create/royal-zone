@@ -115,6 +115,7 @@ export interface User {
   /** @nullable */
   referredBy: number | null;
   isBanned: boolean;
+  isVerified: boolean;
   isFlagged: boolean;
   /** @nullable */
   flagReason: string | null;
@@ -295,6 +296,7 @@ export interface AdminUser {
   username: string | null;
   balance: number;
   isBanned: boolean;
+  isVerified: boolean;
   isFlagged: boolean;
   /** @nullable */
   flagReason: string | null;
@@ -349,6 +351,14 @@ export interface UpdatePayoutAccountNumberInput {
   accountNumber: string;
 }
 
+export type VerificationMode = typeof VerificationMode[keyof typeof VerificationMode];
+
+
+export const VerificationMode = {
+  manual: 'manual',
+  auto: 'auto',
+} as const;
+
 export interface AppConfig {
   minWithdraw: number;
   referralBonus: number;
@@ -369,6 +379,17 @@ export interface AppConfig {
   requireAdPostback: boolean;
   postbackUrl: string;
   adsgramPostbackUrl: string;
+  verificationEnabled: boolean;
+  verificationMode: VerificationMode;
+  verificationFee: number;
+  /** @nullable */
+  verificationBkashNumber: string | null;
+  /** @nullable */
+  verificationNagadNumber: string | null;
+  /** @nullable */
+  verificationAutoUrl: string | null;
+  /** @nullable */
+  verificationAutoSecret: string | null;
 }
 
 export interface ConfigUpdate {
@@ -391,6 +412,74 @@ export interface ConfigUpdate {
   monetagEnabled?: boolean;
   adsgramEnabled?: boolean;
   requireAdPostback?: boolean;
+  verificationEnabled?: boolean;
+  verificationMode?: VerificationMode;
+  /** @minimum 0 */
+  verificationFee?: number;
+  verificationBkashNumber?: string;
+  verificationNagadNumber?: string;
+  verificationAutoUrl?: string;
+  verificationAutoSecret?: string;
+}
+
+export type VerificationRequestStatus = typeof VerificationRequestStatus[keyof typeof VerificationRequestStatus];
+
+
+export const VerificationRequestStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface VerificationRequest {
+  id: number;
+  fee: number;
+  method: WithdrawalMethod;
+  payerNumber: string;
+  trxId: string;
+  status: VerificationRequestStatus;
+  /** @nullable */
+  withdrawAmount?: number | null;
+  /** @nullable */
+  withdrawAccountNumber?: string | null;
+  createdAt: string;
+  /** @nullable */
+  reviewedAt?: string | null;
+}
+
+export interface VerificationStatus {
+  enabled: boolean;
+  mode: VerificationMode;
+  fee: number;
+  /** @nullable */
+  bkashNumber: string | null;
+  /** @nullable */
+  nagadNumber: string | null;
+  /** @nullable */
+  autoUrl: string | null;
+  isVerified: boolean;
+  request?: VerificationRequest;
+}
+
+export interface VerificationSubmitInput {
+  method: WithdrawalMethod;
+  /** @minLength 5 */
+  payerNumber: string;
+  /** @minLength 4 */
+  trxId: string;
+  /** @minimum 0 */
+  withdrawAmount?: number;
+  withdrawMethod?: WithdrawalMethod;
+  withdrawAccountNumber?: string;
+}
+
+export type AdminVerification = VerificationRequest & {
+  user: AdminWithdrawalUser;
+};
+
+export interface VerificationDecisionResult {
+  request: VerificationRequest;
+  withdrawalPlaced: boolean;
 }
 
 export interface PostbackUrlInfo {
@@ -433,6 +522,19 @@ export type AdPostbackPostParams = {
 secret: string;
 claim_id: string;
 };
+
+export type ListAdminVerificationsParams = {
+status?: ListAdminVerificationsStatus;
+};
+
+export type ListAdminVerificationsStatus = typeof ListAdminVerificationsStatus[keyof typeof ListAdminVerificationsStatus];
+
+
+export const ListAdminVerificationsStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
 
 export type ListAdminUsersParams = {
 search?: string;

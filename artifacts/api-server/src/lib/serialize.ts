@@ -25,6 +25,7 @@ export async function toApiUser(user: User) {
     referralCode: user.referralCode,
     referredBy: user.referredBy,
     isBanned: user.isBanned,
+    isVerified: user.isVerified,
     isFlagged: user.isFlagged,
     flagReason: user.flagReason,
     vpnStrikeCount: user.vpnStrikeCount,

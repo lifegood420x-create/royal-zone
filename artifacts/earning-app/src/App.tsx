@@ -18,6 +18,7 @@ import Rules from './pages/rules';
 // Admin Pages
 import AdminDashboard from './pages/admin/dashboard';
 import AdminPayouts from './pages/admin/payouts';
+import AdminVerifications from './pages/admin/verifications';
 import AdminUsers from './pages/admin/users';
 import AdminTasks from './pages/admin/tasks';
 import AdminConfig from './pages/admin/config';
@@ -46,6 +47,7 @@ function AdminRouter() {
       <Switch>
         <Route path="/" component={AdminDashboard} />
         <Route path="/payouts" component={AdminPayouts} />
+        <Route path="/verifications" component={AdminVerifications} />
         <Route path="/users" component={AdminUsers} />
         <Route path="/tasks" component={AdminTasks} />
         <Route path="/config" component={AdminConfig} />

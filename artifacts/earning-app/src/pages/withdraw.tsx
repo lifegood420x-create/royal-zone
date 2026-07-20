@@ -1,15 +1,19 @@
 import { useState } from 'react';
-import { 
-  useGetMe, 
-  useGetPublicConfig, 
-  useListWithdrawals, 
+import {
+  useGetMe,
+  useGetPublicConfig,
+  useListWithdrawals,
   useRequestWithdrawal,
+  useGetVerificationStatus,
+  useSubmitVerification,
+  getGetVerificationStatusQueryKey,
   getListWithdrawalsQueryKey,
   getGetMeQueryKey,
   WithdrawalMethod
 } from '@workspace/api-client-react';
 import { useToast } from '@/hooks/use-toast';
-import { Wallet, AlertCircle, Clock, CheckCircle2, XCircle, ArrowDownToLine, Loader2, ChevronDown } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Wallet, AlertCircle, Clock, CheckCircle2, XCircle, ArrowDownToLine, Loader2, ChevronDown, ShieldCheck, ExternalLink } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency, formatDate, formatTime } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -38,9 +42,61 @@ export default function Withdraw() {
   const { data: config } = useGetPublicConfig();
   const { data: withdrawals, isLoading: withdrawalsLoading } = useListWithdrawals();
   const requestMutation = useRequestWithdrawal();
+  const { data: vstatus } = useGetVerificationStatus();
+  const submitVerification = useSubmitVerification();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [expandedReasons, setExpandedReasons] = useState<Set<number>>(new Set());
+
+  // Account-verification dialog state. `parkedWithdraw` holds the withdrawal
+  // the user was attempting when the server demanded verification — it is
+  // sent along with the payment proof so admin approval can place it.
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [parkedWithdraw, setParkedWithdraw] = useState<WithdrawFormValues | null>(null);
+  const [vMethod, setVMethod] = useState<'bkash' | 'nagad'>('bkash');
+  const [vPayerNumber, setVPayerNumber] = useState('');
+  const [vTrxId, setVTrxId] = useState('');
+
+  const verificationPending = vstatus?.request?.status === 'pending';
+
+  const handleSubmitVerification = () => {
+    if (vPayerNumber.trim().length < 5 || vTrxId.trim().length < 4) {
+      toast({ title: 'সবগুলো ঘর পূরণ করুন', description: 'যে নম্বর থেকে টাকা পাঠিয়েছেন সেটি এবং TrxID দিন।', variant: 'destructive' });
+      return;
+    }
+    submitVerification.mutate(
+      {
+        data: {
+          method: vMethod as WithdrawalMethod,
+          payerNumber: vPayerNumber.trim(),
+          trxId: vTrxId.trim(),
+          ...(parkedWithdraw
+            ? {
+                withdrawAmount: parkedWithdraw.amount,
+                withdrawMethod: parkedWithdraw.method as WithdrawalMethod,
+                withdrawAccountNumber: parkedWithdraw.accountNumber,
+              }
+            : {}),
+        },
+      },
+      {
+        onSuccess: () => {
+          setVerifyOpen(false);
+          setVPayerNumber('');
+          setVTrxId('');
+          toast({
+            title: 'ভেরিফিকেশন জমা হয়েছে ✅',
+            description: 'অ্যাডমিন যাচাই করে অনুমোদন দিলে আপনার উইথড্র রিকোয়েস্টও জমা হয়ে যাবে।',
+          });
+          queryClient.invalidateQueries({ queryKey: getGetVerificationStatusQueryKey() });
+        },
+        onError: (err: any) => {
+          const msg = err?.data?.error || 'আবার চেষ্টা করুন।';
+          toast({ title: 'জমা দেওয়া যায়নি', description: msg, variant: 'destructive' });
+        },
+      },
+    );
+  };
 
   const toggleReason = (id: number) => {
     setExpandedReasons((prev) => {
@@ -83,6 +139,19 @@ export default function Withdraw() {
           queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
         },
         onError: (err: any) => {
+          const body = err?.data;
+          if (body?.error === 'verification_required') {
+            if (verificationPending) {
+              toast({
+                title: 'ভেরিফিকেশন যাচাই চলছে',
+                description: 'আপনার আগের ভেরিফিকেশন রিকোয়েস্ট অ্যাডমিন যাচাই করছেন। অনুমোদন হলেই উইথড্র করতে পারবেন।',
+              });
+              return;
+            }
+            setParkedWithdraw(data);
+            setVerifyOpen(true);
+            return;
+          }
           toast({ title: 'Request Failed', description: err.message || 'Could not submit request.', variant: 'destructive' });
         }
       }
@@ -134,6 +203,26 @@ export default function Withdraw() {
                 <p className="text-sm font-bold text-orange-800">নোটিশ</p>
                 <p className="text-xs text-orange-700 mt-0.5 leading-relaxed">
                   আগের রিজেক্টেড রিকোয়েস্টের কারণে আপনার সর্বনিম্ন উইথড্র পরিমাণ বাড়ানো হয়েছে।
+                </p>
+              </div>
+            </div>
+          )}
+
+          {user?.isVerified && (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex gap-2 items-center mb-5">
+              <ShieldCheck className="text-green-600 shrink-0" size={18} />
+              <p className="text-xs font-bold text-green-800">আপনার অ্যাকাউন্ট ভেরিফাইড ✅</p>
+            </div>
+          )}
+
+          {verificationPending && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex gap-3 items-start mb-5" data-testid="banner-verification-pending">
+              <Clock className="text-blue-500 shrink-0 mt-0.5" size={18} />
+              <div>
+                <p className="text-sm font-bold text-blue-800">ভেরিফিকেশন যাচাই চলছে</p>
+                <p className="text-xs text-blue-700 mt-0.5 leading-relaxed">
+                  আপনার পেমেন্ট অ্যাডমিন যাচাই করছেন। অনুমোদন হলে অ্যাকাউন্ট ভেরিফাইড হবে
+                  এবং আপনার উইথড্র রিকোয়েস্ট নিজে থেকেই জমা হয়ে যাবে।
                 </p>
               </div>
             </div>
@@ -305,6 +394,118 @@ export default function Withdraw() {
           )}
         </div>
       </div>
+
+      {/* Account Verification Dialog */}
+      <Dialog open={verifyOpen} onOpenChange={setVerifyOpen}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck size={20} style={{ color: '#6C21E8' }} />
+              অ্যাকাউন্ট ভেরিফিকেশন
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="bg-purple-50 border border-purple-200 rounded-xl p-3">
+              <p className="text-xs text-purple-900 leading-relaxed">
+                প্রথম উইথড্রর আগে আপনার অ্যাকাউন্ট ভেরিফাই করতে হবে। ভেরিফিকেশন ফি{' '}
+                <span className="font-black">{formatCurrency(vstatus?.fee || 0)}</span> — এটি মাত্র
+                একবারই দিতে হয়। অ্যাডমিন অনুমোদন দিলে আপনার{' '}
+                {parkedWithdraw ? <span className="font-black">{formatCurrency(parkedWithdraw.amount)}</span> : 'উইথড্র'}{' '}
+                রিকোয়েস্টও নিজে থেকেই জমা হয়ে যাবে।
+              </p>
+            </div>
+
+            {vstatus?.mode === 'auto' && vstatus?.autoUrl ? (
+              <a
+                href={vstatus.autoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full h-12 rounded-xl font-black text-sm text-white flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}
+                data-testid="button-auto-pay"
+              >
+                অনলাইনে পেমেন্ট করুন <ExternalLink size={15} />
+              </a>
+            ) : (
+              <div className="space-y-1.5">
+                {vstatus?.bkashNumber && (
+                  <div className="flex items-center justify-between bg-muted/50 rounded-xl px-4 py-2.5">
+                    <span className="text-sm font-bold" style={{ color: '#E2136E' }}>bKash (Send Money)</span>
+                    <span className="font-black text-sm select-all" data-testid="text-verify-bkash">{vstatus.bkashNumber}</span>
+                  </div>
+                )}
+                {vstatus?.nagadNumber && (
+                  <div className="flex items-center justify-between bg-muted/50 rounded-xl px-4 py-2.5">
+                    <span className="text-sm font-bold" style={{ color: '#EC1C24' }}>Nagad (Send Money)</span>
+                    <span className="font-black text-sm select-all" data-testid="text-verify-nagad">{vstatus.nagadNumber}</span>
+                  </div>
+                )}
+                <p className="text-[11px] text-muted-foreground pt-1">
+                  উপরের নম্বরে ফি পাঠিয়ে নিচের ফর্মটি পূরণ করুন।
+                </p>
+              </div>
+            )}
+
+            <div>
+              <p className="font-bold text-foreground text-sm mb-1.5">কোন মাধ্যমে পাঠিয়েছেন?</p>
+              <div className="grid grid-cols-2 gap-3">
+                {(['bkash', 'nagad'] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setVMethod(m)}
+                    className="h-11 px-4 rounded-xl flex items-center justify-center gap-2 font-bold text-sm border-2 transition-all active:scale-95"
+                    style={vMethod === m
+                      ? { background: m === 'bkash' ? '#E2136E' : '#EC1C24', color: 'white', borderColor: 'transparent' }
+                      : { background: '#F8F4FF', color: '#1A0533', borderColor: '#E8E0F0' }
+                    }
+                    data-testid={`select-verify-method-${m}`}
+                  >
+                    {m === 'bkash' ? 'bKash' : 'Nagad'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="font-bold text-foreground text-sm mb-1.5">যে নম্বর থেকে পাঠিয়েছেন</p>
+              <Input
+                placeholder="01XXXXXXXXX"
+                type="tel"
+                maxLength={11}
+                value={vPayerNumber}
+                onChange={(e) => setVPayerNumber(e.target.value)}
+                className="h-11 bg-muted/50 rounded-xl border-purple-100"
+                data-testid="input-verify-payer-number"
+              />
+            </div>
+
+            <div>
+              <p className="font-bold text-foreground text-sm mb-1.5">Transaction ID (TrxID)</p>
+              <Input
+                placeholder="যেমন: 9HK7A2B5CD"
+                value={vTrxId}
+                onChange={(e) => setVTrxId(e.target.value)}
+                className="h-11 bg-muted/50 rounded-xl border-purple-100"
+                data-testid="input-verify-trxid"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSubmitVerification}
+              disabled={submitVerification.isPending}
+              className="w-full h-12 rounded-xl font-black text-base text-white disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A, #FF7B4A)' }}
+              data-testid="button-submit-verification"
+            >
+              {submitVerification.isPending && <Loader2 className="animate-spin" size={18} />}
+              ভেরিফিকেশন জমা দিন
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

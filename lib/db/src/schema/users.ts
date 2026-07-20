@@ -33,6 +33,10 @@ export const usersTable = pgTable("users", {
   // Settled (paid or denied) on the user's first Mini App open.
   referralPending: boolean("referral_pending").notNull().default(false),
   isBanned: boolean("is_banned").notNull().default(false),
+  // Paid account verification (one-time, demanded on the first withdrawal
+  // attempt while the feature is enabled). Set when an admin approves the
+  // user's verification payment.
+  isVerified: boolean("is_verified").notNull().default(false),
   isFlagged: boolean("is_flagged").notNull().default(false),
   flagReason: text("flag_reason"),
   vpnStrikeCount: integer("vpn_strike_count").notNull().default(0),

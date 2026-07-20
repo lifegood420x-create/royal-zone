@@ -14,6 +14,7 @@ export interface AdminUser {
   username: string | null;
   balance: number;
   isBanned: boolean;
+  isVerified: boolean;
   isFlagged: boolean;
   /** @nullable */
   flagReason: string | null;

@@ -5,6 +5,7 @@
  * Bangla Task Hub Telegram mini app API
  * OpenAPI spec version: 0.1.0
  */
+import type { VerificationMode } from './verificationMode';
 
 export interface AppConfig {
   minWithdraw: number;
@@ -26,4 +27,15 @@ export interface AppConfig {
   requireAdPostback: boolean;
   postbackUrl: string;
   adsgramPostbackUrl: string;
+  verificationEnabled: boolean;
+  verificationMode: VerificationMode;
+  verificationFee: number;
+  /** @nullable */
+  verificationBkashNumber: string | null;
+  /** @nullable */
+  verificationNagadNumber: string | null;
+  /** @nullable */
+  verificationAutoUrl: string | null;
+  /** @nullable */
+  verificationAutoSecret: string | null;
 }

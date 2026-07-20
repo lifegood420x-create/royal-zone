@@ -39,6 +39,24 @@ export const appConfigTable = pgTable("app_config", {
   // alone no longer credits balance. Off by default so ad watching keeps
   // working before postback is configured in the network's dashboard.
   requireAdPostback: boolean("require_ad_postback").notNull().default(false),
+  // --- Paid account verification (first withdrawal gate) ---
+  verificationEnabled: boolean("verification_enabled").notNull().default(false),
+  // 'manual': user pays to the configured bKash/Nagad number and submits the
+  // TrxID for admin review. 'auto': user pays through an external gateway
+  // (verificationAutoUrl); the gateway confirms via the postback endpoint.
+  verificationMode: text("verification_mode", { enum: ["manual", "auto"] })
+    .notNull()
+    .default("manual"),
+  verificationFee: numeric("verification_fee", { precision: 14, scale: 2, mode: "number" })
+    .notNull()
+    .default(50),
+  verificationBkashNumber: text("verification_bkash_number"),
+  verificationNagadNumber: text("verification_nagad_number"),
+  // Auto mode: external checkout/payment page the user is sent to.
+  verificationAutoUrl: text("verification_auto_url"),
+  // Auto mode: shared secret the gateway must present when calling
+  // /verification/postback to auto-approve a request.
+  verificationAutoSecret: text("verification_auto_secret"),
 });
 
 export const insertAppConfigSchema = createInsertSchema(appConfigTable).omit({ id: true });

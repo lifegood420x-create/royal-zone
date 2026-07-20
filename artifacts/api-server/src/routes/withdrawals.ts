@@ -37,6 +37,18 @@ router.post("/withdrawals", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
+  // One-time paid account verification gate: demanded on the first
+  // withdrawal that would otherwise succeed, while the feature is enabled.
+  // The frontend catches this error and opens the verification flow; the
+  // parked withdrawal is placed automatically when an admin approves.
+  if (config.verificationEnabled && !user.isVerified) {
+    res.status(403).json({
+      error: "verification_required",
+      message: "প্রথম উত্তোলনের আগে অ্যাকাউন্ট ভেরিফিকেশন প্রয়োজন।",
+    });
+    return;
+  }
+
   const [withdrawal] = await db
     .insert(withdrawalsTable)
     .values({
