@@ -328,7 +328,7 @@ export default function Earn() {
               {tasks.map((task) => (
                 <div
                   key={task.id}
-                  className={`bg-white rounded-2xl border border-purple-100 shadow-sm transition-opacity ${task.completed ? 'opacity-55' : 'opacity-100'}`}
+                  className={`bg-white rounded-2xl border border-purple-100 shadow-sm transition-opacity ${task.completed ? 'opacity-80' : 'opacity-100'}`}
                 >
                   <div className="p-4 flex gap-4 items-center">
                     <div
@@ -355,9 +355,24 @@ export default function Earn() {
                     </div>
                     <div className="shrink-0 flex flex-col justify-center">
                       {task.completed ? (
-                        <div className="flex items-center text-sm font-bold px-3 py-1.5 rounded-xl" style={{ color: '#6C21E8', background: '#EDE0FF' }}>
-                          <CheckCircle2 size={15} className="mr-1.5" /> Done
-                        </div>
+                        // The reward is one-time (the server rejects repeat
+                        // claims), but the link stays usable forever so users
+                        // can revisit the channel/page from the task card.
+                        task.link ? (
+                          <button
+                            className="flex items-center text-sm font-bold px-3 py-1.5 rounded-xl active:scale-95 transition-transform"
+                            style={{ color: '#6C21E8', background: '#EDE0FF' }}
+                            onClick={() => window.open(task.link!, '_blank')}
+                            data-testid={`button-visit-done-task-${task.id}`}
+                          >
+                            <CheckCircle2 size={15} className="mr-1.5" /> Done
+                            <ExternalLink size={12} className="ml-1.5" />
+                          </button>
+                        ) : (
+                          <div className="flex items-center text-sm font-bold px-3 py-1.5 rounded-xl" style={{ color: '#6C21E8', background: '#EDE0FF' }}>
+                            <CheckCircle2 size={15} className="mr-1.5" /> Done
+                          </div>
+                        )
                       ) : visitingTask === task.id ? (
                         <button
                           className="font-bold text-sm rounded-xl px-4 py-2 text-white active:scale-95 transition-transform disabled:opacity-50"
