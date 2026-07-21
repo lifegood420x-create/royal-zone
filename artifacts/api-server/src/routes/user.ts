@@ -28,6 +28,8 @@ router.get("/config/public", requireAuth, async (req, res): Promise<void> => {
     monetagEnabled: config.monetagEnabled,
     adsgramEnabled: config.adsgramEnabled,
     requireAdPostback: config.requireAdPostback,
+    bkashLogoUrl: config.bkashLogoUrl,
+    nagadLogoUrl: config.nagadLogoUrl,
   });
   res.json(data);
 });

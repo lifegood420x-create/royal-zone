@@ -52,6 +52,10 @@ export const appConfigTable = pgTable("app_config", {
     .default(50),
   verificationBkashNumber: text("verification_bkash_number"),
   verificationNagadNumber: text("verification_nagad_number"),
+  // Payment-method logos shown in the user app (verification dialog and
+  // withdraw method buttons). Admin pastes any hosted image URL.
+  bkashLogoUrl: text("bkash_logo_url"),
+  nagadLogoUrl: text("nagad_logo_url"),
   // Auto mode: external checkout/payment page the user is sent to.
   verificationAutoUrl: text("verification_auto_url"),
   // Auto mode: shared secret the gateway must present when calling

@@ -51,6 +51,8 @@ const configSchema = z.object({
   verificationNagadNumber: z.string().optional().or(z.literal('')),
   verificationAutoUrl: z.string().optional().or(z.literal('')),
   verificationAutoSecret: z.string().optional().or(z.literal('')),
+  bkashLogoUrl: z.string().optional().or(z.literal('')),
+  nagadLogoUrl: z.string().optional().or(z.literal('')),
 });
 
 type ConfigFormValues = z.infer<typeof configSchema>;
@@ -93,6 +95,8 @@ export default function AdminConfig() {
       verificationNagadNumber: '',
       verificationAutoUrl: '',
       verificationAutoSecret: '',
+      bkashLogoUrl: '',
+      nagadLogoUrl: '',
     },
   });
 
@@ -126,6 +130,8 @@ export default function AdminConfig() {
         verificationNagadNumber: config.verificationNagadNumber || '',
         verificationAutoUrl: config.verificationAutoUrl || '',
         verificationAutoSecret: config.verificationAutoSecret || '',
+        bkashLogoUrl: config.bkashLogoUrl || '',
+        nagadLogoUrl: config.nagadLogoUrl || '',
       });
       initializedRef.current = true;
     }
@@ -570,6 +576,47 @@ export default function AdminConfig() {
                         )}
                       </>
                     )}
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="font-bold text-sm text-muted-foreground uppercase tracking-wider">Payment Method Logos</h3>
+                    <p className="text-[11px] text-muted-foreground -mt-2">
+                      Shown next to bKash/Nagad in the user app (withdraw buttons and the verification popup). Paste any hosted image URL.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="bkashLogoUrl"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-2">
+                              bKash Logo URL
+                              {field.value ? <img src={field.value} alt="bKash logo" className="w-6 h-6 rounded object-contain border" /> : null}
+                            </FormLabel>
+                            <FormControl>
+                              <Input placeholder="https://.../bkash.png" {...field} data-testid="input-bkash-logo" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="nagadLogoUrl"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-2">
+                              Nagad Logo URL
+                              {field.value ? <img src={field.value} alt="Nagad logo" className="w-6 h-6 rounded object-contain border" /> : null}
+                            </FormLabel>
+                            <FormControl>
+                              <Input placeholder="https://.../nagad.png" {...field} data-testid="input-nagad-logo" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-4">

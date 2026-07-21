@@ -24,4 +24,8 @@ export interface PublicConfig {
   monetagEnabled: boolean;
   adsgramEnabled: boolean;
   requireAdPostback: boolean;
+  /** @nullable */
+  bkashLogoUrl: string | null;
+  /** @nullable */
+  nagadLogoUrl: string | null;
 }

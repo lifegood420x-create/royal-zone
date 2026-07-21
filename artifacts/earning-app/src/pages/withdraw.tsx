@@ -13,7 +13,7 @@ import {
 } from '@workspace/api-client-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Wallet, AlertCircle, Clock, CheckCircle2, XCircle, ArrowDownToLine, Loader2, ChevronDown, ShieldCheck, ExternalLink } from 'lucide-react';
+import { Wallet, AlertCircle, Clock, CheckCircle2, XCircle, ArrowDownToLine, Loader2, ChevronDown, ShieldCheck, ExternalLink, Copy } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency, formatDate, formatTime } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -58,6 +58,29 @@ export default function Withdraw() {
   const [vTrxId, setVTrxId] = useState('');
 
   const verificationPending = vstatus?.request?.status === 'pending';
+
+  const logoFor = (m: 'bkash' | 'nagad') =>
+    (m === 'bkash' ? config?.bkashLogoUrl : config?.nagadLogoUrl) || null;
+
+  const copyNumber = async (num: string) => {
+    try {
+      await navigator.clipboard.writeText(num);
+      toast({ title: 'কপি হয়েছে ✅', description: num });
+    } catch {
+      toast({ title: 'কপি করা যায়নি', description: 'নম্বরটি চেপে ধরে কপি করুন।', variant: 'destructive' });
+    }
+  };
+
+  const MethodBadge = ({ m }: { m: 'bkash' | 'nagad' }) => {
+    const logo = logoFor(m);
+    return logo ? (
+      <img src={logo} alt={m} className="w-6 h-6 rounded-full object-contain bg-white" />
+    ) : (
+      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs">
+        {m === 'bkash' ? 'b' : 'n'}
+      </div>
+    );
+  };
 
   const handleSubmitVerification = () => {
     if (vPayerNumber.trim().length < 5 || vTrxId.trim().length < 4) {
@@ -250,9 +273,7 @@ export default function Withdraw() {
                           }
                           data-testid={`select-method-${m}`}
                         >
-                          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs">
-                            {m === 'bkash' ? 'b' : 'n'}
-                          </div>
+                          <MethodBadge m={m} />
                           {m === 'bkash' ? 'bKash' : 'Nagad'}
                         </button>
                       ))}
@@ -341,12 +362,20 @@ export default function Withdraw() {
                   <div key={w.id} className="bg-white rounded-2xl p-4 shadow-sm border border-purple-100">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-3">
-                        <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black text-white shrink-0"
-                          style={{ background: w.method === 'bkash' ? '#E2136E' : '#EC1C24' }}
-                        >
-                          {w.method === 'bkash' ? 'b' : 'n'}
-                        </div>
+                        {logoFor(w.method as 'bkash' | 'nagad') ? (
+                          <img
+                            src={logoFor(w.method as 'bkash' | 'nagad')!}
+                            alt={w.method}
+                            className="w-10 h-10 rounded-xl object-contain bg-white border border-purple-100 shrink-0"
+                          />
+                        ) : (
+                          <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black text-white shrink-0"
+                            style={{ background: w.method === 'bkash' ? '#E2136E' : '#EC1C24' }}
+                          >
+                            {w.method === 'bkash' ? 'b' : 'n'}
+                          </div>
+                        )}
                         <div>
                           <p className="font-bold text-sm text-foreground capitalize">{w.method}</p>
                           <p className="text-xs text-muted-foreground">{w.accountNumber}</p>
@@ -430,19 +459,51 @@ export default function Withdraw() {
             ) : (
               <div className="space-y-1.5">
                 {vstatus?.bkashNumber && (
-                  <div className="flex items-center justify-between bg-muted/50 rounded-xl px-4 py-2.5">
-                    <span className="text-sm font-bold" style={{ color: '#E2136E' }}>bKash (Send Money)</span>
-                    <span className="font-black text-sm select-all" data-testid="text-verify-bkash">{vstatus.bkashNumber}</span>
+                  <div className="flex items-center justify-between bg-muted/50 rounded-xl px-3 py-2.5 gap-2">
+                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: '#E2136E' }}>
+                      {logoFor('bkash') ? (
+                        <img src={logoFor('bkash')!} alt="bKash" className="w-7 h-7 rounded-lg object-contain bg-white shrink-0" />
+                      ) : null}
+                      bKash (Send Money)
+                    </span>
+                    <span className="flex items-center gap-1.5 shrink-0">
+                      <span className="font-black text-sm select-all" data-testid="text-verify-bkash">{vstatus.bkashNumber}</span>
+                      <button
+                        type="button"
+                        onClick={() => copyNumber(vstatus.bkashNumber!)}
+                        className="w-8 h-8 rounded-lg bg-white border border-purple-100 flex items-center justify-center active:scale-90 transition-transform"
+                        aria-label="Copy bKash number"
+                        data-testid="button-copy-bkash"
+                      >
+                        <Copy size={14} style={{ color: '#6C21E8' }} />
+                      </button>
+                    </span>
                   </div>
                 )}
                 {vstatus?.nagadNumber && (
-                  <div className="flex items-center justify-between bg-muted/50 rounded-xl px-4 py-2.5">
-                    <span className="text-sm font-bold" style={{ color: '#EC1C24' }}>Nagad (Send Money)</span>
-                    <span className="font-black text-sm select-all" data-testid="text-verify-nagad">{vstatus.nagadNumber}</span>
+                  <div className="flex items-center justify-between bg-muted/50 rounded-xl px-3 py-2.5 gap-2">
+                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: '#EC1C24' }}>
+                      {logoFor('nagad') ? (
+                        <img src={logoFor('nagad')!} alt="Nagad" className="w-7 h-7 rounded-lg object-contain bg-white shrink-0" />
+                      ) : null}
+                      Nagad (Send Money)
+                    </span>
+                    <span className="flex items-center gap-1.5 shrink-0">
+                      <span className="font-black text-sm select-all" data-testid="text-verify-nagad">{vstatus.nagadNumber}</span>
+                      <button
+                        type="button"
+                        onClick={() => copyNumber(vstatus.nagadNumber!)}
+                        className="w-8 h-8 rounded-lg bg-white border border-purple-100 flex items-center justify-center active:scale-90 transition-transform"
+                        aria-label="Copy Nagad number"
+                        data-testid="button-copy-nagad"
+                      >
+                        <Copy size={14} style={{ color: '#6C21E8' }} />
+                      </button>
+                    </span>
                   </div>
                 )}
                 <p className="text-[11px] text-muted-foreground pt-1">
-                  উপরের নম্বরে ফি পাঠিয়ে নিচের ফর্মটি পূরণ করুন।
+                  নম্বরের পাশের বাটনে চাপ দিলে নম্বর কপি হয়ে যাবে — ফি পাঠিয়ে নিচের ফর্মটি পূরণ করুন।
                 </p>
               </div>
             )}
@@ -462,6 +523,7 @@ export default function Withdraw() {
                     }
                     data-testid={`select-verify-method-${m}`}
                   >
+                    <MethodBadge m={m} />
                     {m === 'bkash' ? 'bKash' : 'Nagad'}
                   </button>
                 ))}

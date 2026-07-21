@@ -100,7 +100,9 @@ export const GetPublicConfigResponse = zod.object({
   "adsgramBlockId": zod.string().nullable(),
   "monetagEnabled": zod.boolean(),
   "adsgramEnabled": zod.boolean(),
-  "requireAdPostback": zod.boolean()
+  "requireAdPostback": zod.boolean(),
+  "bkashLogoUrl": zod.string().nullable(),
+  "nagadLogoUrl": zod.string().nullable()
 })
 
 
@@ -886,7 +888,9 @@ export const GetAdminConfigResponse = zod.object({
   "verificationBkashNumber": zod.string().nullable(),
   "verificationNagadNumber": zod.string().nullable(),
   "verificationAutoUrl": zod.string().nullable(),
-  "verificationAutoSecret": zod.string().nullable()
+  "verificationAutoSecret": zod.string().nullable(),
+  "bkashLogoUrl": zod.string().nullable(),
+  "nagadLogoUrl": zod.string().nullable()
 })
 
 
@@ -927,7 +931,9 @@ export const UpdateAdminConfigBody = zod.object({
   "verificationBkashNumber": zod.string().optional(),
   "verificationNagadNumber": zod.string().optional(),
   "verificationAutoUrl": zod.string().optional(),
-  "verificationAutoSecret": zod.string().optional()
+  "verificationAutoSecret": zod.string().optional(),
+  "bkashLogoUrl": zod.string().optional(),
+  "nagadLogoUrl": zod.string().optional()
 })
 
 export const UpdateAdminConfigResponse = zod.object({
@@ -953,7 +959,9 @@ export const UpdateAdminConfigResponse = zod.object({
   "verificationBkashNumber": zod.string().nullable(),
   "verificationNagadNumber": zod.string().nullable(),
   "verificationAutoUrl": zod.string().nullable(),
-  "verificationAutoSecret": zod.string().nullable()
+  "verificationAutoSecret": zod.string().nullable(),
+  "bkashLogoUrl": zod.string().nullable(),
+  "nagadLogoUrl": zod.string().nullable()
 })
 
 

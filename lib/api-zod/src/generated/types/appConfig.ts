@@ -38,4 +38,8 @@ export interface AppConfig {
   verificationAutoUrl: string | null;
   /** @nullable */
   verificationAutoSecret: string | null;
+  /** @nullable */
+  bkashLogoUrl: string | null;
+  /** @nullable */
+  nagadLogoUrl: string | null;
 }

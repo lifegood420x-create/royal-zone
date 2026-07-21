@@ -1034,6 +1034,8 @@ components:
         - monetagEnabled
         - adsgramEnabled
         - requireAdPostback
+        - bkashLogoUrl
+        - nagadLogoUrl
       properties:
         minWithdraw: { type: number }
         baseMinWithdraw: { type: number }
@@ -1049,6 +1051,8 @@ components:
         monetagEnabled: { type: boolean }
         adsgramEnabled: { type: boolean }
         requireAdPostback: { type: boolean }
+        bkashLogoUrl: { type: ["string", "null"] }
+        nagadLogoUrl: { type: ["string", "null"] }
 
     FlaggedUser:
       type: object
@@ -1191,6 +1195,8 @@ components:
         - verificationNagadNumber
         - verificationAutoUrl
         - verificationAutoSecret
+        - bkashLogoUrl
+        - nagadLogoUrl
       properties:
         minWithdraw: { type: number }
         referralBonus: { type: number }
@@ -1215,6 +1221,8 @@ components:
         verificationNagadNumber: { type: ["string", "null"] }
         verificationAutoUrl: { type: ["string", "null"] }
         verificationAutoSecret: { type: ["string", "null"] }
+        bkashLogoUrl: { type: ["string", "null"] }
+        nagadLogoUrl: { type: ["string", "null"] }
 
     ConfigUpdate:
       type: object
@@ -1240,6 +1248,8 @@ components:
         verificationNagadNumber: { type: string }
         verificationAutoUrl: { type: string }
         verificationAutoSecret: { type: string }
+        bkashLogoUrl: { type: string }
+        nagadLogoUrl: { type: string }
 
     VerificationMode:
       type: string

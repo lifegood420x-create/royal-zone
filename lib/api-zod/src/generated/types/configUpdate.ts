@@ -35,4 +35,6 @@ export interface ConfigUpdate {
   verificationNagadNumber?: string;
   verificationAutoUrl?: string;
   verificationAutoSecret?: string;
+  bkashLogoUrl?: string;
+  nagadLogoUrl?: string;
 }

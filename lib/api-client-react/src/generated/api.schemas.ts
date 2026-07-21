@@ -266,6 +266,10 @@ export interface PublicConfig {
   monetagEnabled: boolean;
   adsgramEnabled: boolean;
   requireAdPostback: boolean;
+  /** @nullable */
+  bkashLogoUrl: string | null;
+  /** @nullable */
+  nagadLogoUrl: string | null;
 }
 
 export interface FlaggedUser {
@@ -390,6 +394,10 @@ export interface AppConfig {
   verificationAutoUrl: string | null;
   /** @nullable */
   verificationAutoSecret: string | null;
+  /** @nullable */
+  bkashLogoUrl: string | null;
+  /** @nullable */
+  nagadLogoUrl: string | null;
 }
 
 export interface ConfigUpdate {
@@ -420,6 +428,8 @@ export interface ConfigUpdate {
   verificationNagadNumber?: string;
   verificationAutoUrl?: string;
   verificationAutoSecret?: string;
+  bkashLogoUrl?: string;
+  nagadLogoUrl?: string;
 }
 
 export type VerificationRequestStatus = typeof VerificationRequestStatus[keyof typeof VerificationRequestStatus];
