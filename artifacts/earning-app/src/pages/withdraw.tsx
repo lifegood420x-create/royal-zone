@@ -435,14 +435,18 @@ export default function Withdraw() {
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="bg-purple-50 border border-purple-200 rounded-xl p-3">
-              <p className="text-xs text-purple-900 leading-relaxed">
-                প্রথম উইথড্রর আগে আপনার অ্যাকাউন্ট ভেরিফাই করতে হবে। ভেরিফিকেশন ফি{' '}
-                <span className="font-black">{formatCurrency(vstatus?.fee || 0)}</span> — এটি মাত্র
-                একবারই দিতে হয়। অ্যাডমিন অনুমোদন দিলে আপনার{' '}
-                {parkedWithdraw ? <span className="font-black">{formatCurrency(parkedWithdraw.amount)}</span> : 'উইথড্র'}{' '}
-                রিকোয়েস্টও নিজে থেকেই জমা হয়ে যাবে।
+            <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 space-y-1">
+              <p className="text-xs font-bold text-purple-900 leading-relaxed">
+                উইথড্র চালু করতে অ্যাকাউন্ট ভেরিফিকেশন বাধ্যতামূলক।
               </p>
+              <p className="text-xs font-black text-purple-900">
+                💳 ফি: {formatCurrency(vstatus?.fee || 0)} (শুধুমাত্র একবার)
+              </p>
+              <div className="text-xs text-purple-900 leading-relaxed space-y-0.5">
+                <p>• উইথড্র চালু হবে।</p>
+                <p>• অ্যাকাউন্ট Active হবে।</p>
+                <p>• পুনরায় কোনো ফি লাগবে না।</p>
+              </div>
             </div>
 
             {vstatus?.mode === 'auto' && vstatus?.autoUrl ? (
