@@ -441,10 +441,53 @@ export const VerificationRequestStatus = {
   rejected: 'rejected',
 } as const;
 
+export type PaymentType = typeof PaymentType[keyof typeof PaymentType];
+
+
+export const PaymentType = {
+  send_money: 'send_money',
+  cash_out: 'cash_out',
+} as const;
+
+export interface VerificationPaymentMethod {
+  id: number;
+  name: string;
+  accountNumber: string;
+  /** @nullable */
+  logoUrl: string | null;
+  paymentType: PaymentType;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export interface VerificationPaymentMethodInput {
+  /** @minLength 2 */
+  name: string;
+  /** @minLength 5 */
+  accountNumber: string;
+  /** @nullable */
+  logoUrl?: string | null;
+  paymentType: PaymentType;
+  isActive?: boolean;
+  sortOrder?: number;
+}
+
+export interface VerificationPaymentMethodUpdate {
+  /** @minLength 2 */
+  name?: string;
+  /** @minLength 5 */
+  accountNumber?: string;
+  /** @nullable */
+  logoUrl?: string | null;
+  paymentType?: PaymentType;
+  isActive?: boolean;
+  sortOrder?: number;
+}
+
 export interface VerificationRequest {
   id: number;
   fee: number;
-  method: WithdrawalMethod;
+  method: string;
   payerNumber: string;
   trxId: string;
   status: VerificationRequestStatus;
@@ -468,11 +511,16 @@ export interface VerificationStatus {
   /** @nullable */
   autoUrl: string | null;
   isVerified: boolean;
+  methods: VerificationPaymentMethod[];
   request?: VerificationRequest;
 }
 
 export interface VerificationSubmitInput {
-  method: WithdrawalMethod;
+  /**
+     * @minLength 2
+     * @maxLength 40
+     */
+  method: string;
   /** @minLength 5 */
   payerNumber: string;
   /** @minLength 4 */

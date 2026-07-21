@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   useGetMe,
   useGetPublicConfig,
@@ -53,11 +53,27 @@ export default function Withdraw() {
   // sent along with the payment proof so admin approval can place it.
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [parkedWithdraw, setParkedWithdraw] = useState<WithdrawFormValues | null>(null);
-  const [vMethod, setVMethod] = useState<'bkash' | 'nagad'>('bkash');
+  const [vMethod, setVMethod] = useState<string>('bkash');
   const [vPayerNumber, setVPayerNumber] = useState('');
   const [vTrxId, setVTrxId] = useState('');
 
   const verificationPending = vstatus?.request?.status === 'pending';
+
+  // Selectable "which method did you pay with" options: the legacy
+  // bKash/Nagad numbers from settings plus every admin-added custom
+  // method (Upay, Rocket, ...).
+  const payOptions = [
+    ...(vstatus?.bkashNumber ? [{ key: 'bkash', label: 'bKash', logo: null as string | null, color: '#E2136E' }] : []),
+    ...(vstatus?.nagadNumber ? [{ key: 'nagad', label: 'Nagad', logo: null as string | null, color: '#EC1C24' }] : []),
+    ...((vstatus?.methods ?? []).map((m) => ({ key: m.name, label: m.name, logo: m.logoUrl ?? null, color: '#6C21E8' }))),
+  ];
+
+  useEffect(() => {
+    if (verifyOpen && payOptions.length > 0 && !payOptions.some((o) => o.key === vMethod)) {
+      setVMethod(payOptions[0].key);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verifyOpen, vstatus]);
 
   const logoFor = (m: 'bkash' | 'nagad') =>
     (m === 'bkash' ? config?.bkashLogoUrl : config?.nagadLogoUrl) || null;
@@ -90,7 +106,7 @@ export default function Withdraw() {
     submitVerification.mutate(
       {
         data: {
-          method: vMethod as WithdrawalMethod,
+          method: vMethod,
           payerNumber: vPayerNumber.trim(),
           trxId: vTrxId.trim(),
           ...(parkedWithdraw
@@ -506,6 +522,30 @@ export default function Withdraw() {
                     </span>
                   </div>
                 )}
+                {(vstatus?.methods ?? []).map((m) => (
+                  <div key={m.id} className="flex items-center justify-between bg-muted/50 rounded-xl px-3 py-2.5 gap-2">
+                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: '#6C21E8' }}>
+                      {m.logoUrl ? (
+                        <img src={m.logoUrl} alt={m.name} className="w-7 h-7 rounded-lg object-contain bg-white shrink-0" />
+                      ) : null}
+                      <span className="truncate">
+                        {m.name} ({m.paymentType === 'send_money' ? 'Send Money' : 'Cash Out'})
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-1.5 shrink-0">
+                      <span className="font-black text-sm select-all" data-testid={`text-verify-method-${m.id}`}>{m.accountNumber}</span>
+                      <button
+                        type="button"
+                        onClick={() => copyNumber(m.accountNumber)}
+                        className="w-8 h-8 rounded-lg bg-white border border-purple-100 flex items-center justify-center active:scale-90 transition-transform"
+                        aria-label={`Copy ${m.name} number`}
+                        data-testid={`button-copy-method-${m.id}`}
+                      >
+                        <Copy size={14} style={{ color: '#6C21E8' }} />
+                      </button>
+                    </span>
+                  </div>
+                ))}
                 <p className="text-[11px] text-muted-foreground pt-1">
                   নম্বরের পাশের বাটনে চাপ দিলে নম্বর কপি হয়ে যাবে — ফি পাঠিয়ে নিচের ফর্মটি পূরণ করুন।
                 </p>
@@ -515,20 +555,34 @@ export default function Withdraw() {
             <div>
               <p className="font-bold text-foreground text-sm mb-1.5">কোন মাধ্যমে পাঠিয়েছেন?</p>
               <div className="grid grid-cols-2 gap-3">
-                {(['bkash', 'nagad'] as const).map((m) => (
+                {(payOptions.length > 0
+                  ? payOptions
+                  : [
+                      { key: 'bkash', label: 'bKash', logo: null, color: '#E2136E' },
+                      { key: 'nagad', label: 'Nagad', logo: null, color: '#EC1C24' },
+                    ]
+                ).map((o) => (
                   <button
-                    key={m}
+                    key={o.key}
                     type="button"
-                    onClick={() => setVMethod(m)}
-                    className="h-11 px-4 rounded-xl flex items-center justify-center gap-2 font-bold text-sm border-2 transition-all active:scale-95"
-                    style={vMethod === m
-                      ? { background: m === 'bkash' ? '#E2136E' : '#EC1C24', color: 'white', borderColor: 'transparent' }
+                    onClick={() => setVMethod(o.key)}
+                    className="h-11 px-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm border-2 transition-all active:scale-95"
+                    style={vMethod === o.key
+                      ? { background: o.color, color: 'white', borderColor: 'transparent' }
                       : { background: '#F8F4FF', color: '#1A0533', borderColor: '#E8E0F0' }
                     }
-                    data-testid={`select-verify-method-${m}`}
+                    data-testid={`select-verify-method-${o.key}`}
                   >
-                    <MethodBadge m={m} />
-                    {m === 'bkash' ? 'bKash' : 'Nagad'}
+                    {(o.key === 'bkash' || o.key === 'nagad') ? (
+                      <MethodBadge m={o.key as 'bkash' | 'nagad'} />
+                    ) : o.logo ? (
+                      <img src={o.logo} alt={o.label} className="w-6 h-6 rounded-full object-contain bg-white" />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs">
+                        {o.label.charAt(0)}
+                      </div>
+                    )}
+                    <span className="truncate">{o.label}</span>
                   </button>
                 ))}
               </div>

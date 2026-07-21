@@ -343,10 +343,19 @@ export const GetVerificationStatusResponse = zod.object({
   "nagadNumber": zod.string().nullable(),
   "autoUrl": zod.string().nullable(),
   "isVerified": zod.boolean(),
+  "methods": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "accountNumber": zod.string(),
+  "logoUrl": zod.string().nullable(),
+  "paymentType": zod.enum(['send_money', 'cash_out']),
+  "isActive": zod.boolean(),
+  "sortOrder": zod.number()
+})),
   "request": zod.object({
   "id": zod.number(),
   "fee": zod.number(),
-  "method": zod.enum(['bkash', 'nagad']),
+  "method": zod.string(),
   "payerNumber": zod.string(),
   "trxId": zod.string(),
   "status": zod.enum(['pending', 'approved', 'rejected']),
@@ -361,6 +370,9 @@ export const GetVerificationStatusResponse = zod.object({
 /**
  * @summary Submit an account verification payment for review
  */
+export const submitVerificationBodyMethodMin = 2;
+export const submitVerificationBodyMethodMax = 40;
+
 export const submitVerificationBodyPayerNumberMin = 5;
 
 export const submitVerificationBodyTrxIdMin = 4;
@@ -370,7 +382,7 @@ export const submitVerificationBodyWithdrawAmountMin = 0;
 
 
 export const SubmitVerificationBody = zod.object({
-  "method": zod.enum(['bkash', 'nagad']),
+  "method": zod.string().min(submitVerificationBodyMethodMin).max(submitVerificationBodyMethodMax),
   "payerNumber": zod.string().min(submitVerificationBodyPayerNumberMin),
   "trxId": zod.string().min(submitVerificationBodyTrxIdMin),
   "withdrawAmount": zod.number().min(submitVerificationBodyWithdrawAmountMin).optional(),
@@ -381,7 +393,7 @@ export const SubmitVerificationBody = zod.object({
 export const SubmitVerificationResponse = zod.object({
   "id": zod.number(),
   "fee": zod.number(),
-  "method": zod.enum(['bkash', 'nagad']),
+  "method": zod.string(),
   "payerNumber": zod.string(),
   "trxId": zod.string(),
   "status": zod.enum(['pending', 'approved', 'rejected']),
@@ -402,7 +414,7 @@ export const ListAdminVerificationsQueryParams = zod.object({
 export const ListAdminVerificationsResponseItem = zod.object({
   "id": zod.number(),
   "fee": zod.number(),
-  "method": zod.enum(['bkash', 'nagad']),
+  "method": zod.string(),
   "payerNumber": zod.string(),
   "trxId": zod.string(),
   "status": zod.enum(['pending', 'approved', 'rejected']),
@@ -432,7 +444,7 @@ export const ApproveVerificationResponse = zod.object({
   "request": zod.object({
   "id": zod.number(),
   "fee": zod.number(),
-  "method": zod.enum(['bkash', 'nagad']),
+  "method": zod.string(),
   "payerNumber": zod.string(),
   "trxId": zod.string(),
   "status": zod.enum(['pending', 'approved', 'rejected']),
@@ -446,6 +458,93 @@ export const ApproveVerificationResponse = zod.object({
 
 
 /**
+ * @summary List verification payment methods
+ */
+export const ListVerificationMethodsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "accountNumber": zod.string(),
+  "logoUrl": zod.string().nullable(),
+  "paymentType": zod.enum(['send_money', 'cash_out']),
+  "isActive": zod.boolean(),
+  "sortOrder": zod.number()
+})
+export const ListVerificationMethodsResponse = zod.array(ListVerificationMethodsResponseItem)
+
+
+/**
+ * @summary Add a verification payment method
+ */
+export const createVerificationMethodBodyNameMin = 2;
+
+export const createVerificationMethodBodyAccountNumberMin = 5;
+
+
+
+export const CreateVerificationMethodBody = zod.object({
+  "name": zod.string().min(createVerificationMethodBodyNameMin),
+  "accountNumber": zod.string().min(createVerificationMethodBodyAccountNumberMin),
+  "logoUrl": zod.string().nullish(),
+  "paymentType": zod.enum(['send_money', 'cash_out']),
+  "isActive": zod.boolean().optional(),
+  "sortOrder": zod.number().optional()
+})
+
+export const CreateVerificationMethodResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "accountNumber": zod.string(),
+  "logoUrl": zod.string().nullable(),
+  "paymentType": zod.enum(['send_money', 'cash_out']),
+  "isActive": zod.boolean(),
+  "sortOrder": zod.number()
+})
+
+
+/**
+ * @summary Update a verification payment method
+ */
+export const UpdateVerificationMethodParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const updateVerificationMethodBodyNameMin = 2;
+
+export const updateVerificationMethodBodyAccountNumberMin = 5;
+
+
+
+export const UpdateVerificationMethodBody = zod.object({
+  "name": zod.string().min(updateVerificationMethodBodyNameMin).optional(),
+  "accountNumber": zod.string().min(updateVerificationMethodBodyAccountNumberMin).optional(),
+  "logoUrl": zod.string().nullish(),
+  "paymentType": zod.enum(['send_money', 'cash_out']).optional(),
+  "isActive": zod.boolean().optional(),
+  "sortOrder": zod.number().optional()
+})
+
+export const UpdateVerificationMethodResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "accountNumber": zod.string(),
+  "logoUrl": zod.string().nullable(),
+  "paymentType": zod.enum(['send_money', 'cash_out']),
+  "isActive": zod.boolean(),
+  "sortOrder": zod.number()
+})
+
+
+/**
+ * @summary Delete a verification payment method
+ */
+export const DeleteVerificationMethodParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteVerificationMethodResponse = zod.void()
+
+
+/**
  * @summary Reject a verification request
  */
 export const RejectVerificationParams = zod.object({
@@ -456,7 +555,7 @@ export const RejectVerificationResponse = zod.object({
   "request": zod.object({
   "id": zod.number(),
   "fee": zod.number(),
-  "method": zod.enum(['bkash', 'nagad']),
+  "method": zod.string(),
   "payerNumber": zod.string(),
   "trxId": zod.string(),
   "status": zod.enum(['pending', 'approved', 'rejected']),

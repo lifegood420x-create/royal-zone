@@ -6,12 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { VerificationRequestStatus } from './verificationRequestStatus';
-import type { WithdrawalMethod } from './withdrawalMethod';
 
 export interface VerificationRequest {
   id: number;
   fee: number;
-  method: WithdrawalMethod;
+  method: string;
   payerNumber: string;
   trxId: string;
   status: VerificationRequestStatus;

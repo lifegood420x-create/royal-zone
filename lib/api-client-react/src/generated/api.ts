@@ -54,6 +54,9 @@ import type {
   UpdatePayoutAccountNumberInput,
   User,
   VerificationDecisionResult,
+  VerificationPaymentMethod,
+  VerificationPaymentMethodInput,
+  VerificationPaymentMethodUpdate,
   VerificationRequest,
   VerificationStatus,
   VerificationSubmitInput,
@@ -1525,6 +1528,297 @@ export const useApproveVerification = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getApproveVerificationMutationOptions(options));
+    }
+
+export const getListVerificationMethodsUrl = () => {
+
+
+
+
+  return `/api/admin/verification-methods`
+}
+
+/**
+ * @summary List verification payment methods
+ */
+export const listVerificationMethods = async ( options?: RequestInit): Promise<VerificationPaymentMethod[]> => {
+
+  return customFetch<VerificationPaymentMethod[]>(getListVerificationMethodsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListVerificationMethodsQueryKey = () => {
+    return [
+    `/api/admin/verification-methods`
+    ] as const;
+    }
+
+
+export const getListVerificationMethodsQueryOptions = <TData = Awaited<ReturnType<typeof listVerificationMethods>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listVerificationMethods>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListVerificationMethodsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listVerificationMethods>>> = ({ signal }) => listVerificationMethods({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listVerificationMethods>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListVerificationMethodsQueryResult = NonNullable<Awaited<ReturnType<typeof listVerificationMethods>>>
+export type ListVerificationMethodsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List verification payment methods
+ */
+
+export function useListVerificationMethods<TData = Awaited<ReturnType<typeof listVerificationMethods>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listVerificationMethods>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListVerificationMethodsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateVerificationMethodUrl = () => {
+
+
+
+
+  return `/api/admin/verification-methods`
+}
+
+/**
+ * @summary Add a verification payment method
+ */
+export const createVerificationMethod = async (verificationPaymentMethodInput: VerificationPaymentMethodInput, options?: RequestInit): Promise<VerificationPaymentMethod> => {
+
+  return customFetch<VerificationPaymentMethod>(getCreateVerificationMethodUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(verificationPaymentMethodInput)
+  }
+);}
+
+
+
+
+
+export const getCreateVerificationMethodMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createVerificationMethod>>, TError,{data: BodyType<VerificationPaymentMethodInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createVerificationMethod>>, TError,{data: BodyType<VerificationPaymentMethodInput>}, TContext> => {
+
+const mutationKey = ['createVerificationMethod'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createVerificationMethod>>, {data: BodyType<VerificationPaymentMethodInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createVerificationMethod(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateVerificationMethodMutationResult = NonNullable<Awaited<ReturnType<typeof createVerificationMethod>>>
+    export type CreateVerificationMethodMutationBody = BodyType<VerificationPaymentMethodInput>
+    export type CreateVerificationMethodMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Add a verification payment method
+ */
+export const useCreateVerificationMethod = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createVerificationMethod>>, TError,{data: BodyType<VerificationPaymentMethodInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createVerificationMethod>>,
+        TError,
+        {data: BodyType<VerificationPaymentMethodInput>},
+        TContext
+      > => {
+      return useMutation(getCreateVerificationMethodMutationOptions(options));
+    }
+
+export const getUpdateVerificationMethodUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/verification-methods/${id}`
+}
+
+/**
+ * @summary Update a verification payment method
+ */
+export const updateVerificationMethod = async (id: number,
+    verificationPaymentMethodUpdate: VerificationPaymentMethodUpdate, options?: RequestInit): Promise<VerificationPaymentMethod> => {
+
+  return customFetch<VerificationPaymentMethod>(getUpdateVerificationMethodUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(verificationPaymentMethodUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateVerificationMethodMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateVerificationMethod>>, TError,{id: number;data: BodyType<VerificationPaymentMethodUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateVerificationMethod>>, TError,{id: number;data: BodyType<VerificationPaymentMethodUpdate>}, TContext> => {
+
+const mutationKey = ['updateVerificationMethod'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateVerificationMethod>>, {id: number;data: BodyType<VerificationPaymentMethodUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateVerificationMethod(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateVerificationMethodMutationResult = NonNullable<Awaited<ReturnType<typeof updateVerificationMethod>>>
+    export type UpdateVerificationMethodMutationBody = BodyType<VerificationPaymentMethodUpdate>
+    export type UpdateVerificationMethodMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update a verification payment method
+ */
+export const useUpdateVerificationMethod = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateVerificationMethod>>, TError,{id: number;data: BodyType<VerificationPaymentMethodUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateVerificationMethod>>,
+        TError,
+        {id: number;data: BodyType<VerificationPaymentMethodUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateVerificationMethodMutationOptions(options));
+    }
+
+export const getDeleteVerificationMethodUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/verification-methods/${id}`
+}
+
+/**
+ * @summary Delete a verification payment method
+ */
+export const deleteVerificationMethod = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteVerificationMethodUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteVerificationMethodMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVerificationMethod>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteVerificationMethod>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteVerificationMethod'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteVerificationMethod>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteVerificationMethod(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteVerificationMethodMutationResult = NonNullable<Awaited<ReturnType<typeof deleteVerificationMethod>>>
+
+    export type DeleteVerificationMethodMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a verification payment method
+ */
+export const useDeleteVerificationMethod = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVerificationMethod>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteVerificationMethod>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteVerificationMethodMutationOptions(options));
     }
 
 export const getRejectVerificationUrl = (id: number,) => {

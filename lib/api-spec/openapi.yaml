@@ -328,6 +328,76 @@ paths:
               schema:
                 $ref: "#/components/schemas/VerificationDecisionResult"
 
+  /admin/verification-methods:
+    get:
+      operationId: listVerificationMethods
+      tags: [admin]
+      summary: List verification payment methods
+      responses:
+        "200":
+          description: Methods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VerificationPaymentMethod"
+    post:
+      operationId: createVerificationMethod
+      tags: [admin]
+      summary: Add a verification payment method
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerificationPaymentMethodInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationPaymentMethod"
+
+  /admin/verification-methods/{id}:
+    patch:
+      operationId: updateVerificationMethod
+      tags: [admin]
+      summary: Update a verification payment method
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerificationPaymentMethodUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationPaymentMethod"
+    delete:
+      operationId: deleteVerificationMethod
+      tags: [admin]
+      summary: Delete a verification payment method
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   /admin/verifications/{id}/reject:
     post:
       operationId: rejectVerification
@@ -1259,13 +1329,50 @@ components:
       type: string
       enum: [pending, approved, rejected]
 
+    PaymentType:
+      type: string
+      enum: [send_money, cash_out]
+
+    VerificationPaymentMethod:
+      type: object
+      required: [id, name, accountNumber, logoUrl, paymentType, isActive, sortOrder]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        accountNumber: { type: string }
+        logoUrl: { type: ["string", "null"] }
+        paymentType: { $ref: "#/components/schemas/PaymentType" }
+        isActive: { type: boolean }
+        sortOrder: { type: integer }
+
+    VerificationPaymentMethodInput:
+      type: object
+      required: [name, accountNumber, paymentType]
+      properties:
+        name: { type: string, minLength: 2 }
+        accountNumber: { type: string, minLength: 5 }
+        logoUrl: { type: ["string", "null"] }
+        paymentType: { $ref: "#/components/schemas/PaymentType" }
+        isActive: { type: boolean }
+        sortOrder: { type: integer }
+
+    VerificationPaymentMethodUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 2 }
+        accountNumber: { type: string, minLength: 5 }
+        logoUrl: { type: ["string", "null"] }
+        paymentType: { $ref: "#/components/schemas/PaymentType" }
+        isActive: { type: boolean }
+        sortOrder: { type: integer }
+
     VerificationRequest:
       type: object
       required: [id, fee, method, payerNumber, trxId, status, createdAt]
       properties:
         id: { type: integer }
         fee: { type: number }
-        method: { $ref: "#/components/schemas/WithdrawalMethod" }
+        method: { type: string }
         payerNumber: { type: string }
         trxId: { type: string }
         status: { $ref: "#/components/schemas/VerificationRequestStatus" }
@@ -1276,7 +1383,7 @@ components:
 
     VerificationStatus:
       type: object
-      required: [enabled, mode, fee, bkashNumber, nagadNumber, autoUrl, isVerified]
+      required: [enabled, mode, fee, bkashNumber, nagadNumber, autoUrl, isVerified, methods]
       properties:
         enabled: { type: boolean }
         mode: { $ref: "#/components/schemas/VerificationMode" }
@@ -1285,13 +1392,17 @@ components:
         nagadNumber: { type: ["string", "null"] }
         autoUrl: { type: ["string", "null"] }
         isVerified: { type: boolean }
+        methods:
+          type: array
+          items:
+            $ref: "#/components/schemas/VerificationPaymentMethod"
         request: { $ref: "#/components/schemas/VerificationRequest" }
 
     VerificationSubmitInput:
       type: object
       required: [method, payerNumber, trxId]
       properties:
-        method: { $ref: "#/components/schemas/WithdrawalMethod" }
+        method: { type: string, minLength: 2, maxLength: 40 }
         payerNumber: { type: string, minLength: 5 }
         trxId: { type: string, minLength: 4 }
         withdrawAmount: { type: number, minimum: 0 }

@@ -103,7 +103,7 @@ export default function AdminVerifications() {
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Fee: <span className="font-bold text-foreground">{formatCurrency(r.fee)}</span>
                       {' · '}
-                      <span className="capitalize font-semibold" style={{ color: r.method === 'bkash' ? '#E2136E' : '#EC1C24' }}>{r.method}</span>
+                      <span className="capitalize font-semibold" style={{ color: r.method === 'bkash' ? '#E2136E' : r.method === 'nagad' ? '#EC1C24' : '#6C21E8' }}>{r.method}</span>
                     </p>
                     <p className="text-xs mt-1">
                       From: <span className="font-mono font-bold select-all">{r.payerNumber}</span>

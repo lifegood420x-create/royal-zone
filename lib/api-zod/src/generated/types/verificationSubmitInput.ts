@@ -8,7 +8,11 @@
 import type { WithdrawalMethod } from './withdrawalMethod';
 
 export interface VerificationSubmitInput {
-  method: WithdrawalMethod;
+  /**
+     * @minLength 2
+     * @maxLength 40
+     */
+  method: string;
   /** @minLength 5 */
   payerNumber: string;
   /** @minLength 4 */

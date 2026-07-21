@@ -18,7 +18,9 @@ export const verificationRequestsTable = pgTable("verification_requests", {
     .notNull()
     .references(() => usersTable.id),
   fee: numeric("fee", { precision: 14, scale: 2, mode: "number" }).notNull(),
-  method: text("method", { enum: withdrawalMethodValues }).notNull(),
+  // Name of the payment method the fee was paid with. Free text (not the
+  // bkash/nagad enum) because admins can add custom methods (Upay, ...).
+  method: text("method").notNull(),
   // The number the user says they paid from, and the payment's transaction id.
   payerNumber: text("payer_number").notNull(),
   trxId: text("trx_id").notNull(),

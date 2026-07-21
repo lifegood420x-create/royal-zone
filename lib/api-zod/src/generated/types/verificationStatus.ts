@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { VerificationMode } from './verificationMode';
+import type { VerificationPaymentMethod } from './verificationPaymentMethod';
 import type { VerificationRequest } from './verificationRequest';
 
 export interface VerificationStatus {
@@ -19,5 +20,6 @@ export interface VerificationStatus {
   /** @nullable */
   autoUrl: string | null;
   isVerified: boolean;
+  methods: VerificationPaymentMethod[];
   request?: VerificationRequest;
 }

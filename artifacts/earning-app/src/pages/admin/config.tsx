@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { 
-  useGetAdminConfig, 
+import {
+  useGetAdminConfig,
   useUpdateAdminConfig,
   useSendBroadcast,
   useGetWebhookStatus,
@@ -8,6 +8,12 @@ import {
   useRegeneratePostbackSecret,
   getGetAdminConfigQueryKey,
   getGetWebhookStatusQueryKey,
+  useListVerificationMethods,
+  useCreateVerificationMethod,
+  useUpdateVerificationMethod,
+  useDeleteVerificationMethod,
+  getListVerificationMethodsQueryKey,
+  PaymentType,
 } from '@workspace/api-client-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { Save, Send, RefreshCw, ServerCog, Settings2, Megaphone, Link2, AlertCircle, ShieldCheck, Copy, KeyRound } from 'lucide-react';
+import { Save, Send, RefreshCw, ServerCog, Settings2, Megaphone, Link2, AlertCircle, ShieldCheck, Copy, KeyRound, Plus, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -539,6 +545,9 @@ export default function AdminConfig() {
                                 </FormItem>
                               )}
                             />
+                            <div className="md:col-span-2">
+                              <VerificationMethodsManager />
+                            </div>
                           </div>
                         ) : (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -769,6 +778,151 @@ export default function AdminConfig() {
           </Card>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Admin-managed extra payment methods for the verification fee (Upay,
+ * Rocket, ...). Each has a receive number, optional logo, and whether the
+ * user should Send Money or Cash Out. Rendered inside the Settings page's
+ * verification section (manual mode).
+ */
+function VerificationMethodsManager() {
+  const { data: methods, isLoading } = useListVerificationMethods();
+  const createMutation = useCreateVerificationMethod();
+  const updateMutation = useUpdateVerificationMethod();
+  const deleteMutation = useDeleteVerificationMethod();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const [name, setName] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [paymentType, setPaymentType] = useState<PaymentType>('send_money' as PaymentType);
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: getListVerificationMethodsQueryKey() });
+
+  const handleAdd = () => {
+    if (name.trim().length < 2 || accountNumber.trim().length < 5) {
+      toast({ title: 'Error', description: 'Name and account number are required.', variant: 'destructive' });
+      return;
+    }
+    createMutation.mutate(
+      {
+        data: {
+          name: name.trim(),
+          accountNumber: accountNumber.trim(),
+          logoUrl: logoUrl.trim() || null,
+          paymentType,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast({ title: 'Method added' });
+          setName('');
+          setAccountNumber('');
+          setLogoUrl('');
+          invalidate();
+        },
+        onError: () => toast({ title: 'Error', description: 'Could not add method.', variant: 'destructive' }),
+      },
+    );
+  };
+
+  return (
+    <div className="rounded-lg border p-4 space-y-3 bg-muted/10">
+      <div>
+        <p className="font-semibold text-sm">Extra Payment Methods</p>
+        <p className="text-[11px] text-muted-foreground">
+          Add more ways to receive the verification fee (Upay, Rocket, ...). These appear in the
+          user's verification popup alongside the bKash/Nagad numbers above.
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="h-10 bg-muted animate-pulse rounded-lg" />
+      ) : methods && methods.length > 0 ? (
+        <div className="space-y-2">
+          {methods.map((m) => (
+            <div key={m.id} className="flex flex-wrap items-center gap-3 rounded-lg border bg-background px-3 py-2">
+              {m.logoUrl ? (
+                <img src={m.logoUrl} alt={m.name} className="w-7 h-7 rounded object-contain border" />
+              ) : (
+                <div className="w-7 h-7 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                  {m.name.charAt(0)}
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold truncate">{m.name}</p>
+                <p className="text-xs text-muted-foreground font-mono">{m.accountNumber}</p>
+              </div>
+              <span className="text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-muted">
+                {m.paymentType === 'send_money' ? 'Send Money' : 'Cash Out'}
+              </span>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={m.isActive}
+                  onCheckedChange={(checked) =>
+                    updateMutation.mutate(
+                      { id: m.id, data: { isActive: checked } },
+                      { onSuccess: invalidate, onError: () => toast({ title: 'Error', variant: 'destructive' }) },
+                    )
+                  }
+                  data-testid={`switch-method-active-${m.id}`}
+                />
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="text-destructive"
+                  onClick={() => {
+                    if (!confirm(`Delete ${m.name}?`)) return;
+                    deleteMutation.mutate(
+                      { id: m.id },
+                      { onSuccess: () => { toast({ title: 'Method deleted' }); invalidate(); }, onError: () => toast({ title: 'Error', variant: 'destructive' }) },
+                    );
+                  }}
+                  data-testid={`button-delete-method-${m.id}`}
+                >
+                  <Trash2 size={15} />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground border border-dashed rounded-lg p-3 text-center">
+          No extra methods yet.
+        </p>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+        <Input placeholder="Name (e.g. Upay)" value={name} onChange={(e) => setName(e.target.value)} data-testid="input-new-method-name" />
+        <Input placeholder="Account number" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} data-testid="input-new-method-number" />
+        <Input placeholder="Logo URL (optional)" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} data-testid="input-new-method-logo" />
+        <div className="grid grid-cols-2 gap-2">
+          {(['send_money', 'cash_out'] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setPaymentType(t as PaymentType)}
+              className={`h-9 rounded-lg text-xs font-bold border transition-colors ${
+                paymentType === t
+                  ? 'bg-primary text-primary-foreground border-transparent'
+                  : 'bg-background text-muted-foreground border-border'
+              }`}
+              data-testid={`select-new-method-type-${t}`}
+            >
+              {t === 'send_money' ? 'Send Money' : 'Cash Out'}
+            </button>
+          ))}
+        </div>
+      </div>
+      <Button type="button" size="sm" onClick={handleAdd} disabled={createMutation.isPending} data-testid="button-add-method">
+        <Plus size={14} className="mr-1" /> Add Method
+      </Button>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { and, desc, eq } from "drizzle-orm";
-import { db, verificationRequestsTable } from "@workspace/db";
+import { and, asc, desc, eq } from "drizzle-orm";
+import { db, verificationRequestsTable, verificationPaymentMethodsTable } from "@workspace/db";
 import {
   GetVerificationStatusResponse,
   SubmitVerificationBody,
@@ -17,12 +17,19 @@ router.get("/verification/status", requireAuth, async (req, res): Promise<void> 
   const user = req.currentUser!;
   const config = await getAppConfig();
 
-  const [latest] = await db
-    .select()
-    .from(verificationRequestsTable)
-    .where(eq(verificationRequestsTable.userId, user.id))
-    .orderBy(desc(verificationRequestsTable.createdAt))
-    .limit(1);
+  const [[latest], methods] = await Promise.all([
+    db
+      .select()
+      .from(verificationRequestsTable)
+      .where(eq(verificationRequestsTable.userId, user.id))
+      .orderBy(desc(verificationRequestsTable.createdAt))
+      .limit(1),
+    db
+      .select()
+      .from(verificationPaymentMethodsTable)
+      .where(eq(verificationPaymentMethodsTable.isActive, true))
+      .orderBy(asc(verificationPaymentMethodsTable.sortOrder), asc(verificationPaymentMethodsTable.id)),
+  ]);
 
   res.json(
     GetVerificationStatusResponse.parse({
@@ -33,6 +40,7 @@ router.get("/verification/status", requireAuth, async (req, res): Promise<void> 
       nagadNumber: config.verificationNagadNumber,
       autoUrl: config.verificationAutoUrl,
       isVerified: user.isVerified,
+      methods,
       ...(latest ? { request: latest } : {}),
     }),
   );
