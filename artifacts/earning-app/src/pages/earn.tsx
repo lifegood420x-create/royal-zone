@@ -360,13 +360,12 @@ export default function Earn() {
                         // can revisit the channel/page from the task card.
                         task.link ? (
                           <button
-                            className="flex items-center text-sm font-bold px-3 py-1.5 rounded-xl active:scale-95 transition-transform"
-                            style={{ color: '#6C21E8', background: '#EDE0FF' }}
+                            className="font-bold text-sm rounded-xl px-4 py-2 border border-purple-200 flex items-center gap-1.5 active:scale-95 transition-transform"
+                            style={{ color: '#6C21E8', background: '#F8F4FF' }}
                             onClick={() => window.open(task.link!, '_blank')}
                             data-testid={`button-visit-done-task-${task.id}`}
                           >
-                            <CheckCircle2 size={15} className="mr-1.5" /> Done
-                            <ExternalLink size={12} className="ml-1.5" />
+                            Join <ExternalLink size={13} />
                           </button>
                         ) : (
                           <div className="flex items-center text-sm font-bold px-3 py-1.5 rounded-xl" style={{ color: '#6C21E8', background: '#EDE0FF' }}>
