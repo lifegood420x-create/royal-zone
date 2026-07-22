@@ -1,8 +1,7 @@
 import { usersTable, db, type User } from "@workspace/db";
-import { and, eq, gte, ne, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { getAppConfig } from "./config";
 import type { TelegramUserInfo } from "./telegram";
-import { checkIpForVpn } from "./vpn-check";
 
 function generateReferralCode(): string {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase();
@@ -18,9 +17,8 @@ async function findUniqueReferralCode(): Promise<string> {
 }
 
 /**
- * Finds the existing user by Telegram ID, or creates one — handling
- * referral crediting and same-device fake-referral flagging on first
- * registration. Always refreshes `lastActiveAt`.
+ * Finds the existing user by Telegram ID, or creates one — crediting the
+ * referral bonus on first registration. Always refreshes `lastActiveAt`.
  */
 export async function upsertTelegramUser(
   info: TelegramUserInfo,
@@ -39,8 +37,8 @@ export async function upsertTelegramUser(
       })
       .where(eq(usersTable.id, existing.id))
       .returning();
-    // A webhook signup left the referral bonus unsettled — now that the
-    // user is here with a real IP/device, run the fraud checks and settle.
+    // A webhook signup from before fraud checks were removed may have left
+    // the referral bonus unsettled — settle (credit) it now.
     if (updated.referralPending) {
       return await settlePendingReferral(updated, opts);
     }
@@ -58,52 +56,6 @@ export async function upsertTelegramUser(
     referrer = found ?? null;
   }
 
-  // Anti-fraud: referral farming — one person creates account A (referrer),
-  // then spins up B, C, D... on the SAME DEVICE, each using A's referral code.
-  // Detection is device-based (persistent client-generated ID stored in
-  // localStorage) rather than IP-based, so family members sharing a Wi-Fi
-  // router are never penalised. If no deviceId is provided (old client), fall
-  // back gracefully — no flag.
-  let hasSiblingWithSameDevice = false;
-  if (referrer && opts.deviceId) {
-    const [sibling] = await db
-      .select({ id: usersTable.id })
-      .from(usersTable)
-      .where(and(
-        eq(usersTable.referredBy, referrer.id),
-        eq(usersTable.registrationDevice, opts.deviceId),
-      ));
-    hasSiblingWithSameDevice = !!sibling;
-  }
-
-  const isSameDeviceAsReferrer =
-    !!referrer &&
-    !!opts.deviceId &&
-    !!referrer.registrationDevice &&
-    referrer.registrationDevice === opts.deviceId;
-
-  // Neither case auto-bans — fake-referral accounts are: (1) denied the
-  // referral bonus and (2) blocked from ad rewards (see isFlagged in ads.ts).
-  const isFakeReferralChain = hasSiblingWithSameDevice;
-  const isSuspiciousFirstSignup = isSameDeviceAsReferrer && !hasSiblingWithSameDevice;
-
-  // VPN / proxy check on first signup
-  const vpnResult = await checkIpForVpn(opts.ip);
-
-  // Bot-webhook signups carry no IP or device id, so none of the fraud
-  // checks above could actually run. Park the referral bonus instead of
-  // paying it unchecked — it is settled on the first Mini App open.
-  const deferReferral = !!referrer && !opts.ip && !opts.deviceId;
-
-  const shouldFlag = isFakeReferralChain || isSuspiciousFirstSignup || vpnResult.isVpn;
-  const flagReason = isFakeReferralChain
-    ? "Fake referral chain: same device reused under the same referrer. Referral bonus denied and ad rewards blocked."
-    : isSuspiciousFirstSignup
-      ? "Self/fake referral (same device as referrer). Referral bonus denied and ad rewards blocked."
-      : vpnResult.isVpn
-        ? vpnResult.reason
-        : null;
-
   let created: User;
   try {
     const [inserted] = await db
@@ -115,12 +67,12 @@ export async function upsertTelegramUser(
         photoUrl: info.photoUrl,
         referralCode,
         referredBy: referrer?.id ?? null,
-        referralPending: deferReferral,
+        referralPending: false,
         registrationIp: opts.ip ?? null,
         registrationDevice: opts.deviceId ?? null,
         isBanned: false,
-        isFlagged: shouldFlag,
-        flagReason,
+        isFlagged: false,
+        flagReason: null,
       })
       .returning();
     created = inserted;
@@ -135,16 +87,7 @@ export async function upsertTelegramUser(
     return existingRow;
   }
 
-  // Credit the referrer's bonus only when every fraud signal is clean —
-  // fake-device chains, self referrals AND VPN/proxy signups are all denied.
-  // Deferred (webhook) referrals are settled later instead.
-  if (
-    referrer &&
-    !deferReferral &&
-    !isFakeReferralChain &&
-    !isSuspiciousFirstSignup &&
-    !vpnResult.isVpn
-  ) {
+  if (referrer) {
     await creditReferrer(referrer.id);
   }
 
@@ -163,52 +106,18 @@ async function creditReferrer(referrerId: number): Promise<void> {
 }
 
 /**
- * Settles a referral bonus that was parked at webhook-signup time (no
- * IP/device available then). Runs the same fraud checks as a direct
- * Mini App signup, then either credits the referrer or flags the user.
- * The conditional update on referral_pending makes concurrent first
- * requests settle (and pay) at most once.
+ * Settles a referral bonus that was parked at webhook-signup time (from
+ * before fraud checks were removed) and credits the referrer. The
+ * conditional update on referral_pending makes concurrent first requests
+ * settle (and pay) at most once.
  */
 async function settlePendingReferral(
   user: User,
   opts: { ip?: string | null; deviceId?: string | null },
 ): Promise<User> {
-  // Still no identity signals (e.g. another webhook update) — keep waiting.
-  if (!opts.ip && !opts.deviceId) return user;
-
   const referrer = user.referredBy
     ? (await db.select().from(usersTable).where(eq(usersTable.id, user.referredBy)))[0] ?? null
     : null;
-
-  let hasSiblingWithSameDevice = false;
-  if (referrer && opts.deviceId) {
-    const [sibling] = await db
-      .select({ id: usersTable.id })
-      .from(usersTable)
-      .where(and(
-        eq(usersTable.referredBy, referrer.id),
-        eq(usersTable.registrationDevice, opts.deviceId),
-        ne(usersTable.id, user.id),
-      ));
-    hasSiblingWithSameDevice = !!sibling;
-  }
-
-  const isSameDeviceAsReferrer =
-    !!referrer &&
-    !!opts.deviceId &&
-    !!referrer.registrationDevice &&
-    referrer.registrationDevice === opts.deviceId;
-
-  const vpnResult = await checkIpForVpn(opts.ip);
-
-  const shouldFlag = hasSiblingWithSameDevice || isSameDeviceAsReferrer || vpnResult.isVpn;
-  const flagReason = hasSiblingWithSameDevice
-    ? "Fake referral chain: same device reused under the same referrer. Referral bonus denied and ad rewards blocked."
-    : isSameDeviceAsReferrer
-      ? "Self/fake referral (same device as referrer). Referral bonus denied and ad rewards blocked."
-      : vpnResult.isVpn
-        ? vpnResult.reason
-        : null;
 
   const [settled] = await db
     .update(usersTable)
@@ -216,7 +125,6 @@ async function settlePendingReferral(
       referralPending: false,
       registrationIp: user.registrationIp ?? opts.ip ?? null,
       registrationDevice: user.registrationDevice ?? opts.deviceId ?? null,
-      ...(shouldFlag ? { isFlagged: true, flagReason } : {}),
     })
     .where(and(eq(usersTable.id, user.id), eq(usersTable.referralPending, true)))
     .returning();
@@ -224,7 +132,7 @@ async function settlePendingReferral(
   // Another concurrent request already settled it — don't credit twice.
   if (!settled) return user;
 
-  if (referrer && !shouldFlag) {
+  if (referrer) {
     await creditReferrer(referrer.id);
   }
 

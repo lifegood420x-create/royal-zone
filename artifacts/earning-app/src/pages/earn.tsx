@@ -13,20 +13,11 @@ import { showRewardedAd } from '../lib/rewarded-ads';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { Play, CheckCircle2, ExternalLink, Loader2, PlayCircle, Clock, ShieldOff, AlertTriangle } from 'lucide-react';
+import { Play, CheckCircle2, ExternalLink, Loader2, PlayCircle, Clock } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency } from '../lib/utils';
 import { TaskIcon, getTaskIconConfig } from '../lib/task-icons';
 
-/** Format remaining seconds as H:MM:SS or MM:SS */
-function formatTimeRemaining(ms: number): string {
-  const total = Math.max(0, Math.ceil(ms / 1000));
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-}
 
 export default function Earn() {
   const { data: user, refetch: refetchUser } = useGetMe();
@@ -36,25 +27,12 @@ export default function Earn() {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [completingTask, setCompletingTask] = useState<number | null>(null);
   const [visitingTask, setVisitingTask] = useState<number | null>(null);
-  // VPN block countdown (ms remaining)
-  const [vpnBlockMs, setVpnBlockMs] = useState<number>(0);
 
   const watchAdMutation = useWatchAd();
   const claimAdMutation = useClaimAd();
   const completeTaskMutation = useCompleteTask();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  // VPN block countdown ticker — vpnBlockedUntil is a Date object from the schema
-  const vpnBlockUntil = user?.vpnBlockedUntil ?? null;
-  useEffect(() => {
-    if (!vpnBlockUntil) { setVpnBlockMs(0); return; }
-    const target = new Date(vpnBlockUntil).getTime();
-    const tick = () => setVpnBlockMs(Math.max(0, target - Date.now()));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [vpnBlockUntil]);
 
   const runCountdown = (seconds: number): Promise<void> => {
     return new Promise((resolve) => {
@@ -97,24 +75,16 @@ export default function Earn() {
             },
             onError: (err: any) => {
               const body = err?.data as any;
-              if (body?.error === 'vpn_block') {
-                queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
-              } else {
-                const msg = body?.error || err?.message || 'Something went wrong while crediting your reward.';
-                toast({ title: 'Error', description: msg, variant: 'destructive' });
-              }
+              const msg = body?.error || err?.message || 'Something went wrong while crediting your reward.';
+              toast({ title: 'Error', description: msg, variant: 'destructive' });
             }
           }
         );
       }
     } catch (err: any) {
       const body = err?.data as any;
-      if (body?.error === 'vpn_block') {
-        queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
-      } else {
-        const msg = body?.error || err?.message || 'Could not load ad.';
-        toast({ title: 'Ad failed', description: msg, variant: 'destructive' });
-      }
+      const msg = body?.error || err?.message || 'Could not load ad.';
+      toast({ title: 'Ad failed', description: msg, variant: 'destructive' });
     } finally {
       setActiveAd(null);
       setCountdown(null);
@@ -223,53 +193,7 @@ export default function Earn() {
 
           {/* Buttons section */}
           <div className="px-5 py-4">
-            {/* VPN block notice — shown when user has an active 12-hour block */}
-            {vpnBlockMs > 0 ? (
-              <div className="rounded-xl p-4 flex flex-col gap-3" style={{ background: '#FFF4EC', border: '1.5px solid #FFD0AA' }}>
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #FF7B4A, #E8347A)' }}>
-                    <ShieldOff size={18} color="white" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-black text-sm" style={{ color: '#C44B0A' }}>বিজ্ঞাপন সাময়িকভাবে বন্ধ</p>
-                    <p className="text-xs mt-0.5" style={{ color: '#9A4B1A' }}>
-                      VPN বা প্রক্সি সংযোগ শনাক্ত হয়েছে। নিরাপত্তার কারণে বিজ্ঞাপন দেখা সাময়িকভাবে বন্ধ করা হয়েছে।
-                    </p>
-                  </div>
-                </div>
-                {/* reason */}
-                {user?.flagReason && (
-                  <div className="rounded-lg px-3 py-2 text-xs" style={{ background: '#FFE8D4', color: '#7A3010' }}>
-                    <span className="font-bold">কারণ: </span>{user.flagReason}
-                  </div>
-                )}
-                {/* countdown */}
-                <div className="rounded-xl px-4 py-3 flex items-center justify-between" style={{ background: 'white', border: '1px solid #FFD0AA' }}>
-                  <div>
-                    <p className="text-xs font-semibold" style={{ color: '#9A4B1A' }}>সময় শেষ হলে আবার দেখতে পারবেন</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">VPN বন্ধ করুন এবং অপেক্ষা করুন</p>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Clock size={14} style={{ color: '#E8347A' }} />
-                    <span className="font-black text-base tabular-nums" style={{ color: '#E8347A' }}>
-                      {formatTimeRemaining(vpnBlockMs)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ) : user?.isFlagged ? (
-              <div className="rounded-xl p-4 flex items-start gap-3" style={{ background: '#FFF0F0', border: '1.5px solid #FFB8B8' }}>
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #E8347A, #C4000D)' }}>
-                  <AlertTriangle size={18} color="white" />
-                </div>
-                <div>
-                  <p className="font-black text-sm" style={{ color: '#9A0010' }}>বিজ্ঞাপন স্থায়ীভাবে বন্ধ</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#7A0010' }}>
-                    বারবার VPN ব্যবহারের কারণে এই অ্যাকাউন্টে বিজ্ঞাপন দেখার সুবিধা বন্ধ করা হয়েছে।
-                  </p>
-                </div>
-              </div>
-            ) : (config?.monetagEnabled || config?.adsgramEnabled) ? (
+            {(config?.monetagEnabled || config?.adsgramEnabled) ? (
               <div className="grid grid-cols-2 gap-3">
                 {config?.monetagEnabled && (
                   <button

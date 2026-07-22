@@ -6,7 +6,6 @@ import { requireAuth } from "../middlewares/auth";
 import { toApiUser } from "../lib/serialize";
 import { getAppConfig } from "../lib/config";
 import { todaysAdCount, recordAdWatch } from "../lib/users";
-import { checkIpForVpn } from "../lib/vpn-check";
 
 const router: IRouter = Router();
 
@@ -19,47 +18,6 @@ router.post("/ads/watch", requireAuth, async (req, res): Promise<void> => {
 
   const user = req.currentUser!;
   const logCtx = { userId: user.id, username: user.username, network: parsed.data.network };
-
-  if (user.isFlagged) {
-    res.status(403).json({ error: "Ad rewards are disabled for this account." });
-    return;
-  }
-
-  // Check active VPN block (first-strike 12h temporary ban)
-  if (user.vpnBlockUntil && new Date(user.vpnBlockUntil) > new Date()) {
-    res.status(403).json({
-      error: "vpn_block",
-      blockedUntil: user.vpnBlockUntil,
-      reason: user.flagReason,
-    });
-    return;
-  }
-
-  // Real-time VPN check — tiered: 1st offence = 12h block, 2nd = permanent flag
-  const requestIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.ip;
-  const vpnResult = await checkIpForVpn(requestIp);
-  if (vpnResult.isVpn) {
-    const strikes = (user.vpnStrikeCount ?? 0) + 1;
-    if (strikes >= 2) {
-      // 2nd offence — permanent flag
-      await db.update(usersTable)
-        .set({ isFlagged: true, flagReason: vpnResult.reason, vpnStrikeCount: strikes, vpnBlockUntil: null })
-        .where(eq(usersTable.id, user.id));
-      res.status(403).json({ error: "Ad rewards are permanently disabled for this account." });
-    } else {
-      // 1st offence — 12h temporary block
-      const blockedUntil = new Date(Date.now() + 12 * 60 * 60 * 1000);
-      await db.update(usersTable)
-        .set({ vpnStrikeCount: strikes, vpnBlockUntil: blockedUntil, flagReason: vpnResult.reason })
-        .where(eq(usersTable.id, user.id));
-      res.status(403).json({
-        error: "vpn_block",
-        blockedUntil: blockedUntil.toISOString(),
-        reason: vpnResult.reason,
-      });
-    }
-    return;
-  }
 
   const config = await getAppConfig();
 
@@ -125,45 +83,6 @@ router.post("/ads/claim", requireAuth, async (req, res): Promise<void> => {
   }
 
   const user = req.currentUser!;
-
-  if (user.isFlagged) {
-    res.status(403).json({ error: "Ad rewards are disabled for this account." });
-    return;
-  }
-
-  // Check active VPN block (first-strike 12h temporary ban)
-  if (user.vpnBlockUntil && new Date(user.vpnBlockUntil) > new Date()) {
-    res.status(403).json({
-      error: "vpn_block",
-      blockedUntil: user.vpnBlockUntil,
-      reason: user.flagReason,
-    });
-    return;
-  }
-
-  // Real-time VPN check — tiered: 1st offence = 12h block, 2nd = permanent flag
-  const claimIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.ip;
-  const claimVpn = await checkIpForVpn(claimIp);
-  if (claimVpn.isVpn) {
-    const strikes = (user.vpnStrikeCount ?? 0) + 1;
-    if (strikes >= 2) {
-      await db.update(usersTable)
-        .set({ isFlagged: true, flagReason: claimVpn.reason, vpnStrikeCount: strikes, vpnBlockUntil: null })
-        .where(eq(usersTable.id, user.id));
-      res.status(403).json({ error: "Ad rewards are permanently disabled for this account." });
-    } else {
-      const blockedUntil = new Date(Date.now() + 12 * 60 * 60 * 1000);
-      await db.update(usersTable)
-        .set({ vpnStrikeCount: strikes, vpnBlockUntil: blockedUntil, flagReason: claimVpn.reason })
-        .where(eq(usersTable.id, user.id));
-      res.status(403).json({
-        error: "vpn_block",
-        blockedUntil: blockedUntil.toISOString(),
-        reason: claimVpn.reason,
-      });
-    }
-    return;
-  }
 
   const config = await getAppConfig();
   const currentCount = todaysAdCount(user);
