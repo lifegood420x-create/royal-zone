@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react';
-import {
-  useGetMe,
-  useGetPublicConfig,
-  useListTasks,
-  useListPublicAdNetworks,
-  useWatchAd,
+import { 
+  useGetMe, 
+  useGetPublicConfig, 
+  useListTasks, 
+  useWatchAd, 
   useClaimAd,
   useCompleteTask,
   getGetMeQueryKey,
   getListTasksQueryKey,
-  type PublicAdNetwork,
 } from '@workspace/api-client-react';
-import { showRewardedAd, showNetworkAd } from '../lib/rewarded-ads';
+import { showRewardedAd } from '../lib/rewarded-ads';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
@@ -25,8 +23,7 @@ export default function Earn() {
   const { data: user, refetch: refetchUser } = useGetMe();
   const { data: config } = useGetPublicConfig();
   const { data: tasks, isLoading: tasksLoading } = useListTasks();
-  const { data: adNetworks } = useListPublicAdNetworks();
-  const [activeAd, setActiveAd] = useState<string | null>(null);
+  const [activeAd, setActiveAd] = useState<'monetag' | 'adsgram' | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [completingTask, setCompletingTask] = useState<number | null>(null);
   const [visitingTask, setVisitingTask] = useState<number | null>(null);
@@ -52,22 +49,23 @@ export default function Earn() {
     });
   };
 
-  const runAdFlow = async (network: string, show: (requestVar?: string) => Promise<void>) => {
+  const handleWatchAd = async (network: 'monetag' | 'adsgram') => {
     if (!config) return;
     setActiveAd(network);
     try {
+      const zoneId = network === 'monetag' ? config.monetagZoneId : config.adsgramBlockId;
       const durationSeconds = config.adDurationSeconds || 15;
 
       if (config.requireAdPostback) {
         const claim = await claimAdMutation.mutateAsync({ data: { network } });
-        await Promise.all([show(claim.claimId), runCountdown(durationSeconds)]);
+        await Promise.all([showRewardedAd(network, zoneId, claim.claimId), runCountdown(durationSeconds)]);
         toast({
           title: 'Ad watched',
           description: 'Reward will be credited once the ad network confirms the view.',
         });
         setTimeout(() => queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() }), 5000);
       } else {
-        await Promise.all([show(undefined), runCountdown(durationSeconds)]);
+        await Promise.all([showRewardedAd(network, zoneId), runCountdown(durationSeconds)]);
         watchAdMutation.mutate(
           { data: { network } },
           {
@@ -92,15 +90,6 @@ export default function Earn() {
       setCountdown(null);
     }
   };
-
-  const handleWatchAd = (network: 'monetag' | 'adsgram') => {
-    if (!config) return;
-    const zoneId = network === 'monetag' ? config.monetagZoneId : config.adsgramBlockId;
-    return runAdFlow(network, (requestVar) => showRewardedAd(network, zoneId, requestVar));
-  };
-
-  const handleWatchNetworkAd = (net: PublicAdNetwork) =>
-    runAdFlow(net.name, (requestVar) => showNetworkAd(net, requestVar));
 
   const handleClaimTask = (taskId: number) => {
     setCompletingTask(taskId);
@@ -195,7 +184,7 @@ export default function Earn() {
                 style={{ width: `${adProgress}%`, background: 'linear-gradient(90deg, #6C21E8, #E8347A)' }}
               />
             </div>
-            {adsLeft === 0 && (config?.monetagEnabled || config?.adsgramEnabled || (adNetworks && adNetworks.length > 0)) && (
+            {adsLeft === 0 && (config?.monetagEnabled || config?.adsgramEnabled) && (
               <p className="text-xs text-center text-muted-foreground mt-3 font-medium">
                 🎉 You've reached your daily limit. Come back tomorrow!
               </p>
@@ -204,7 +193,7 @@ export default function Earn() {
 
           {/* Buttons section */}
           <div className="px-5 py-4">
-            {(config?.monetagEnabled || config?.adsgramEnabled || (adNetworks && adNetworks.length > 0)) ? (
+            {(config?.monetagEnabled || config?.adsgramEnabled) ? (
               <div className="grid grid-cols-2 gap-3">
                 {config?.monetagEnabled && (
                   <button
@@ -236,22 +225,6 @@ export default function Earn() {
                     )}
                   </button>
                 )}
-                {adNetworks?.map((net) => (
-                  <button
-                    key={net.id}
-                    disabled={adsLeft === 0 || activeAd !== null}
-                    onClick={() => handleWatchNetworkAd(net)}
-                    className="rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white disabled:opacity-50 active:scale-95 transition-all"
-                    style={{ background: 'linear-gradient(135deg, #0E9F6E, #1C64F2)' }}
-                    data-testid={`button-ad-network-${net.id}`}
-                  >
-                    {activeAd === net.name ? (
-                      <Loader2 className="animate-spin" size={18} />
-                    ) : (
-                      <><Play size={15} fill="white" color="white" /> {net.name}</>
-                    )}
-                  </button>
-                ))}
               </div>
             ) : (
               <p className="text-sm text-center text-muted-foreground py-3 font-medium" data-testid="text-ads-unavailable">

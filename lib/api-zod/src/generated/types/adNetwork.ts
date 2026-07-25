@@ -6,7 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-/**
- * Ad network key — "monetag", "adsgram", or the name of a custom admin-defined network.
- */
-export type AdNetwork = string;
+export type AdNetwork = typeof AdNetwork[keyof typeof AdNetwork];
+
+
+export const AdNetwork = {
+  monetag: 'monetag',
+  adsgram: 'adsgram',
+} as const;
