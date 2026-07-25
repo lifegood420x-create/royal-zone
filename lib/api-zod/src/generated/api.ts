@@ -201,7 +201,7 @@ export const ListPublicAdNetworksResponse = zod.array(ListPublicAdNetworksRespon
  * @summary Record a completed rewarded ad view and credit the reward
  */
 export const WatchAdBody = zod.object({
-  "network": zod.enum(['monetag', 'adsgram'])
+  "network": zod.string().describe('Ad network key — \"monetag\", \"adsgram\", or the name of a custom admin-defined network.')
 })
 
 export const WatchAdResponse = zod.object({
@@ -231,7 +231,7 @@ export const WatchAdResponse = zod.object({
 }),
   "adWatch": zod.object({
   "id": zod.number(),
-  "network": zod.enum(['monetag', 'adsgram']),
+  "network": zod.string().describe('Ad network key — \"monetag\", \"adsgram\", or the name of a custom admin-defined network.'),
   "reward": zod.number(),
   "watchedAt": zod.coerce.date()
 })
@@ -242,7 +242,7 @@ export const WatchAdResponse = zod.object({
  * @summary Reserve a daily ad-watch slot before showing the ad, for postback-verified crediting
  */
 export const ClaimAdBody = zod.object({
-  "network": zod.enum(['monetag', 'adsgram'])
+  "network": zod.string().describe('Ad network key — \"monetag\", \"adsgram\", or the name of a custom admin-defined network.')
 })
 
 export const ClaimAdResponse = zod.object({

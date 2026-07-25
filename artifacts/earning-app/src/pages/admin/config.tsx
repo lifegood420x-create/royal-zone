@@ -13,7 +13,13 @@ import {
   useUpdateVerificationMethod,
   useDeleteVerificationMethod,
   getListVerificationMethodsQueryKey,
+  useListAdminAdNetworks,
+  useCreateAdNetwork,
+  useUpdateAdNetwork,
+  useDeleteAdNetwork,
+  getListAdminAdNetworksQueryKey,
   PaymentType,
+  AdNetworkSdkType,
 } from '@workspace/api-client-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -386,6 +392,8 @@ export default function AdminConfig() {
                         )}
                       />
                     </div>
+
+                    <AdNetworksManager />
                   </div>
 
                   <div className="space-y-4">
@@ -922,6 +930,176 @@ function VerificationMethodsManager() {
       </div>
       <Button type="button" size="sm" onClick={handleAdd} disabled={createMutation.isPending} data-testid="button-add-method">
         <Plus size={14} className="mr-1" /> Add Method
+      </Button>
+    </div>
+  );
+}
+
+function AdNetworksManager() {
+  const { data: networks, isLoading } = useListAdminAdNetworks();
+  const createMutation = useCreateAdNetwork();
+  const updateMutation = useUpdateAdNetwork();
+  const deleteMutation = useDeleteAdNetwork();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const [name, setName] = useState('');
+  const [sdkType, setSdkType] = useState<AdNetworkSdkType>('monetag' as AdNetworkSdkType);
+  const [zoneId, setZoneId] = useState('');
+  const [sdkUrl, setSdkUrl] = useState('');
+  const [callTemplate, setCallTemplate] = useState('');
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: getListAdminAdNetworksQueryKey() });
+
+  const handleAdd = () => {
+    if (name.trim().length < 2 || zoneId.trim().length < 1) {
+      toast({ title: 'Error', description: 'Name and Zone/Block ID are required.', variant: 'destructive' });
+      return;
+    }
+    if (sdkType === 'custom' && !sdkUrl.trim() && !callTemplate.trim()) {
+      toast({ title: 'Error', description: 'Custom networks need an SDK Script URL or a Call Template.', variant: 'destructive' });
+      return;
+    }
+    createMutation.mutate(
+      {
+        data: {
+          name: name.trim(),
+          sdkType,
+          zoneId: zoneId.trim(),
+          sdkUrl: sdkUrl.trim() || null,
+          callTemplate: callTemplate.trim() || null,
+          isEnabled: true,
+          sortOrder: (networks?.length ?? 0) + 1,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast({ title: 'Ad network added' });
+          setName('');
+          setZoneId('');
+          setSdkUrl('');
+          setCallTemplate('');
+          invalidate();
+        },
+        onError: () => toast({ title: 'Error', description: 'Could not add ad network.', variant: 'destructive' }),
+      },
+    );
+  };
+
+  return (
+    <div className="rounded-lg border p-4 space-y-3 bg-muted/10">
+      <div>
+        <p className="font-semibold text-sm">Extra Ad Networks</p>
+        <p className="text-[11px] text-muted-foreground">
+          Add more ad providers without any code change. Each enabled network gets its own watch
+          button on the Earn page. Monetag/Adsgram type only needs a Zone/Block ID; Custom type
+          takes the provider's script link and/or the JS call that shows the ad
+          (placeholders: {'{{ZONE_ID}}'} and {'{{REQUEST_VAR}}'}).
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="h-10 bg-muted animate-pulse rounded-lg" />
+      ) : networks && networks.length > 0 ? (
+        <div className="space-y-2">
+          {networks.map((n) => (
+            <div key={n.id} className="flex flex-wrap items-center gap-3 rounded-lg border bg-background px-3 py-2">
+              <div className="w-7 h-7 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                {n.name.charAt(0)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold truncate">{n.name}</p>
+                <p className="text-xs text-muted-foreground font-mono truncate">
+                  {n.zoneId}{n.sdkUrl ? ` · ${n.sdkUrl}` : ''}
+                </p>
+              </div>
+              <span className="text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-muted">
+                {n.sdkType}
+              </span>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={n.isEnabled}
+                  onCheckedChange={(checked) =>
+                    updateMutation.mutate(
+                      {
+                        id: n.id,
+                        data: {
+                          name: n.name,
+                          sdkType: n.sdkType,
+                          zoneId: n.zoneId,
+                          sdkUrl: n.sdkUrl,
+                          callTemplate: n.callTemplate,
+                          isEnabled: checked,
+                          sortOrder: n.sortOrder,
+                        },
+                      },
+                      { onSuccess: invalidate, onError: () => toast({ title: 'Error', variant: 'destructive' }) },
+                    )
+                  }
+                  data-testid={`switch-ad-network-enabled-${n.id}`}
+                />
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="text-destructive"
+                  onClick={() => {
+                    if (!confirm(`Delete ${n.name}?`)) return;
+                    deleteMutation.mutate(
+                      { id: n.id },
+                      { onSuccess: () => { toast({ title: 'Ad network deleted' }); invalidate(); }, onError: () => toast({ title: 'Error', variant: 'destructive' }) },
+                    );
+                  }}
+                  data-testid={`button-delete-ad-network-${n.id}`}
+                >
+                  <Trash2 size={15} />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground border border-dashed rounded-lg p-3 text-center">
+          No extra ad networks yet.
+        </p>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+        <Input placeholder="Name (e.g. Monetag 2)" value={name} onChange={(e) => setName(e.target.value)} data-testid="input-new-ad-network-name" />
+        <div className="grid grid-cols-3 gap-2">
+          {(['monetag', 'adsgram', 'custom'] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setSdkType(t as AdNetworkSdkType)}
+              className={`h-9 rounded-lg text-xs font-bold border transition-colors capitalize ${
+                sdkType === t
+                  ? 'bg-primary text-primary-foreground border-transparent'
+                  : 'bg-background text-muted-foreground border-border'
+              }`}
+              data-testid={`select-new-ad-network-type-${t}`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+        <Input placeholder="Zone / Block ID" value={zoneId} onChange={(e) => setZoneId(e.target.value)} data-testid="input-new-ad-network-zone" />
+        {sdkType === 'custom' && (
+          <>
+            <Input placeholder="SDK Script URL (optional)" value={sdkUrl} onChange={(e) => setSdkUrl(e.target.value)} data-testid="input-new-ad-network-sdk-url" />
+            <Input
+              placeholder="Call Template e.g. window.showAd('{{ZONE_ID}}')"
+              value={callTemplate}
+              onChange={(e) => setCallTemplate(e.target.value)}
+              className="md:col-span-2"
+              data-testid="input-new-ad-network-call-template"
+            />
+          </>
+        )}
+      </div>
+      <Button type="button" size="sm" onClick={handleAdd} disabled={createMutation.isPending} data-testid="button-add-ad-network">
+        <Plus size={14} className="mr-1" /> Add Ad Network
       </Button>
     </div>
   );

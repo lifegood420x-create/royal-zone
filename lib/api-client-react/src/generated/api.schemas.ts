@@ -38,13 +38,10 @@ export const WithdrawalStatus = {
   rejected: 'rejected',
 } as const;
 
-export type AdNetwork = typeof AdNetwork[keyof typeof AdNetwork];
-
-
-export const AdNetwork = {
-  monetag: 'monetag',
-  adsgram: 'adsgram',
-} as const;
+/**
+ * Ad network key — "monetag", "adsgram", or the name of a custom admin-defined network.
+ */
+export type AdNetwork = string;
 
 export type AdNetworkSdkType = typeof AdNetworkSdkType[keyof typeof AdNetworkSdkType];
 

@@ -844,7 +844,7 @@ components:
 
     AdNetwork:
       type: string
-      enum: [monetag, adsgram]
+      description: Ad network key — "monetag", "adsgram", or the name of a custom admin-defined network.
 
     AdNetworkSdkType:
       type: string

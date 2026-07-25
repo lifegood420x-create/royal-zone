@@ -3,7 +3,6 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
 
-export const adNetworkValues = ["monetag", "adsgram"] as const;
 export const adWatchSourceValues = ["client", "postback"] as const;
 export const adWatchStatusValues = ["pending", "confirmed"] as const;
 
@@ -12,7 +11,8 @@ export const adWatchesTable = pgTable("ad_watches", {
   userId: integer("user_id")
     .notNull()
     .references(() => usersTable.id),
-  network: text("network", { enum: adNetworkValues }).notNull(),
+  // Free-form network key — "monetag", "adsgram", or a custom admin-defined network name.
+  network: text("network").notNull(),
   reward: numeric("reward", { precision: 14, scale: 2, mode: "number" }).notNull(),
   watchedAt: timestamp("watched_at", { withTimezone: true }).notNull().defaultNow(),
   // "client" = credited immediately when the browser reported completion
