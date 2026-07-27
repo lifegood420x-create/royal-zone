@@ -357,9 +357,9 @@ export default function AdminConfig() {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-muted/20">
                             <div className="space-y-0.5">
-                              <FormLabel>Monetag Ads</FormLabel>
+                              <FormLabel>Video Ads (GigaPub)</FormLabel>
                               <p className="text-[10px] text-muted-foreground">
-                                Turn off to hide the Monetag "Server 1" button from users.
+                                Turn off to hide the "Watch" ad button from users.
                               </p>
                             </div>
                             <FormControl>
@@ -374,9 +374,9 @@ export default function AdminConfig() {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-muted/20">
                             <div className="space-y-0.5">
-                              <FormLabel>Adsgram Ads</FormLabel>
+                              <FormLabel>Adsgram Ads (unused)</FormLabel>
                               <p className="text-[10px] text-muted-foreground">
-                                Turn off to hide the Adsgram "Server 2" button from users.
+                                No longer shown — the app now serves GigaPub ads via the "Watch" button.
                               </p>
                             </div>
                             <FormControl>

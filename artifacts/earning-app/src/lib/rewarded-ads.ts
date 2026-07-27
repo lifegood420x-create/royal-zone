@@ -1,8 +1,8 @@
 /**
- * Rewarded ad loading — supports Monetag and Adsgram.
+ * Rewarded ad loading — GigaPub.
  */
 
-export type AdNetwork = 'monetag' | 'adsgram';
+const GIGAPUB_SCRIPT = 'https://ad.gigapub.tech/script?id=7478';
 
 const loadedScripts = new Set<string>();
 
@@ -27,37 +27,17 @@ function loadScript(src: string, attrs: Record<string, string> = {}): Promise<vo
 
 declare global {
   interface Window {
-    Adsgram?: {
-      init: (opts: { blockId: string }) => {
-        show: (params?: Record<string, string>) => Promise<void>;
-      };
-    };
-    [key: `show_${string}`]: ((params?: Record<string, string>) => Promise<void>) | undefined;
+    showGiga?: () => Promise<void>;
   }
 }
 
-async function showMonetagAd(zoneId: string, requestVar?: string): Promise<void> {
-  const fnName = `show_${zoneId}` as const;
-  await loadScript('https://libtl.com/sdk.js', {
-    'data-zone': zoneId,
-    'data-sdk': fnName,
-  });
+async function showGigaPubAd(): Promise<void> {
+  await loadScript(GIGAPUB_SCRIPT);
 
-  const trigger = window[fnName];
-  if (typeof trigger !== 'function') {
-    throw new Error('Monetag ad SDK failed to initialize.');
+  if (typeof window.showGiga !== 'function') {
+    throw new Error('GigaPub ad SDK failed to initialize.');
   }
-  await trigger(requestVar ? { r: requestVar } : undefined);
-}
-
-async function showAdsgramAd(blockId: string, requestVar?: string): Promise<void> {
-  await loadScript('https://sad.adsgram.ai/js/sad.min.js');
-
-  if (!window.Adsgram) {
-    throw new Error('Adsgram ad SDK failed to initialize.');
-  }
-  const controller = window.Adsgram.init({ blockId });
-  await controller.show(requestVar ? { subid: requestVar } : undefined);
+  await window.showGiga();
 }
 
 /** Wraps a Promise with a timeout — rejects if it doesn't resolve in time. */
@@ -78,21 +58,6 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
  * Show a rewarded ad. Resolves when the user finishes watching. Throws on failure.
  * Times out after 3 minutes to prevent the UI from freezing forever.
  */
-export async function showRewardedAd(
-  network: AdNetwork,
-  zoneId: string | null,
-  requestVar?: string,
-): Promise<void> {
-  if (!zoneId) {
-    throw new Error(
-      network === 'monetag'
-        ? 'Monetag Zone ID এখনো সেট করা হয়নি।'
-        : 'Adsgram Block ID এখনো সেট করা হয়নি।',
-    );
-  }
-  const adPromise = network === 'monetag'
-    ? showMonetagAd(zoneId, requestVar)
-    : showAdsgramAd(zoneId, requestVar);
-
-  await withTimeout(adPromise, 3 * 60 * 1000, `${network} ad`);
+export async function showRewardedAd(): Promise<void> {
+  await withTimeout(showGigaPubAd(), 3 * 60 * 1000, 'GigaPub ad');
 }

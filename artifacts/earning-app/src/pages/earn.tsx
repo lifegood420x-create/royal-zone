@@ -23,7 +23,7 @@ export default function Earn() {
   const { data: user, refetch: refetchUser } = useGetMe();
   const { data: config } = useGetPublicConfig();
   const { data: tasks, isLoading: tasksLoading } = useListTasks();
-  const [activeAd, setActiveAd] = useState<'monetag' | 'adsgram' | null>(null);
+  const [watchingAd, setWatchingAd] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [completingTask, setCompletingTask] = useState<number | null>(null);
   const [visitingTask, setVisitingTask] = useState<number | null>(null);
@@ -49,25 +49,28 @@ export default function Earn() {
     });
   };
 
-  const handleWatchAd = async (network: 'monetag' | 'adsgram') => {
+  // The API's AdNetwork enum still says "monetag" — kept as the record label
+  // to avoid an API/schema change; the ad actually shown is GigaPub.
+  const AD_NETWORK_LABEL = 'monetag' as const;
+
+  const handleWatchAd = async () => {
     if (!config) return;
-    setActiveAd(network);
+    setWatchingAd(true);
     try {
-      const zoneId = network === 'monetag' ? config.monetagZoneId : config.adsgramBlockId;
       const durationSeconds = config.adDurationSeconds || 15;
 
       if (config.requireAdPostback) {
-        const claim = await claimAdMutation.mutateAsync({ data: { network } });
-        await Promise.all([showRewardedAd(network, zoneId, claim.claimId), runCountdown(durationSeconds)]);
+        await claimAdMutation.mutateAsync({ data: { network: AD_NETWORK_LABEL } });
+        await Promise.all([showRewardedAd(), runCountdown(durationSeconds)]);
         toast({
           title: 'Ad watched',
           description: 'Reward will be credited once the ad network confirms the view.',
         });
         setTimeout(() => queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() }), 5000);
       } else {
-        await Promise.all([showRewardedAd(network, zoneId), runCountdown(durationSeconds)]);
+        await Promise.all([showRewardedAd(), runCountdown(durationSeconds)]);
         watchAdMutation.mutate(
-          { data: { network } },
+          { data: { network: AD_NETWORK_LABEL } },
           {
             onSuccess: (res) => {
               toast({ title: 'Ad Completed!', description: `You earned ${formatCurrency(res.adWatch.reward)}` });
@@ -86,7 +89,7 @@ export default function Earn() {
       const msg = body?.error || err?.message || 'Could not load ad.';
       toast({ title: 'Ad failed', description: msg, variant: 'destructive' });
     } finally {
-      setActiveAd(null);
+      setWatchingAd(false);
       setCountdown(null);
     }
   };
@@ -124,7 +127,7 @@ export default function Earn() {
   return (
     <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F8F4FF' }}>
       {/* Countdown overlay — only shown while the minimum watch timer is active.
-           Intentionally NOT shown when countdown === 0 so the Monetag/Adsgram
+           Intentionally NOT shown when countdown === 0 so the GigaPub
            ad overlay can remain visible and the user can dismiss it without
            our UI blocking the ad's close button. */}
       {countdown !== null && countdown > 0 && (
@@ -184,7 +187,7 @@ export default function Earn() {
                 style={{ width: `${adProgress}%`, background: 'linear-gradient(90deg, #6C21E8, #E8347A)' }}
               />
             </div>
-            {adsLeft === 0 && (config?.monetagEnabled || config?.adsgramEnabled) && (
+            {adsLeft === 0 && config?.monetagEnabled && (
               <p className="text-xs text-center text-muted-foreground mt-3 font-medium">
                 🎉 You've reached your daily limit. Come back tomorrow!
               </p>
@@ -193,39 +196,20 @@ export default function Earn() {
 
           {/* Buttons section */}
           <div className="px-5 py-4">
-            {(config?.monetagEnabled || config?.adsgramEnabled) ? (
-              <div className="grid grid-cols-2 gap-3">
-                {config?.monetagEnabled && (
-                  <button
-                    disabled={adsLeft === 0 || activeAd !== null}
-                    onClick={() => handleWatchAd('monetag')}
-                    className="rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white disabled:opacity-50 active:scale-95 transition-all"
-                    style={{ background: 'linear-gradient(135deg, #6C21E8, #9B51E0)' }}
-                    data-testid="button-ad-monetag"
-                  >
-                    {activeAd === 'monetag' ? (
-                      <Loader2 className="animate-spin" size={18} />
-                    ) : (
-                      <><Play size={15} fill="white" color="white" /> Server 1</>
-                    )}
-                  </button>
+            {config?.monetagEnabled ? (
+              <button
+                disabled={adsLeft === 0 || watchingAd}
+                onClick={handleWatchAd}
+                className="w-full rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white disabled:opacity-50 active:scale-95 transition-all"
+                style={{ background: 'linear-gradient(135deg, #6C21E8, #9B51E0)' }}
+                data-testid="button-ad-watch"
+              >
+                {watchingAd ? (
+                  <Loader2 className="animate-spin" size={18} />
+                ) : (
+                  <><Play size={15} fill="white" color="white" /> Watch</>
                 )}
-                {config?.adsgramEnabled && (
-                  <button
-                    disabled={adsLeft === 0 || activeAd !== null}
-                    onClick={() => handleWatchAd('adsgram')}
-                    className="rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white disabled:opacity-50 active:scale-95 transition-all"
-                    style={{ background: 'linear-gradient(135deg, #E8347A, #FF7B4A)' }}
-                    data-testid="button-ad-adsgram"
-                  >
-                    {activeAd === 'adsgram' ? (
-                      <Loader2 className="animate-spin" size={18} />
-                    ) : (
-                      <><Play size={15} fill="white" color="white" /> Server 2</>
-                    )}
-                  </button>
-                )}
-              </div>
+              </button>
             ) : (
               <p className="text-sm text-center text-muted-foreground py-3 font-medium" data-testid="text-ads-unavailable">
                 Video ads are temporarily unavailable. Please check back later.
