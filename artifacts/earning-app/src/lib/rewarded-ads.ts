@@ -2,7 +2,7 @@
  * Rewarded ad loading — GigaPub.
  */
 
-const GIGAPUB_SCRIPT = 'https://ad.gigapub.tech/script?id=7478';
+const GIGAPUB_SCRIPT = 'https://ad.gigapub.tech/script?id=8416';
 
 const loadedScripts = new Set<string>();
 
