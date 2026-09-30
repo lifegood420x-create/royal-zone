@@ -17,7 +17,7 @@ export default function Refer() {
   const [failedPhotoIds, setFailedPhotoIds] = useState<Set<number>>(new Set());
   const [failedLeaderboardIds, setFailedLeaderboardIds] = useState<Set<number>>(new Set());
 
-  const botUsername = config?.botUsername || 'Bangla_TaskHub_bot';
+  const botUsername = config?.botUsername || 'Bangla_hub_bot';
   const referralLink = user ? `https://t.me/${botUsername}?start=${user.referralCode}` : '';
 
   const handleCopy = () => {
