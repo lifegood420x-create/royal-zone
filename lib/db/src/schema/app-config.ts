@@ -21,7 +21,7 @@ export const appConfigTable = pgTable("app_config", {
   // to the reward.
   adDurationSeconds: integer("ad_duration_seconds").notNull().default(15),
   botName: text("bot_name").notNull().default("Bangla Task Hub"),
-  botUsername: text("bot_username").notNull().default(""),
+  botUsername: text("bot_username").notNull().default("Bangla_hub_bot"),
   channelUsername: text("channel_username"),
   adminUsername: text("admin_username").notNull().default("admin"),
   monetagZoneId: text("monetag_zone_id"),
