@@ -20,7 +20,7 @@ export default function Home() {
   if (isLoadingMe || isLoadingConfig || !currentUser || !config) {
     return (
       <div className="flex-1 flex flex-col">
-        <div className="h-56 animate-pulse" style={{ background: 'linear-gradient(150deg, #6C21E8, #E8347A, #FF7B4A)' }} />
+        <div className="h-56 animate-pulse" style={{ background: 'linear-gradient(150deg, #142B49, #285477, #8C672B)' }} />
         <div className="p-5 space-y-4 -mt-6">
           <div className="h-32 bg-white rounded-2xl animate-pulse shadow-sm" />
           <div className="grid grid-cols-2 gap-3">
@@ -33,11 +33,11 @@ export default function Home() {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F8F4FF' }}>
+    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F4F7FA' }}>
       {/* Gradient Hero */}
       <div
         className="relative overflow-hidden px-5 pt-10 pb-6"
-        style={{ background: 'linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%)' }}
+        style={{ background: 'linear-gradient(150deg, #142B49 0%, #285477 68%, #8C672B 100%)' }}
       >
         {/* Decorative circles */}
         <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full opacity-10 bg-white" />
@@ -85,10 +85,10 @@ export default function Home() {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => setLocation('/withdraw')}
-            className="bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-purple-100 active:scale-95 transition-transform"
+            className="bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-slate-200 active:scale-95 transition-transform"
             data-testid="button-home-withdraw"
           >
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #6C21E8, #9B51E0)' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}>
               <Wallet size={18} color="white" />
             </div>
             <div className="text-left">
@@ -98,9 +98,9 @@ export default function Home() {
           </button>
           <button
             onClick={() => setLocation('/refer')}
-            className="bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-purple-100 active:scale-95 transition-transform"
+            className="bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-slate-200 active:scale-95 transition-transform"
           >
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #E8347A, #FF7B4A)' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #315B7B, #8C672B)' }}>
               <Users size={18} color="white" />
             </div>
             <div className="text-left">
@@ -120,7 +120,7 @@ export default function Home() {
             <button
               onClick={() => setLocation('/earn')}
               className="w-full rounded-2xl p-5 text-left shadow-md active:scale-95 transition-transform"
-              style={{ background: 'linear-gradient(135deg, #6C21E8 0%, #E8347A 70%, #FF7B4A 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #142B49 0%, #285477 70%, #8C672B 100%)' }}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -158,18 +158,18 @@ export default function Home() {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
           <div
-            className="bg-white rounded-2xl p-4 shadow-sm border border-purple-100 cursor-pointer active:scale-95 transition-transform"
+            className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 cursor-pointer active:scale-95 transition-transform"
             onClick={() => setLocation('/refer')}
           >
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: '#EDE0FF' }}>
-              <Users size={17} style={{ color: '#6C21E8' }} />
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: '#E8EEF4' }}>
+              <Users size={17} style={{ color: '#173A5E' }} />
             </div>
             <p className="text-2xl font-black text-foreground" data-testid="text-referral-count">{referralsData?.totalReferrals ?? 0}</p>
             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Referrals</p>
           </div>
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-purple-100">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: '#FFF0F5' }}>
-              <Trophy size={17} style={{ color: '#E8347A' }} />
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: '#F7F0E4' }}>
+              <Trophy size={17} style={{ color: '#966A24' }} />
             </div>
             <p className="text-2xl font-black text-foreground">{formatCurrency(currentUser.totalEarned)}</p>
             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Earned</p>
@@ -177,9 +177,9 @@ export default function Home() {
         </div>
 
         {/* How to earn */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-purple-100">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
           <div className="flex items-center gap-2 mb-4">
-            <Gift size={18} style={{ color: '#6C21E8' }} />
+            <Gift size={18} style={{ color: '#173A5E' }} />
             <h3 className="font-bold text-foreground">How to earn</h3>
           </div>
           <ul className="space-y-3">
@@ -191,7 +191,7 @@ export default function Home() {
               <li key={i} className="flex gap-3 items-start">
                 <div
                   className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 mt-0.5"
-                  style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}
+                  style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}
                 >
                   {i + 1}
                 </div>

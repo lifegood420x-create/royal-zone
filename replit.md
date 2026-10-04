@@ -1,4 +1,4 @@
-# Bangla Task Hub
+# Royal Zone
 
 A Telegram Mini App where users watch rewarded ads, complete simple tasks, and refer friends to earn bKash/Nagad cash, with a hidden admin panel for payout approval and app management.
 

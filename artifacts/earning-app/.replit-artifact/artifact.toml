@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Bangla Task Hub"
+title = "Royal Zone"
 version = "1.0.0"
 id = "artifacts/earning-app"
 router = "path"

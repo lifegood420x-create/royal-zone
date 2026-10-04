@@ -204,7 +204,7 @@ export default function AdminTasks() {
                         Reward: {formatCurrency(task.reward)}
                       </span>
                       {task.link && (
-                        <a href={task.link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline flex items-center">
+                        <a href={task.link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center">
                           <LinkIcon size={12} className="mr-1" /> Link
                         </a>
                       )}

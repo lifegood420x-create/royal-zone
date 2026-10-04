@@ -65,95 +65,96 @@
   --badge-outline: rgba(0, 0, 0, 0.05);
   --opaque-button-border-intensity: -8;
 
-  /* Sunrise Fintech — violet × coral × orange */
-  --background: 267 60% 99%;
-  --foreground: 277 84% 11%;
+  /* Royal Zone — midnight navy, warm gold, and clean light neutrals */
+  --background: 210 33% 98%;
+  --foreground: 215 32% 16%;
 
-  --border: 267 25% 90%;
-  --input: 267 25% 91%;
-  --ring: 267 76% 52%;
+  --border: 214 24% 90%;
+  --input: 214 24% 90%;
+  --ring: 211 56% 38%;
 
   --card: 0 0% 100%;
-  --card-foreground: 277 84% 11%;
-  --card-border: 267 25% 92%;
+  --card-foreground: 215 32% 16%;
+  --card-border: 214 24% 92%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 277 84% 11%;
-  --popover-border: 267 25% 90%;
+  --popover-foreground: 215 32% 16%;
+  --popover-border: 214 24% 90%;
 
-  /* Violet — brand primary */
-  --primary: 267 76% 52%;
+  /* Deep navy — primary actions and selected states */
+  --primary: 211 56% 28%;
   --primary-foreground: 0 0% 100%;
 
-  /* Coral-pink — accent / reward */
-  --secondary: 337 79% 55%;
-  --secondary-foreground: 0 0% 100%;
+  /* Cool neutral — secondary controls */
+  --secondary: 214 28% 93%;
+  --secondary-foreground: 215 32% 21%;
 
-  --muted: 267 30% 95%;
-  --muted-foreground: 267 20% 52%;
+  --muted: 214 26% 95%;
+  --muted-foreground: 215 17% 43%;
 
-  --accent: 267 50% 94%;
-  --accent-foreground: 267 76% 52%;
+  /* Soft gold tint — restrained highlights */
+  --accent: 42 48% 94%;
+  --accent-foreground: 35 68% 29%;
 
-  --destructive: 0 80% 56%;
+  --destructive: 0 72% 48%;
   --destructive-foreground: 0 0% 100%;
 
-  --success: 142 71% 42%;
+  --success: 151 48% 36%;
   --success-foreground: 0 0% 100%;
 
-  --warning: 36 100% 47%;
-  --warning-foreground: 36 100% 10%;
+  --warning: 38 86% 42%;
+  --warning-foreground: 36 80% 12%;
 
   --app-font-sans: 'Plus Jakarta Sans', sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: 'Spline Sans Mono', monospace;
   --radius: 1rem;
 
-  --shadow-sm:  0 2px 8px -2px rgba(108, 33, 232, 0.08);
-  --shadow-md:  0 8px 28px -4px rgba(108, 33, 232, 0.12);
-  --shadow-lg:  0 20px 48px -8px rgba(108, 33, 232, 0.16);
-  --shadow-xl:  0 28px 64px -12px rgba(108, 33, 232, 0.22);
+  --shadow-sm:  0 2px 8px -2px rgba(23, 48, 72, 0.07);
+  --shadow-md:  0 8px 28px -4px rgba(23, 48, 72, 0.11);
+  --shadow-lg:  0 20px 48px -8px rgba(23, 48, 72, 0.14);
+  --shadow-xl:  0 28px 64px -12px rgba(23, 48, 72, 0.18);
 
   /* Brand gradient — used as inline style or via utility */
-  --grad-brand: linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%);
+  --grad-brand: linear-gradient(145deg, #142B49 0%, #285477 68%, #8C672B 100%);
 }
 
 .dark {
-  --background: 155 35% 6%;
-  --foreground: 140 18% 95%;
+  --background: 214 34% 8%;
+  --foreground: 210 24% 94%;
 
-  --border: 150 22% 16%;
-  --input: 150 22% 16%;
-  --ring: 156 65% 42%;
+  --border: 212 24% 19%;
+  --input: 212 24% 19%;
+  --ring: 205 57% 57%;
 
-  --card: 155 32% 9%;
-  --card-foreground: 140 18% 95%;
-  --card-border: 150 22% 16%;
+  --card: 214 30% 11%;
+  --card-foreground: 210 24% 94%;
+  --card-border: 212 24% 19%;
 
-  --popover: 155 32% 9%;
-  --popover-foreground: 140 18% 95%;
-  --popover-border: 150 22% 16%;
+  --popover: 214 30% 11%;
+  --popover-foreground: 210 24% 94%;
+  --popover-border: 212 24% 19%;
 
-  --primary: 156 65% 42%;
-  --primary-foreground: 156 80% 8%;
+  --primary: 205 57% 57%;
+  --primary-foreground: 214 34% 8%;
 
-  --secondary: 36 100% 52%;
-  --secondary-foreground: 36 100% 10%;
+  --secondary: 212 24% 19%;
+  --secondary-foreground: 210 24% 94%;
 
-  --muted: 150 22% 14%;
-  --muted-foreground: 140 12% 62%;
+  --muted: 212 24% 16%;
+  --muted-foreground: 212 15% 66%;
 
-  --accent: 150 22% 17%;
-  --accent-foreground: 140 18% 95%;
+  --accent: 39 28% 20%;
+  --accent-foreground: 42 62% 78%;
 
-  --destructive: 0 68% 52%;
+  --destructive: 0 64% 55%;
   --destructive-foreground: 0 0% 100%;
 
-  --success: 156 65% 42%;
+  --success: 151 48% 46%;
   --success-foreground: 0 0% 100%;
 
-  --warning: 36 100% 52%;
-  --warning-foreground: 36 100% 10%;
+  --warning: 38 80% 52%;
+  --warning-foreground: 36 80% 10%;
 }
 
 @layer base {
@@ -182,10 +183,10 @@
 
 /* Premium gradient utilities */
 .gradient-primary {
-  background: linear-gradient(135deg, hsl(158, 80%, 16%) 0%, hsl(152, 70%, 26%) 60%, hsl(146, 62%, 32%) 100%);
+  background: linear-gradient(135deg, hsl(211, 52%, 19%) 0%, hsl(208, 48%, 31%) 62%, hsl(40, 48%, 34%) 100%);
 }
 .gradient-gold {
-  background: linear-gradient(135deg, hsl(40, 100%, 44%) 0%, hsl(36, 100%, 52%) 100%);
+  background: linear-gradient(135deg, hsl(41, 48%, 36%) 0%, hsl(40, 54%, 48%) 100%);
 }
 .gradient-card-shine::before {
   content: '';

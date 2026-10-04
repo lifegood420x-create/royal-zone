@@ -55,10 +55,10 @@ export default function AdminDashboard() {
   }
 
   const stats = [
-    { title: 'Total Users', value: dashboard.totalUsers, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { title: 'Active 24h', value: dashboard.active24h, icon: Activity, color: 'text-green-500', bg: 'bg-green-500/10' },
-    { title: 'Pending Payouts', value: dashboard.pendingRequestsCount, icon: AlertTriangle, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-    { title: 'Total Paid Out', value: formatCurrency(dashboard.totalPaidOut), icon: CreditCard, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { title: 'Total Users', value: dashboard.totalUsers, icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
+    { title: 'Active 24h', value: dashboard.active24h, icon: Activity, color: 'text-success', bg: 'bg-success/10' },
+    { title: 'Pending Payouts', value: dashboard.pendingRequestsCount, icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning/10' },
+    { title: 'Total Paid Out', value: formatCurrency(dashboard.totalPaidOut), icon: CreditCard, color: 'text-accent-foreground', bg: 'bg-accent' },
   ];
 
   return (

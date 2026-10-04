@@ -21,8 +21,8 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <div className="flex-1 p-5 space-y-4 animate-pulse" style={{ background: '#F8F4FF' }}>
-        <div className="h-48 rounded-2xl" style={{ background: 'linear-gradient(150deg, #6C21E8, #E8347A, #FF7B4A)' }} />
+      <div className="flex-1 p-5 space-y-4 animate-pulse" style={{ background: '#F4F7FA' }}>
+        <div className="h-48 rounded-2xl" style={{ background: 'linear-gradient(150deg, #142B49, #285477, #8C672B)' }} />
         <div className="space-y-3">
           <div className="h-24 bg-white rounded-2xl" />
           <div className="h-16 bg-white rounded-2xl" />
@@ -33,11 +33,11 @@ export default function Profile() {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F8F4FF' }}>
+    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F4F7FA' }}>
       {/* Gradient Hero with profile */}
       <div
         className="relative overflow-hidden px-5 pt-10 pb-6 text-center"
-        style={{ background: 'linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%)' }}
+        style={{ background: 'linear-gradient(150deg, #142B49 0%, #285477 68%, #8C672B 100%)' }}
       >
         <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-10 bg-white" />
         <div className="absolute bottom-0 left-6 w-24 h-24 rounded-full opacity-10 bg-white" />
@@ -73,12 +73,12 @@ export default function Profile() {
         {/* Admin button */}
         {isAdmin && (
           <button
-            className="w-full bg-white rounded-2xl p-4 flex items-center justify-between shadow-sm border border-purple-100 active:scale-95 transition-transform"
+            className="w-full bg-white rounded-2xl p-4 flex items-center justify-between shadow-sm border border-slate-200 active:scale-95 transition-transform"
             onClick={() => setLocation('/admin')}
             data-testid="link-admin-panel"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}>
                 <ShieldAlert size={18} color="white" />
               </div>
               <div className="text-left">
@@ -93,11 +93,11 @@ export default function Profile() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Balance', value: formatCurrency(user.balance), color: '#6C21E8', bg: '#EDE0FF' },
-            { label: 'Withdrawn', value: formatCurrency(user.totalWithdrawn), color: '#E8347A', bg: '#FFF0F5' },
+            { label: 'Balance', value: formatCurrency(user.balance), color: '#173A5E', bg: '#E8EEF4' },
+            { label: 'Withdrawn', value: formatCurrency(user.totalWithdrawn), color: '#966A24', bg: '#F7F0E4' },
             { label: 'Tasks Done', value: String(user.totalTasksCount), color: '#16A34A', bg: '#F0FDF4' },
           ].map(stat => (
-            <div key={stat.label} className="bg-white rounded-2xl p-3.5 shadow-sm border border-purple-100 text-center">
+            <div key={stat.label} className="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200 text-center">
               <div className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto mb-2" style={{ background: stat.bg }}>
                 <div className="w-3 h-3 rounded-full" style={{ background: stat.color }} />
               </div>
@@ -108,12 +108,12 @@ export default function Profile() {
         </div>
 
         {/* Menu */}
-        <div className="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           {[
             {
               icon: HelpCircle,
-              iconBg: '#EFF6FF',
-              iconColor: '#3B82F6',
+              iconBg: '#E8EEF4',
+              iconColor: '#24496B',
               title: 'Help & Support',
               sub: 'Contact our team on Telegram',
               onClick: () => window.open(`https://t.me/${(config?.adminUsername || 'shanto_As').replace(/^@/, '')}`, '_blank'),
@@ -121,8 +121,8 @@ export default function Profile() {
             },
             {
               icon: ShieldAlert,
-              iconBg: '#FFF7ED',
-              iconColor: '#F97316',
+              iconBg: '#F7F0E4',
+              iconColor: '#966A24',
               title: 'App Rules',
               sub: 'Read before earning',
               onClick: () => setLocation('/rules'),
@@ -148,7 +148,7 @@ export default function Profile() {
                   </div>
                   <ChevronRight size={18} className="text-muted-foreground" />
                 </button>
-                {i < arr.length - 1 && <div className="h-px bg-purple-50 mx-4" />}
+                {i < arr.length - 1 && <div className="h-px bg-slate-100 mx-4" />}
               </div>
             );
           })}

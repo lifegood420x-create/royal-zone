@@ -702,7 +702,7 @@ export default function AdminConfig() {
           <Card className="border shadow-sm">
             <CardHeader className="bg-muted/20 border-b pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Megaphone size={20} className="text-blue-500" />
+                <Megaphone size={20} className="text-primary" />
                 Broadcast Message
               </CardTitle>
             </CardHeader>
@@ -737,7 +737,7 @@ export default function AdminConfig() {
           <Card className="border shadow-sm">
             <CardHeader className="bg-muted/20 border-b pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <ServerCog size={20} className="text-orange-500" />
+                <ServerCog size={20} className="text-accent-foreground" />
                 Webhook Status
               </CardTitle>
             </CardHeader>

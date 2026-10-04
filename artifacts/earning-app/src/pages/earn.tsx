@@ -125,7 +125,7 @@ export default function Earn() {
   const adProgress = adLimit > 0 ? (adsWatched / adLimit) * 100 : 0;
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F8F4FF' }}>
+    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F4F7FA' }}>
       {/* Countdown overlay — only shown while the minimum watch timer is active.
            Intentionally NOT shown when countdown === 0 so the GigaPub
            ad overlay can remain visible and the user can dismiss it without
@@ -133,7 +133,7 @@ export default function Earn() {
       {countdown !== null && countdown > 0 && (
         <div className="fixed inset-0 z-40 flex items-center justify-center p-6" style={{ background: 'rgba(26,5,51,0.75)' }} data-testid="overlay-ad-countdown">
           <div className="bg-white rounded-3xl p-8 max-w-xs w-full flex flex-col items-center text-center gap-4 shadow-2xl">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}>
               <Clock size={28} color="white" />
             </div>
             <p className="font-black text-foreground text-lg">এড দেখছেন...</p>
@@ -144,7 +144,7 @@ export default function Earn() {
               <div
                 className="h-full rounded-full transition-all"
                 style={{
-                  background: 'linear-gradient(90deg, #6C21E8, #E8347A)',
+                  background: 'linear-gradient(90deg, #173A5E, #315B7B)',
                   width: `${config?.adDurationSeconds ? ((config.adDurationSeconds - countdown) / config.adDurationSeconds) * 100 : 0}%`
                 }}
               />
@@ -157,7 +157,7 @@ export default function Earn() {
       {/* Gradient header */}
       <div
         className="relative overflow-hidden px-5 pt-10 pb-6"
-        style={{ background: 'linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%)' }}
+        style={{ background: 'linear-gradient(150deg, #142B49 0%, #285477 68%, #8C672B 100%)' }}
       >
         <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-10 bg-white" />
         <div className="flex items-center justify-between">
@@ -174,17 +174,17 @@ export default function Earn() {
 
       <div className="px-4 pb-6 pt-5 space-y-5">
         {/* Ad Card — Progress + Buttons একসাথে */}
-        <div className="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           {/* Progress section */}
-          <div className="px-5 pt-5 pb-4 border-b border-purple-50">
+          <div className="px-5 pt-5 pb-4 border-b border-slate-100">
             <div className="flex justify-between items-center mb-2.5">
               <span className="text-sm font-bold text-foreground">Daily Progress</span>
-              <span className="font-black text-sm" style={{ color: '#6C21E8' }}>{adsWatched} / {adLimit} watched</span>
+              <span className="font-black text-sm" style={{ color: '#173A5E' }}>{adsWatched} / {adLimit} watched</span>
             </div>
             <div className="bg-muted rounded-full h-2.5 overflow-hidden">
               <div
                 className="h-full rounded-full transition-all"
-                style={{ width: `${adProgress}%`, background: 'linear-gradient(90deg, #6C21E8, #E8347A)' }}
+                style={{ width: `${adProgress}%`, background: 'linear-gradient(90deg, #173A5E, #315B7B)' }}
               />
             </div>
             {adsLeft === 0 && config?.monetagEnabled && (
@@ -201,7 +201,7 @@ export default function Earn() {
                 disabled={adsLeft === 0 || watchingAd}
                 onClick={handleWatchAd}
                 className="w-full rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white disabled:opacity-50 active:scale-95 transition-all"
-                style={{ background: 'linear-gradient(135deg, #6C21E8, #9B51E0)' }}
+                style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}
                 data-testid="button-ad-watch"
               >
                 {watchingAd ? (
@@ -221,14 +221,14 @@ export default function Earn() {
         {/* Tasks Section */}
         <div>
           <div className="flex items-center gap-2 mb-3 px-1">
-            <CheckCircle2 size={18} style={{ color: '#6C21E8' }} />
+            <CheckCircle2 size={18} style={{ color: '#173A5E' }} />
             <h2 className="font-black text-foreground text-base">Tasks</h2>
           </div>
 
           {tasksLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-24 bg-white animate-pulse rounded-2xl border border-purple-100" />
+                <div key={i} className="h-24 bg-white animate-pulse rounded-2xl border border-slate-200" />
               ))}
             </div>
           ) : tasks && tasks.length > 0 ? (
@@ -236,7 +236,7 @@ export default function Earn() {
               {tasks.map((task) => (
                 <div
                   key={task.id}
-                  className={`bg-white rounded-2xl border border-purple-100 shadow-sm transition-opacity ${task.completed ? 'opacity-80' : 'opacity-100'}`}
+                  className={`bg-white rounded-2xl border border-slate-200 shadow-sm transition-opacity ${task.completed ? 'opacity-80' : 'opacity-100'}`}
                 >
                   <div className="p-4 flex gap-4 items-center">
                     <div
@@ -252,7 +252,7 @@ export default function Earn() {
                       <div className="flex items-center gap-2 mt-2">
                         <span
                           className="text-xs font-bold px-2 py-0.5 rounded-lg text-white"
-                          style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}
+                          style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}
                         >
                           +{formatCurrency(task.reward)}
                         </span>
@@ -268,22 +268,22 @@ export default function Earn() {
                         // can revisit the channel/page from the task card.
                         task.link ? (
                           <button
-                            className="font-bold text-sm rounded-xl px-4 py-2 border border-purple-200 flex items-center gap-1.5 active:scale-95 transition-transform"
-                            style={{ color: '#6C21E8', background: '#F8F4FF' }}
+                            className="font-bold text-sm rounded-xl px-4 py-2 border border-slate-300 flex items-center gap-1.5 active:scale-95 transition-transform"
+                            style={{ color: '#173A5E', background: '#F4F7FA' }}
                             onClick={() => window.open(task.link!, '_blank')}
                             data-testid={`button-visit-done-task-${task.id}`}
                           >
                             Join <ExternalLink size={13} />
                           </button>
                         ) : (
-                          <div className="flex items-center text-sm font-bold px-3 py-1.5 rounded-xl" style={{ color: '#6C21E8', background: '#EDE0FF' }}>
+                          <div className="flex items-center text-sm font-bold px-3 py-1.5 rounded-xl" style={{ color: '#173A5E', background: '#E8EEF4' }}>
                             <CheckCircle2 size={15} className="mr-1.5" /> Done
                           </div>
                         )
                       ) : visitingTask === task.id ? (
                         <button
                           className="font-bold text-sm rounded-xl px-4 py-2 text-white active:scale-95 transition-transform disabled:opacity-50"
-                          style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}
+                          style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}
                           onClick={() => handleClaimTask(task.id)}
                           disabled={completingTask === task.id}
                           data-testid={`button-claim-task-${task.id}`}
@@ -292,8 +292,8 @@ export default function Earn() {
                         </button>
                       ) : (
                         <button
-                          className="font-bold text-sm rounded-xl px-4 py-2 border border-purple-200 flex items-center gap-1.5 active:scale-95 transition-transform"
-                          style={{ color: '#6C21E8', background: '#F8F4FF' }}
+                            className="font-bold text-sm rounded-xl px-4 py-2 border border-slate-300 flex items-center gap-1.5 active:scale-95 transition-transform"
+                            style={{ color: '#173A5E', background: '#F4F7FA' }}
                           onClick={() => {
                             if (task.link) window.open(task.link, '_blank');
                             setVisitingTask(task.id);
@@ -309,7 +309,7 @@ export default function Earn() {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-purple-100 border-dashed p-8 flex flex-col items-center text-center shadow-sm">
+            <div className="bg-white rounded-2xl border border-slate-200 border-dashed p-8 flex flex-col items-center text-center shadow-sm">
               <CheckCircle2 size={40} className="text-muted-foreground/25 mb-3" />
               <p className="font-bold text-foreground mb-1">No tasks available</p>
               <p className="text-sm text-muted-foreground">Check back later for new earning opportunities.</p>

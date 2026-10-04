@@ -50,7 +50,7 @@ function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border/60 shadow-[0_-4px_24px_rgba(108,33,232,0.08)] pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border/60 shadow-[0_-4px_24px_rgba(23,48,72,0.08)] pb-[env(safe-area-inset-bottom)] md:hidden">
       <div className="max-w-md mx-auto flex items-center justify-between px-2 h-16">
         {navItems.map((item) => {
           const isActive = location === item.href;
@@ -66,18 +66,18 @@ function BottomNav() {
                 <Icon
                   size={22}
                   strokeWidth={isActive ? 2.5 : 2}
-                  style={isActive ? { color: '#6C21E8' } : { color: '#9B8AB3' }}
+                  style={isActive ? { color: '#173A5E' } : { color: '#64748B' }}
                 />
                 {isActive && (
                   <div
                     className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full"
-                    style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}
+                    style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}
                   />
                 )}
               </div>
               <span
                 className="text-[10px] font-semibold transition-all"
-                style={isActive ? { color: '#6C21E8' } : { color: '#9B8AB3' }}
+                style={isActive ? { color: '#173A5E' } : { color: '#64748B' }}
               >
                 {item.label}
               </span>

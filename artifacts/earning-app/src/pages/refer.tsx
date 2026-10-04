@@ -17,7 +17,7 @@ export default function Refer() {
   const [failedPhotoIds, setFailedPhotoIds] = useState<Set<number>>(new Set());
   const [failedLeaderboardIds, setFailedLeaderboardIds] = useState<Set<number>>(new Set());
 
-  const botUsername = config?.botUsername || 'Bangla_hub_bot';
+  const botUsername = 'royal_zone_bot';
   const referralLink = user ? `https://t.me/${botUsername}?start=${user.referralCode}` : '';
 
   const handleCopy = () => {
@@ -30,7 +30,7 @@ export default function Refer() {
 
   const handleShare = () => {
     if (!referralLink) return;
-    const text = `Join me on Bangla Task Hub and get rewarded! Use my link: ${referralLink}`;
+    const text = `Join me on Royal Zone and get rewarded! Use my link: ${referralLink}`;
     const url = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
@@ -38,11 +38,11 @@ export default function Refer() {
   const referrals = referralsData?.referrals || [];
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F8F4FF' }}>
+    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F4F7FA' }}>
       {/* Gradient Hero */}
       <div
         className="relative overflow-hidden px-5 pt-10 pb-6 text-center"
-        style={{ background: 'linear-gradient(150deg, #6C21E8 0%, #E8347A 60%, #FF7B4A 100%)' }}
+        style={{ background: 'linear-gradient(150deg, #142B49 0%, #285477 68%, #8C672B 100%)' }}
       >
         <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-10 bg-white" />
         <div className="absolute bottom-0 left-6 w-24 h-24 rounded-full opacity-10 bg-white" />
@@ -84,22 +84,22 @@ export default function Refer() {
       <div className="px-4 pb-6 pt-5 space-y-4">
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-purple-100 text-center">
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 text-center">
             <p className="text-xs font-semibold text-muted-foreground mb-1">Total Referrals</p>
             <p className="text-3xl font-black text-foreground" data-testid="text-total-referrals">
               {referralsData?.totalReferrals || 0}
             </p>
           </div>
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-purple-100 text-center">
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 text-center">
             <p className="text-xs font-semibold text-muted-foreground mb-1">Total Earned</p>
-            <p className="text-3xl font-black" style={{ color: '#6C21E8' }} data-testid="text-referral-earnings">
+            <p className="text-3xl font-black" style={{ color: '#173A5E' }} data-testid="text-referral-earnings">
               {formatCurrency(referralsData?.totalReferralEarnings || 0)}
             </p>
           </div>
         </div>
 
         {/* Tab Switcher */}
-        <div className="bg-white rounded-2xl p-1.5 flex gap-1.5 shadow-sm border border-purple-100">
+        <div className="bg-white rounded-2xl p-1.5 flex gap-1.5 shadow-sm border border-slate-200">
           {([
             { key: 'leaderboard', label: 'Leaderboard', icon: Trophy },
             { key: 'my-referrals', label: 'Your Referrals', icon: Users },
@@ -109,8 +109,8 @@ export default function Refer() {
               onClick={() => setActiveTab(key)}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all"
               style={activeTab === key
-                ? { background: 'linear-gradient(135deg, #6C21E8, #E8347A)', color: 'white' }
-                : { color: '#9B8AB3' }
+                ? { background: 'linear-gradient(135deg, #173A5E, #315B7B)', color: 'white' }
+                : { color: '#718096' }
               }
             >
               <Icon size={14} /> {label}
@@ -124,7 +124,7 @@ export default function Refer() {
             {isLoadingLeaderboard ? (
               <div className="space-y-2">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="h-16 bg-white animate-pulse rounded-2xl border border-purple-100" />
+                  <div key={i} className="h-16 bg-white animate-pulse rounded-2xl border border-slate-200" />
                 ))}
               </div>
             ) : (leaderboard?.entries?.length ?? 0) > 0 ? (
@@ -141,7 +141,7 @@ export default function Refer() {
                   return (
                     <div
                       key={entry.userId}
-                      className="rounded-2xl p-3.5 flex items-center gap-3 shadow-sm border border-purple-100"
+                      className="rounded-2xl p-3.5 flex items-center gap-3 shadow-sm border border-slate-200"
                       style={{ background: isTop3 ? rankBg[entry.rank] : 'white' }}
                     >
                       <div className="w-8 shrink-0 text-center">
@@ -160,7 +160,7 @@ export default function Refer() {
                           onError={() => setFailedLeaderboardIds(prev => new Set(prev).add(entry.userId))}
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0" style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}>
                           {entry.firstName.charAt(0).toUpperCase()}
                         </div>
                       )}
@@ -168,7 +168,7 @@ export default function Refer() {
                         <p className="font-bold text-sm text-foreground truncate">{entry.firstName}</p>
                       </div>
                       <div className="shrink-0 text-right">
-                        <p className="text-sm font-black" style={{ color: '#6C21E8' }}>{entry.referralCount}</p>
+                        <p className="text-sm font-black" style={{ color: '#173A5E' }}>{entry.referralCount}</p>
                         <p className="text-[10px] text-muted-foreground">Referrals</p>
                       </div>
                     </div>
@@ -176,7 +176,7 @@ export default function Refer() {
                 })}
               </div>
             ) : (
-              <div className="bg-white rounded-2xl border border-dashed border-purple-200 p-8 flex flex-col items-center text-center shadow-sm">
+              <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-8 flex flex-col items-center text-center shadow-sm">
                 <Trophy size={32} className="text-muted-foreground/25 mb-2" />
                 <p className="text-sm text-muted-foreground">No one on the leaderboard yet</p>
               </div>
@@ -190,13 +190,13 @@ export default function Refer() {
             {isLoading ? (
               <div className="space-y-3">
                 {[1, 2].map(i => (
-                  <div key={i} className="h-16 bg-white animate-pulse rounded-2xl border border-purple-100" />
+                  <div key={i} className="h-16 bg-white animate-pulse rounded-2xl border border-slate-200" />
                 ))}
               </div>
             ) : referrals.length > 0 ? (
               <div className="space-y-3">
                 {referrals.map((ref) => (
-                  <div key={ref.id} className="bg-white rounded-2xl p-3.5 flex items-center justify-between shadow-sm border border-purple-100">
+                  <div key={ref.id} className="bg-white rounded-2xl p-3.5 flex items-center justify-between shadow-sm border border-slate-200">
                     <div className="flex items-center gap-3">
                       {ref.photoUrl && !failedPhotoIds.has(ref.id) ? (
                         <img
@@ -207,7 +207,7 @@ export default function Refer() {
                           onError={() => setFailedPhotoIds((prev) => new Set(prev).add(ref.id))}
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white" style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}>
                           {ref.firstName.charAt(0).toUpperCase()}
                         </div>
                       )}
@@ -216,16 +216,16 @@ export default function Refer() {
                         <p className="text-xs text-muted-foreground">Joined {formatDate(ref.joinedAt)}</p>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-white px-3 py-1 rounded-lg" style={{ background: 'linear-gradient(135deg, #6C21E8, #E8347A)' }}>
+                    <span className="text-xs font-bold text-white px-3 py-1 rounded-lg" style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}>
                       +{formatCurrency(config?.referralBonus || 0)}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-2xl border border-dashed border-purple-200 p-8 flex flex-col items-center text-center shadow-sm">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ background: '#EDE0FF' }}>
-                  <Users size={24} style={{ color: '#6C21E8' }} />
+              <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-8 flex flex-col items-center text-center shadow-sm">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ background: '#E8EEF4' }}>
+                  <Users size={24} style={{ color: '#173A5E' }} />
                 </div>
                 <p className="font-bold text-foreground mb-1">No referrals yet</p>
                 <p className="text-sm text-muted-foreground max-w-[200px]">
