@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle, XCircle, Search, CreditCard, Loader2, Pencil, Star, RefreshCw } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../lib/utils';
+import { AdminPageHeader } from '../../components/page-header';
 import { Input } from '@/components/ui/input';
 
 type Tab = 'first' | 'next';
@@ -188,11 +189,8 @@ export default function AdminPayouts() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Pending Payouts</h1>
-          <p className="text-muted-foreground mt-1">Review and process withdrawal requests</p>
-        </div>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <AdminPageHeader title="Pending Payouts" subtitle="Review and process withdrawal requests" />
         <div className="relative w-full md:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
           <Input
@@ -205,7 +203,7 @@ export default function AdminPayouts() {
       </div>
 
       {/* Tab Switcher */}
-      <div className="bg-muted rounded-xl p-1 flex gap-1">
+      <div className="bg-white rounded-2xl p-1.5 flex gap-1 border shadow-sm">
         <button
           onClick={() => setActiveTab('first')}
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${

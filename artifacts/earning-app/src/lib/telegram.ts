@@ -72,4 +72,6 @@ export function bootstrapTelegram(): void {
   webApp.ready();
   webApp.expand();
   webApp.disableVerticalSwipes?.();
+  webApp.setHeaderColor?.('#F5F8FC');
+  webApp.setBackgroundColor?.('#F5F8FC');
 }

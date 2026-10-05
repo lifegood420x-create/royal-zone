@@ -21,6 +21,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit2, Trash2, Link as LinkIcon, Loader2, ListTodo } from 'lucide-react';
 import { formatCurrency } from '../../lib/utils';
 import { TaskIcon, getTaskIconConfig } from '../../lib/task-icons';
+import { AdminPageHeader } from '../../components/page-header';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -164,11 +165,8 @@ export default function AdminTasks() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Tasks</h1>
-          <p className="text-muted-foreground mt-1">Manage earning opportunities for users</p>
-        </div>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <AdminPageHeader title="Tasks" subtitle="Manage earning opportunities for users" />
         <Button onClick={openAddDialog} className="font-bold">
           <Plus size={18} className="mr-1.5" /> Add Task
         </Button>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Spline+Sans+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -61,100 +61,86 @@
 }
 
 :root {
-  --button-outline: rgba(0, 0, 0, 0.08);
-  --badge-outline: rgba(0, 0, 0, 0.05);
+  --button-outline: rgba(37, 99, 235, 0.12);
+  --badge-outline: rgba(15, 23, 42, 0.06);
   --opaque-button-border-intensity: -8;
 
-  /* Royal Zone — midnight navy, warm gold, and clean light neutrals */
-  --background: 210 33% 98%;
-  --foreground: 215 32% 16%;
+  /* Royal Zone light — airy white, sky blue, mint money */
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
 
-  --border: 214 24% 90%;
-  --input: 214 24% 90%;
-  --ring: 211 56% 38%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 217 91% 53%;
 
   --card: 0 0% 100%;
-  --card-foreground: 215 32% 16%;
-  --card-border: 214 24% 92%;
+  --card-foreground: 222 47% 11%;
+  --card-border: 214 32% 93%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 215 32% 16%;
-  --popover-border: 214 24% 90%;
+  --popover-foreground: 222 47% 11%;
+  --popover-border: 214 32% 91%;
 
-  /* Deep navy — primary actions and selected states */
-  --primary: 211 56% 28%;
+  --primary: 217 91% 53%;
   --primary-foreground: 0 0% 100%;
 
-  /* Cool neutral — secondary controls */
-  --secondary: 214 28% 93%;
-  --secondary-foreground: 215 32% 21%;
+  --secondary: 214 32% 96%;
+  --secondary-foreground: 222 47% 16%;
 
-  --muted: 214 26% 95%;
-  --muted-foreground: 215 17% 43%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
 
-  /* Soft gold tint — restrained highlights */
-  --accent: 42 48% 94%;
-  --accent-foreground: 35 68% 29%;
+  --accent: 152 76% 94%;
+  --accent-foreground: 160 84% 27%;
 
-  --destructive: 0 72% 48%;
+  --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
-  --success: 151 48% 36%;
+  --success: 160 84% 39%;
   --success-foreground: 0 0% 100%;
 
-  --warning: 38 86% 42%;
-  --warning-foreground: 36 80% 12%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 32 95% 14%;
 
-  --app-font-sans: 'Plus Jakarta Sans', sans-serif;
+  --app-font-sans: 'Manrope', 'Plus Jakarta Sans', sans-serif;
   --app-font-serif: Georgia, serif;
-  --app-font-mono: 'Spline Sans Mono', monospace;
-  --radius: 1rem;
+  --app-font-mono: 'IBM Plex Mono', monospace;
+  --radius: 1.05rem;
 
-  --shadow-sm:  0 2px 8px -2px rgba(23, 48, 72, 0.07);
-  --shadow-md:  0 8px 28px -4px rgba(23, 48, 72, 0.11);
-  --shadow-lg:  0 20px 48px -8px rgba(23, 48, 72, 0.14);
-  --shadow-xl:  0 28px 64px -12px rgba(23, 48, 72, 0.18);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(37, 99, 235, 0.12);
+  --shadow-md: 0 10px 30px -12px rgba(37, 99, 235, 0.18);
+  --shadow-lg: 0 22px 50px -18px rgba(37, 99, 235, 0.22);
+  --shadow-xl: 0 30px 64px -20px rgba(15, 23, 42, 0.16);
 
-  /* Brand gradient — used as inline style or via utility */
-  --grad-brand: linear-gradient(145deg, #142B49 0%, #285477 68%, #8C672B 100%);
+  --grad-brand: linear-gradient(135deg, #2563EB 0%, #0EA5E9 55%, #10B981 100%);
 }
 
 .dark {
-  --background: 214 34% 8%;
-  --foreground: 210 24% 94%;
-
-  --border: 212 24% 19%;
-  --input: 212 24% 19%;
-  --ring: 205 57% 57%;
-
-  --card: 214 30% 11%;
-  --card-foreground: 210 24% 94%;
-  --card-border: 212 24% 19%;
-
-  --popover: 214 30% 11%;
-  --popover-foreground: 210 24% 94%;
-  --popover-border: 212 24% 19%;
-
-  --primary: 205 57% 57%;
-  --primary-foreground: 214 34% 8%;
-
-  --secondary: 212 24% 19%;
-  --secondary-foreground: 210 24% 94%;
-
-  --muted: 212 24% 16%;
-  --muted-foreground: 212 15% 66%;
-
-  --accent: 39 28% 20%;
-  --accent-foreground: 42 62% 78%;
-
-  --destructive: 0 64% 55%;
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 217 91% 53%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --card-border: 214 32% 93%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --popover-border: 214 32% 91%;
+  --primary: 217 91% 53%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 214 32% 96%;
+  --secondary-foreground: 222 47% 16%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 152 76% 94%;
+  --accent-foreground: 160 84% 27%;
+  --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
-
-  --success: 151 48% 46%;
+  --success: 160 84% 39%;
   --success-foreground: 0 0% 100%;
-
-  --warning: 38 80% 52%;
-  --warning-foreground: 36 80% 10%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 32 95% 14%;
 }
 
 @layer base {
@@ -181,30 +167,34 @@
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* Premium gradient utilities */
 .gradient-primary {
-  background: linear-gradient(135deg, hsl(211, 52%, 19%) 0%, hsl(208, 48%, 31%) 62%, hsl(40, 48%, 34%) 100%);
+  background: var(--grad-brand);
 }
 .gradient-gold {
-  background: linear-gradient(135deg, hsl(41, 48%, 36%) 0%, hsl(40, 54%, 48%) 100%);
+  background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
 }
 .gradient-card-shine::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 60%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 60%);
   border-radius: inherit;
   pointer-events: none;
 }
 
-/* Stagger utilities */
+.page-canvas {
+  background:
+    radial-gradient(1200px 400px at 0% -10%, rgba(37, 99, 235, 0.08), transparent 55%),
+    radial-gradient(900px 320px at 100% 0%, rgba(16, 185, 129, 0.08), transparent 50%),
+    hsl(var(--background));
+}
+
 .stagger-1 { animation-delay: 50ms; }
 .stagger-2 { animation-delay: 100ms; }
 .stagger-3 { animation-delay: 150ms; }
 .stagger-4 { animation-delay: 200ms; }
 .stagger-5 { animation-delay: 250ms; }
 
-/* Micro-interaction helpers */
 .active-scale {
   transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }

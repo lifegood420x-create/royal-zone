@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle, XCircle, ShieldCheck, Loader2, Clock } from 'lucide-react';
 import { formatCurrency, formatDate, formatTime } from '../../lib/utils';
+import { AdminPageHeader } from '../../components/page-header';
 
 type Tab = 'pending' | 'approved' | 'rejected';
 
@@ -62,11 +63,8 @@ export default function AdminVerifications() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
-      <div className="flex items-center gap-2">
-        <ShieldCheck className="text-primary" size={22} />
-        <h1 className="text-xl font-bold">Account Verifications</h1>
-      </div>
+    <div className="space-y-4">
+      <AdminPageHeader title="Account Verifications" subtitle="Review payment proofs" />
 
       <div className="flex gap-2">
         {(['pending', 'approved', 'rejected'] as const).map((tab) => (

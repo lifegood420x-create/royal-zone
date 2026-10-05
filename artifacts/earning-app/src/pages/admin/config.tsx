@@ -23,6 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Save, Send, RefreshCw, ServerCog, Settings2, Megaphone, Link2, AlertCircle, ShieldCheck, Copy, KeyRound, Plus, Trash2 } from 'lucide-react';
+import { AdminPageHeader } from '../../components/page-header';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -226,10 +227,7 @@ export default function AdminConfig() {
 
   return (
     <div className="space-y-6 pb-10">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground mt-1">Configure app parameters and integrations</p>
-      </div>
+      <AdminPageHeader title="Settings" subtitle="Configure app parameters and integrations" />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-6">

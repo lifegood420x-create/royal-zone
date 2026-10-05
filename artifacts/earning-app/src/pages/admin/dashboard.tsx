@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Users, Activity, CreditCard, AlertTriangle, CheckCircle, Ban } from 'lucide-react';
-import { formatCurrency } from '../../lib/utils';
+import { AdminPageHeader } from '../../components/page-header';
 
 export default function AdminDashboard() {
   const { data: dashboard, isLoading } = useGetAdminDashboard();
@@ -63,16 +63,13 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Overview of app performance</p>
-      </div>
+      <AdminPageHeader title="Dashboard" subtitle="Overview of app performance" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
           return (
-            <Card key={i} className="border shadow-sm">
+            <Card key={i} className="border shadow-sm rounded-2xl bg-white">
               <CardContent className="p-6 flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-full ${stat.bg} ${stat.color} flex items-center justify-center shrink-0`}>
                   <Icon size={24} />

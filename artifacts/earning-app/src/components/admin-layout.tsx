@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from './auth-provider';
+import { BrandMark } from './page-header';
 import {
   LayoutDashboard,
   Users,
   Settings,
   CreditCard,
   ListTodo,
-  LogOut,
   ChevronLeft,
   ShieldCheck,
 } from 'lucide-react';
@@ -18,19 +18,16 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 bg-background">
-        <h1 className="text-2xl font-bold text-destructive mb-2">Access Denied</h1>
-        <p className="text-muted-foreground text-center mb-6">You do not have permission to view the admin area.</p>
-        <Link href="/" className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium">Return Home</Link>
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 page-canvas">
+        <div className="bg-card rounded-3xl border shadow-sm p-8 max-w-sm text-center">
+          <h1 className="text-2xl font-extrabold text-destructive mb-2">Access Denied</h1>
+          <p className="text-muted-foreground text-center mb-6">You do not have permission to view the admin area.</p>
+          <Link href="/" className="inline-flex px-4 py-2.5 bg-primary text-primary-foreground rounded-xl font-semibold">Return Home</Link>
+        </div>
       </div>
     );
   }
 
-  // AdminLayout renders inside <Route path="/admin" nest>, so wouter's
-  // router base for this subtree is already "/admin" — hrefs here must be
-  // relative to that nest (not repeat the "/admin" prefix), or Link
-  // double-prepends it (e.g. "/admin/admin/payouts") and the nested Switch
-  // 404s because it never sees a route it recognizes.
   const navItems = [
     { href: '/', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/payouts', label: 'Payouts', icon: CreditCard },
@@ -41,12 +38,14 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-[100dvh] bg-muted/30 flex">
-      {/* Desktop Sidebar */}
-      <aside className="w-64 bg-card border-r hidden md:flex flex-col h-[100dvh] sticky top-0">
-        <div className="p-6 border-b">
-          <h2 className="text-lg font-bold text-foreground">Admin Panel</h2>
-          <p className="text-sm text-muted-foreground">Control Panel</p>
+    <div className="min-h-[100dvh] page-canvas flex">
+      <aside className="w-64 bg-white/90 backdrop-blur-xl border-r hidden md:flex flex-col h-[100dvh] sticky top-0">
+        <div className="p-6 border-b flex items-center gap-3">
+          <BrandMark />
+          <div>
+            <h2 className="text-base font-extrabold text-foreground leading-tight">Royal Zone</h2>
+            <p className="text-xs text-muted-foreground">Admin console</p>
+          </div>
         </div>
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
           {navItems.map((item) => {
@@ -56,9 +55,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive 
-                    ? 'bg-primary/10 text-primary' 
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                  isActive
+                    ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/25'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}
                 data-testid={`admin-nav-${item.label.toLowerCase()}`}
@@ -72,7 +71,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         <div className="p-4 border-t">
           <Link
             href="~/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             <ChevronLeft size={18} />
             Back to App
@@ -80,27 +79,25 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 md:h-[100dvh] md:overflow-y-auto bg-muted/30 md:pb-0 pb-20">
-        {/* Material-style top app bar (mobile only) */}
-        <header className="bg-primary text-primary-foreground px-4 h-14 flex items-center gap-1 sticky top-0 z-20 shadow-md md:hidden">
+      <div className="flex-1 flex flex-col min-w-0 md:h-[100dvh] md:overflow-y-auto md:pb-0 pb-24">
+        <header className="bg-white/90 backdrop-blur-xl text-foreground px-4 h-14 flex items-center gap-2 sticky top-0 z-20 border-b md:hidden">
           <Link
             href="~/"
-            className="p-2 -ml-2 rounded-full active:bg-white/15 transition-colors"
+            className="p-2 -ml-2 rounded-full active:bg-muted transition-colors"
             aria-label="Back to app"
           >
             <ChevronLeft size={22} />
           </Link>
-          <h2 className="font-medium text-lg tracking-tight">Admin Panel</h2>
+          <BrandMark size="sm" />
+          <h2 className="font-extrabold text-base tracking-tight">Admin</h2>
         </header>
 
         <main className="flex-1 p-4 md:p-8 max-w-md md:max-w-6xl mx-auto w-full">
           {children}
         </main>
 
-        {/* Android-style bottom navigation bar (mobile only) */}
-        <nav className="fixed bottom-0 left-0 right-0 z-30 bg-card border-t shadow-[0_-4px_24px_rgba(0,0,0,0.08)] pb-[env(safe-area-inset-bottom)] md:hidden">
-          <div className="max-w-md mx-auto flex items-stretch justify-between px-1 h-16">
+        <nav className="fixed bottom-3 left-3 right-3 z-30 md:hidden pb-[env(safe-area-inset-bottom)]">
+          <div className="max-w-md mx-auto flex items-stretch justify-between px-1 h-[4.25rem] rounded-[1.6rem] bg-white/95 backdrop-blur-xl border border-white shadow-[0_12px_40px_-16px_rgba(37,99,235,0.45)] overflow-x-auto">
             {navItems.map((item) => {
               const isActive = location === item.href;
               const Icon = item.icon;
@@ -108,18 +105,18 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex-1 flex flex-col items-center justify-center gap-1 relative active:scale-95 transition-transform"
+                  className="flex-1 min-w-[3.1rem] flex flex-col items-center justify-center gap-0.5"
                   data-testid={`admin-nav-${item.label.toLowerCase()}`}
                 >
                   <div
-                    className={`flex items-center justify-center h-8 w-14 rounded-full transition-colors ${
-                      isActive ? 'bg-primary/15 text-primary' : 'text-muted-foreground'
+                    className={`flex items-center justify-center h-7 w-10 rounded-full transition-colors ${
+                      isActive ? 'bg-primary text-white' : 'text-muted-foreground'
                     }`}
                   >
-                    <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                    <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
                   </div>
                   <span
-                    className={`text-[11px] font-medium leading-none ${
+                    className={`text-[9px] font-bold leading-none ${
                       isActive ? 'text-primary' : 'text-muted-foreground'
                     }`}
                   >

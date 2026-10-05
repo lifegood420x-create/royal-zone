@@ -14,6 +14,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Search, Ban, CheckCircle, ShieldAlert, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import { useDebounce } from '../../lib/use-debounce';
+import { AdminPageHeader } from '../../components/page-header';
 
 export default function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -72,11 +73,8 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Manage Users</h1>
-          <p className="text-muted-foreground mt-1">Search and moderate user accounts</p>
-        </div>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <AdminPageHeader title="Manage Users" subtitle="Search and moderate user accounts" />
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
           <Input 

@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Wallet, AlertCircle, Clock, CheckCircle2, XCircle, ArrowDownToLine, Loader2, ChevronDown, ShieldCheck, ExternalLink, Copy } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency, formatDate, formatTime } from '../lib/utils';
+import { PageHeader } from '../components/page-header';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -65,7 +66,7 @@ export default function Withdraw() {
   const payOptions = [
     ...(vstatus?.bkashNumber ? [{ key: 'bkash', label: 'bKash', logo: null as string | null, color: '#E2136E' }] : []),
     ...(vstatus?.nagadNumber ? [{ key: 'nagad', label: 'Nagad', logo: null as string | null, color: '#EC1C24' }] : []),
-    ...((vstatus?.methods ?? []).map((m) => ({ key: m.name, label: m.name, logo: m.logoUrl ?? null, color: '#173A5E' }))),
+    ...((vstatus?.methods ?? []).map((m) => ({ key: m.name, label: m.name, logo: m.logoUrl ?? null, color: '#2563EB' }))),
   ];
 
   useEffect(() => {
@@ -206,32 +207,30 @@ export default function Withdraw() {
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F4F7FA' }}>
-      {/* Gradient Hero */}
-      <div
-        className="relative overflow-hidden px-5 pt-10 pb-6"
-        style={{ background: 'linear-gradient(150deg, #142B49 0%, #285477 68%, #8C672B 100%)' }}
-      >
-        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-10 bg-white" />
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Available Balance</p>
-            <p className="text-white text-4xl font-black tracking-tight" data-testid="text-withdraw-balance">
-              {formatCurrency(user?.balance || 0)}
-            </p>
+    <div className="flex-1 flex flex-col overflow-y-auto page-canvas">
+      <PageHeader
+        title="Withdraw"
+        subtitle={`Min. ${formatCurrency(minWithdraw)}`}
+        trailing={
+          <div className="w-11 h-11 bg-blue-50 text-primary rounded-2xl flex items-center justify-center">
+            <Wallet size={20} />
           </div>
-          <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-            <Wallet size={22} color="white" />
-          </div>
+        }
+      />
+      <div className="px-4 pt-4">
+        <div className="bg-white rounded-3xl border shadow-sm p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground mb-1">Available Balance</p>
+          <p className="text-foreground text-4xl font-extrabold tracking-tight" data-testid="text-withdraw-balance">
+            {formatCurrency(user?.balance || 0)}
+          </p>
         </div>
-        <p className="text-white/60 text-xs mt-3">Min. withdrawal: {formatCurrency(minWithdraw)}</p>
       </div>
 
       <div className="px-4 pb-6 pt-5 space-y-5">
         {/* Form Card */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
           <div className="flex items-center gap-2 mb-5">
-            <ArrowDownToLine size={18} style={{ color: '#173A5E' }} />
+            <ArrowDownToLine size={18} className="text-primary" />
             <h2 className="font-black text-foreground">Request Payout</h2>
           </div>
 
@@ -350,8 +349,7 @@ export default function Withdraw() {
 
               <button
                 type="submit"
-                className="w-full h-12 rounded-xl font-black text-base text-white disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #142B49, #285477, #8C672B)' }}
+                className="w-full h-12 rounded-xl font-black text-base text-white disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2 bg-primary shadow-md shadow-primary/25"
                 disabled={requestMutation.isPending || !user || user.balance < minWithdraw}
                 data-testid="button-submit-withdrawal"
               >
@@ -445,7 +443,7 @@ export default function Withdraw() {
         <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <ShieldCheck size={20} style={{ color: '#173A5E' }} />
+              <ShieldCheck size={20} className="text-primary" />
               অ্যাকাউন্ট ভেরিফিকেশন
             </DialogTitle>
           </DialogHeader>
@@ -470,8 +468,7 @@ export default function Withdraw() {
                 href={vstatus.autoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full h-12 rounded-xl font-black text-sm text-white flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}
+                className="w-full h-12 rounded-xl font-black text-sm text-white flex items-center justify-center gap-2 bg-primary"
                 data-testid="button-auto-pay"
               >
                 অনলাইনে পেমেন্ট করুন <ExternalLink size={15} />
@@ -495,7 +492,7 @@ export default function Withdraw() {
                         aria-label="Copy bKash number"
                         data-testid="button-copy-bkash"
                       >
-                        <Copy size={14} style={{ color: '#173A5E' }} />
+                        <Copy size={14} className="text-primary" />
                       </button>
                     </span>
                   </div>
@@ -517,14 +514,14 @@ export default function Withdraw() {
                         aria-label="Copy Nagad number"
                         data-testid="button-copy-nagad"
                       >
-                        <Copy size={14} style={{ color: '#173A5E' }} />
+                        <Copy size={14} className="text-primary" />
                       </button>
                     </span>
                   </div>
                 )}
                 {(vstatus?.methods ?? []).map((m) => (
                   <div key={m.id} className="flex items-center justify-between bg-muted/50 rounded-xl px-3 py-2.5 gap-2">
-                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: '#173A5E' }}>
+                    <span className="flex items-center gap-2 text-sm font-bold min-w-0 text-primary">
                       {m.logoUrl ? (
                         <img src={m.logoUrl} alt={m.name} className="w-7 h-7 rounded-lg object-contain bg-white shrink-0" />
                       ) : null}
@@ -541,7 +538,7 @@ export default function Withdraw() {
                         aria-label={`Copy ${m.name} number`}
                         data-testid={`button-copy-method-${m.id}`}
                       >
-                        <Copy size={14} style={{ color: '#173A5E' }} />
+                        <Copy size={14} className="text-primary" />
                       </button>
                     </span>
                   </div>
@@ -616,8 +613,7 @@ export default function Withdraw() {
               type="button"
               onClick={handleSubmitVerification}
               disabled={submitVerification.isPending}
-              className="w-full h-12 rounded-xl font-black text-base text-white disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, #142B49, #285477, #8C672B)' }}
+              className="w-full h-12 rounded-xl font-black text-base text-white disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2 bg-primary shadow-md shadow-primary/25"
               data-testid="button-submit-verification"
             >
               {submitVerification.isPending && <Loader2 className="animate-spin" size={18} />}

@@ -23,8 +23,8 @@ export default function Rules() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="flex-1 flex flex-col bg-muted/20 overflow-y-auto">
-      <div className="bg-card border-b px-6 py-4 sticky top-0 z-10 shadow-sm flex items-center gap-3">
+    <div className="flex-1 flex flex-col page-canvas overflow-y-auto">
+      <div className="bg-white/90 backdrop-blur-xl border-b px-4 py-3 sticky top-0 z-10 flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
@@ -35,7 +35,7 @@ export default function Rules() {
           <ArrowLeft size={20} />
         </Button>
         <div>
-          <h1 className="text-xl font-bold text-foreground">App Rules</h1>
+          <h1 className="text-xl font-extrabold text-foreground">App Rules</h1>
           <p className="text-sm text-muted-foreground mt-1">আয় শুরু করার আগে পড়ে নিন</p>
         </div>
       </div>

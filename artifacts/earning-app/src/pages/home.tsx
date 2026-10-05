@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useGetMe, useGetPublicConfig, useListReferrals, useListTasks } from '@workspace/api-client-react';
-import { Button } from '@/components/ui/button';
-import { Wallet, Gift, Users, Trophy, TrendingUp, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
+import { Wallet, Gift, Users, Trophy, TrendingUp, CheckCircle2, ArrowRight } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { formatCurrency } from '../lib/utils';
 import { useAuth } from '../components/auth-provider';
+import { PageHeader } from '../components/page-header';
 
 export default function Home() {
   const { data: user, isLoading: isLoadingMe } = useGetMe();
@@ -19,10 +19,10 @@ export default function Home() {
 
   if (isLoadingMe || isLoadingConfig || !currentUser || !config) {
     return (
-      <div className="flex-1 flex flex-col">
-        <div className="h-56 animate-pulse" style={{ background: 'linear-gradient(150deg, #142B49, #285477, #8C672B)' }} />
-        <div className="p-5 space-y-4 -mt-6">
-          <div className="h-32 bg-white rounded-2xl animate-pulse shadow-sm" />
+      <div className="flex-1 flex flex-col page-canvas">
+        <div className="h-28 bg-white animate-pulse border-b" />
+        <div className="p-5 space-y-4">
+          <div className="h-32 bg-white rounded-3xl animate-pulse shadow-sm" />
           <div className="grid grid-cols-2 gap-3">
             <div className="h-24 bg-white rounded-2xl animate-pulse shadow-sm" />
             <div className="h-24 bg-white rounded-2xl animate-pulse shadow-sm" />
@@ -33,63 +33,49 @@ export default function Home() {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F4F7FA' }}>
-      {/* Gradient Hero */}
-      <div
-        className="relative overflow-hidden px-5 pt-10 pb-6"
-        style={{ background: 'linear-gradient(150deg, #142B49 0%, #285477 68%, #8C672B 100%)' }}
-      >
-        {/* Decorative circles */}
-        <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full opacity-10 bg-white" />
-        <div className="absolute bottom-0 left-4 w-28 h-28 rounded-full opacity-10 bg-white" />
-
-        <div className="relative flex justify-between items-center gap-3 mb-5">
-          <div className="min-w-0 flex-1">
-            <p className="text-white/70 text-xs font-semibold mb-0.5">Welcome back 👋</p>
-            <h1 className="text-white text-lg font-black tracking-tight truncate" data-testid="text-greeting">
-              {/* Show only the first segment before " | " to avoid long display names wrapping */}
-              {currentUser.firstName.split(/\s*[|·•—]\s*/)[0].trim()}
-            </h1>
-          </div>
-          {currentUser.photoUrl && !photoFailed ? (
+    <div className="flex-1 flex flex-col overflow-y-auto page-canvas">
+      <PageHeader
+        title={`Hi, ${currentUser.firstName.split(/\s*[|·•—]\s*/)[0].trim()}`}
+        subtitle="Welcome back"
+        trailing={
+          currentUser.photoUrl && !photoFailed ? (
             <img
               src={currentUser.photoUrl}
               alt="Profile"
-              className="w-11 h-11 rounded-full border-2 border-white/30 shadow-lg shrink-0 object-cover"
+              className="w-11 h-11 rounded-2xl border border-border shadow-sm shrink-0 object-cover"
               referrerPolicy="no-referrer"
               onError={() => setPhotoFailed(true)}
             />
           ) : (
-            <div className="w-11 h-11 rounded-full bg-white/20 text-white flex items-center justify-center font-black text-lg border-2 border-white/30 shadow-lg shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center font-black text-lg shadow-sm shrink-0">
               {currentUser.firstName.charAt(0)}
             </div>
-          )}
-        </div>
+          )
+        }
+      />
 
-        <div className="relative">
-          <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Total Balance</p>
+      <div className="px-4 pb-6 pt-4 space-y-4">
+        <div className="rounded-3xl p-5 bg-white border shadow-sm relative overflow-hidden">
+          <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-primary/10" />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground mb-1">Total Balance</p>
           <div data-testid="text-balance">
-            <span className="text-white text-4xl font-black tracking-tight">{formatCurrency(currentUser.balance)}</span>
+            <span className="text-4xl font-extrabold tracking-tight text-foreground">{formatCurrency(currentUser.balance)}</span>
           </div>
-          <div className="flex items-center gap-1.5 mt-1.5">
-            <TrendingUp size={12} className="text-white/70" />
-            <span className="text-white/70 text-xs font-medium">Total earned: {formatCurrency(currentUser.totalEarned)}</span>
+          <div className="flex items-center gap-1.5 mt-2 text-success">
+            <TrendingUp size={14} />
+            <span className="text-xs font-semibold">Total earned: {formatCurrency(currentUser.totalEarned)}</span>
           </div>
+          <span className="sr-only" data-testid="text-greeting">{currentUser.firstName.split(/\s*[|·•—]\s*/)[0].trim()}</span>
         </div>
-      </div>
 
-      {/* Content pulled up over hero */}
-      <div className="px-4 pb-6 pt-5 space-y-4">
-
-        {/* Action buttons */}
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => setLocation('/withdraw')}
-            className="bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-slate-200 active:scale-95 transition-transform"
+            className="bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border active:scale-95 transition-transform"
             data-testid="button-home-withdraw"
           >
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}>
-              <Wallet size={18} color="white" />
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 bg-primary text-primary-foreground">
+              <Wallet size={18} />
             </div>
             <div className="text-left">
               <p className="font-bold text-sm text-foreground">Withdraw</p>
@@ -98,10 +84,10 @@ export default function Home() {
           </button>
           <button
             onClick={() => setLocation('/refer')}
-            className="bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-slate-200 active:scale-95 transition-transform"
+            className="bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm border active:scale-95 transition-transform"
           >
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #315B7B, #8C672B)' }}>
-              <Users size={18} color="white" />
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 bg-emerald-500 text-white">
+              <Users size={18} />
             </div>
             <div className="text-left">
               <p className="font-bold text-sm text-foreground">Refer</p>
@@ -110,7 +96,6 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Daily Tasks card */}
         {(() => {
           const pending = tasks ? tasks.filter(t => !t.completed).length : 0;
           const done = tasks ? tasks.filter(t => t.completed).length : 0;
@@ -119,35 +104,34 @@ export default function Home() {
           return (
             <button
               onClick={() => setLocation('/earn')}
-              className="w-full rounded-2xl p-5 text-left shadow-md active:scale-95 transition-transform"
-              style={{ background: 'linear-gradient(135deg, #142B49 0%, #285477 70%, #8C672B 100%)' }}
+              className="w-full rounded-3xl p-5 text-left bg-white border shadow-sm active:scale-95 transition-transform"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                    <CheckCircle2 size={20} color="white" />
+                  <div className="w-11 h-11 rounded-2xl bg-blue-50 text-primary flex items-center justify-center shrink-0">
+                    <CheckCircle2 size={20} />
                   </div>
                   <div>
-                    <p className="text-white font-black text-base leading-tight">Daily Tasks</p>
-                    <p className="text-white/70 text-xs mt-0.5">
+                    <p className="text-foreground font-extrabold text-base leading-tight">Daily Tasks</p>
+                    <p className="text-muted-foreground text-xs mt-0.5">
                       {pending > 0 ? `${pending} task${pending > 1 ? 's' : ''} pending` : total === 0 ? 'No tasks yet' : '🎉 All done!'}
                     </p>
                   </div>
                 </div>
-                <div className="bg-white/20 border border-white/30 rounded-xl px-3 py-2 flex items-center gap-1.5 shrink-0">
-                  <span className="text-white font-black text-xs">View</span>
-                  <ArrowRight size={13} color="white" />
+                <div className="bg-primary text-primary-foreground rounded-xl px-3 py-2 flex items-center gap-1.5 shrink-0">
+                  <span className="font-bold text-xs">View</span>
+                  <ArrowRight size={13} />
                 </div>
               </div>
 
               {total > 0 && (
                 <>
-                  <div className="bg-white/20 rounded-full h-2 overflow-hidden">
-                    <div className="h-full bg-white rounded-full transition-all" style={{ width: `${pct}%` }} />
+                  <div className="bg-muted rounded-full h-2 overflow-hidden">
+                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
                   </div>
                   <div className="flex justify-between mt-1.5">
-                    <span className="text-white/70 text-xs">{done} completed</span>
-                    <span className="text-white/70 text-xs">{pct}%</span>
+                    <span className="text-muted-foreground text-xs">{done} completed</span>
+                    <span className="text-muted-foreground text-xs">{pct}%</span>
                   </div>
                 </>
               )}
@@ -155,31 +139,29 @@ export default function Home() {
           );
         })()}
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3">
           <div
-            className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 cursor-pointer active:scale-95 transition-transform"
+            className="bg-white rounded-2xl p-4 shadow-sm border cursor-pointer active:scale-95 transition-transform"
             onClick={() => setLocation('/refer')}
           >
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: '#E8EEF4' }}>
-              <Users size={17} style={{ color: '#173A5E' }} />
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3 bg-blue-50">
+              <Users size={17} className="text-primary" />
             </div>
-            <p className="text-2xl font-black text-foreground" data-testid="text-referral-count">{referralsData?.totalReferrals ?? 0}</p>
+            <p className="text-2xl font-extrabold text-foreground" data-testid="text-referral-count">{referralsData?.totalReferrals ?? 0}</p>
             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Referrals</p>
           </div>
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: '#F7F0E4' }}>
-              <Trophy size={17} style={{ color: '#966A24' }} />
+          <div className="bg-white rounded-2xl p-4 shadow-sm border">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3 bg-amber-50">
+              <Trophy size={17} className="text-amber-600" />
             </div>
-            <p className="text-2xl font-black text-foreground">{formatCurrency(currentUser.totalEarned)}</p>
+            <p className="text-2xl font-extrabold text-foreground">{formatCurrency(currentUser.totalEarned)}</p>
             <p className="text-xs font-medium text-muted-foreground mt-0.5">Total Earned</p>
           </div>
         </div>
 
-        {/* How to earn */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+        <div className="bg-white rounded-3xl p-5 shadow-sm border">
           <div className="flex items-center gap-2 mb-4">
-            <Gift size={18} style={{ color: '#173A5E' }} />
+            <Gift size={18} className="text-primary" />
             <h3 className="font-bold text-foreground">How to earn</h3>
           </div>
           <ul className="space-y-3">
@@ -189,10 +171,7 @@ export default function Home() {
               `Invite friends with your referral link and get ${formatCurrency(config.referralBonus)} each.`,
             ].map((text, i) => (
               <li key={i} className="flex gap-3 items-start">
-                <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 mt-0.5"
-                  style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}
-                >
+                <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 mt-0.5 bg-primary">
                   {i + 1}
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">{text}</p>
