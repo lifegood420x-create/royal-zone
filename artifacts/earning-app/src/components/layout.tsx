@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { Home, ListTodo, Users, Wallet, User as UserIcon } from 'lucide-react';
+import { Home, ListTodo, Settings } from 'lucide-react';
 import { useAuth } from './auth-provider';
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -44,22 +44,21 @@ function BottomNav() {
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/earn', label: 'Earn', icon: ListTodo },
-    { href: '/refer', label: 'Refer', icon: Users },
-    { href: '/withdraw', label: 'Withdraw', icon: Wallet },
-    { href: '/profile', label: 'Profile', icon: UserIcon },
+    { href: '/settings', label: 'Settings', icon: Settings },
   ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 royal-nav bg-card border-t border-border/60 pb-[env(safe-area-inset-bottom)]">
       <div className="max-w-md mx-auto flex items-center justify-between px-2 h-16">
         {navItems.map((item) => {
-          const isActive = location === item.href;
+          const isActive = location === item.href || (item.href === '/settings' && ['/profile', '/withdraw', '/refer', '/rules'].includes(location));
           const Icon = item.icon;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-16 h-full space-y-1 rounded-xl transition-all duration-200 active:scale-95`}
+              className="flex flex-1 flex-col items-center justify-center h-full space-y-1 rounded-lg transition-all duration-200 active:scale-95"
+              aria-current={isActive ? 'page' : undefined}
               data-testid={`nav-${item.label.toLowerCase()}`}
             >
               <div className={`relative transition-transform ${isActive ? 'translate-y-[-2px]' : ''}`}>

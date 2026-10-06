@@ -14,6 +14,7 @@ import Refer from './pages/refer';
 import Withdraw from './pages/withdraw';
 import Profile from './pages/profile';
 import Rules from './pages/rules';
+import Settings from './pages/settings';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/dashboard';
@@ -31,6 +32,7 @@ function UserRouter() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/earn" component={Earn} />
+        <Route path="/settings" component={Settings} />
         <Route path="/refer" component={Refer} />
         <Route path="/withdraw" component={Withdraw} />
         <Route path="/profile" component={Profile} />
