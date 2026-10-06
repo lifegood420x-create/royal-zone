@@ -125,26 +125,26 @@ export default function Earn() {
   const adProgress = adLimit > 0 ? (adsWatched / adLimit) * 100 : 0;
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F4F7FA' }}>
+    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: 'var(--background)' }}>
       {/* Countdown overlay — only shown while the minimum watch timer is active.
            Intentionally NOT shown when countdown === 0 so the GigaPub
            ad overlay can remain visible and the user can dismiss it without
            our UI blocking the ad's close button. */}
       {countdown !== null && countdown > 0 && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-6" style={{ background: 'rgba(26,5,51,0.75)' }} data-testid="overlay-ad-countdown">
-          <div className="bg-white rounded-3xl p-8 max-w-xs w-full flex flex-col items-center text-center gap-4 shadow-2xl">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}>
-              <Clock size={28} color="white" />
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-6" style={{ background: 'var(--overlay)' }} data-testid="overlay-ad-countdown">
+          <div className="bg-card rounded-3xl p-8 max-w-xs w-full flex flex-col items-center text-center gap-4 shadow-2xl">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'var(--primary)' }}>
+              <Clock size={28} color="currentColor" />
             </div>
-            <p className="font-black text-foreground text-lg">এড দেখছেন...</p>
+            <p className="font-bold text-foreground text-lg">এড দেখছেন...</p>
             <p className="text-sm text-muted-foreground">
-              Reward পেতে আরো <span className="font-black text-foreground text-lg" data-testid="text-ad-countdown">{countdown}s</span>
+              Reward পেতে আরো <span className="font-bold text-foreground text-lg" data-testid="text-ad-countdown">{countdown}s</span>
             </p>
             <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
               <div
                 className="h-full rounded-full transition-all"
                 style={{
-                  background: 'linear-gradient(90deg, #173A5E, #315B7B)',
+                  background: 'linear-gradient(90deg, var(--primary), var(--primary))',
                   width: `${config?.adDurationSeconds ? ((config.adDurationSeconds - countdown) / config.adDurationSeconds) * 100 : 0}%`
                 }}
               />
@@ -156,35 +156,35 @@ export default function Earn() {
 
       {/* Gradient header */}
       <div
-        className="relative overflow-hidden px-5 pt-10 pb-6"
-        style={{ background: 'linear-gradient(150deg, #142B49 0%, #285477 68%, #8C672B 100%)' }}
+        className="royal-header relative overflow-hidden px-5 pt-9 pb-6"
+        
       >
-        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-10 bg-white" />
+        
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Daily Ads</p>
-            <h1 className="text-white text-2xl font-black tracking-tight">Earn</h1>
+            <p className="text-primary-foreground/70 text-xs font-semibold uppercase tracking-normal mb-1">Daily Ads</p>
+            <h1 className="text-primary-foreground text-2xl font-bold tracking-normal">Earn</h1>
           </div>
           <div className="text-right">
-            <p className="text-white/70 text-xs font-medium mb-0.5">Today's reward</p>
-            <p className="text-white font-black text-xl">{formatCurrency(config?.adReward || 0)} <span className="text-white/60 text-sm font-medium">/ ad</span></p>
+            <p className="text-primary-foreground/70 text-xs font-medium mb-0.5">Today's reward</p>
+            <p className="text-primary-foreground font-bold text-xl">{formatCurrency(config?.adReward || 0)} <span className="text-primary-foreground/60 text-sm font-medium">/ ad</span></p>
           </div>
         </div>
       </div>
 
       <div className="px-4 pb-6 pt-5 space-y-5">
         {/* Ad Card — Progress + Buttons একসাথে */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="royal-panel bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
           {/* Progress section */}
-          <div className="px-5 pt-5 pb-4 border-b border-slate-100">
+          <div className="px-5 pt-5 pb-4 border-b border-border">
             <div className="flex justify-between items-center mb-2.5">
               <span className="text-sm font-bold text-foreground">Daily Progress</span>
-              <span className="font-black text-sm" style={{ color: '#173A5E' }}>{adsWatched} / {adLimit} watched</span>
+              <span className="font-bold text-sm" style={{ color: 'var(--primary)' }}>{adsWatched} / {adLimit} watched</span>
             </div>
             <div className="bg-muted rounded-full h-2.5 overflow-hidden">
               <div
                 className="h-full rounded-full transition-all"
-                style={{ width: `${adProgress}%`, background: 'linear-gradient(90deg, #173A5E, #315B7B)' }}
+                style={{ width: `${adProgress}%`, background: 'linear-gradient(90deg, var(--primary), var(--primary))' }}
               />
             </div>
             {adsLeft === 0 && config?.monetagEnabled && (
@@ -200,14 +200,14 @@ export default function Earn() {
               <button
                 disabled={adsLeft === 0 || watchingAd}
                 onClick={handleWatchAd}
-                className="w-full rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-white disabled:opacity-50 active:scale-95 transition-all"
-                style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}
+                className="w-full rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-primary-foreground disabled:opacity-50 active:scale-95 transition-all"
+                style={{ background: 'var(--primary)' }}
                 data-testid="button-ad-watch"
               >
                 {watchingAd ? (
                   <Loader2 className="animate-spin" size={18} />
                 ) : (
-                  <><Play size={15} fill="white" color="white" /> Watch</>
+                  <><Play size={15} fill="currentColor" color="currentColor" /> Watch</>
                 )}
               </button>
             ) : (
@@ -221,14 +221,14 @@ export default function Earn() {
         {/* Tasks Section */}
         <div>
           <div className="flex items-center gap-2 mb-3 px-1">
-            <CheckCircle2 size={18} style={{ color: '#173A5E' }} />
-            <h2 className="font-black text-foreground text-base">Tasks</h2>
+            <CheckCircle2 size={18} style={{ color: 'var(--primary)' }} />
+            <h2 className="font-bold text-foreground text-base">Tasks</h2>
           </div>
 
           {tasksLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-24 bg-white animate-pulse rounded-2xl border border-slate-200" />
+                <div key={i} className="h-24 bg-card animate-pulse rounded-2xl border border-border" />
               ))}
             </div>
           ) : tasks && tasks.length > 0 ? (
@@ -236,7 +236,7 @@ export default function Earn() {
               {tasks.map((task) => (
                 <div
                   key={task.id}
-                  className={`bg-white rounded-2xl border border-slate-200 shadow-sm transition-opacity ${task.completed ? 'opacity-80' : 'opacity-100'}`}
+                  className={`royal-panel bg-card rounded-2xl border border-border shadow-sm transition-opacity ${task.completed ? 'opacity-80' : 'opacity-100'}`}
                 >
                   <div className="p-4 flex gap-4 items-center">
                     <div
@@ -251,12 +251,12 @@ export default function Earn() {
                       )}
                       <div className="flex items-center gap-2 mt-2">
                         <span
-                          className="text-xs font-bold px-2 py-0.5 rounded-lg text-white"
-                          style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}
+                          className="text-xs font-bold px-2 py-0.5 rounded-lg text-primary-foreground"
+                          style={{ background: 'var(--primary)' }}
                         >
                           +{formatCurrency(task.reward)}
                         </span>
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] uppercase font-bold tracking-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                           {task.type.replace('_', ' ')}
                         </span>
                       </div>
@@ -268,22 +268,22 @@ export default function Earn() {
                         // can revisit the channel/page from the task card.
                         task.link ? (
                           <button
-                            className="font-bold text-sm rounded-xl px-4 py-2 border border-slate-300 flex items-center gap-1.5 active:scale-95 transition-transform"
-                            style={{ color: '#173A5E', background: '#F4F7FA' }}
+                            className="font-bold text-sm rounded-xl px-4 py-2 border border-border flex items-center gap-1.5 active:scale-95 transition-transform"
+                            style={{ color: 'var(--primary)', background: 'var(--background)' }}
                             onClick={() => window.open(task.link!, '_blank')}
                             data-testid={`button-visit-done-task-${task.id}`}
                           >
                             Join <ExternalLink size={13} />
                           </button>
                         ) : (
-                          <div className="flex items-center text-sm font-bold px-3 py-1.5 rounded-xl" style={{ color: '#173A5E', background: '#E8EEF4' }}>
+                          <div className="flex items-center text-sm font-bold px-3 py-1.5 rounded-xl" style={{ color: 'var(--primary)', background: 'var(--secondary)' }}>
                             <CheckCircle2 size={15} className="mr-1.5" /> Done
                           </div>
                         )
                       ) : visitingTask === task.id ? (
                         <button
-                          className="font-bold text-sm rounded-xl px-4 py-2 text-white active:scale-95 transition-transform disabled:opacity-50"
-                          style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}
+                          className="font-bold text-sm rounded-xl px-4 py-2 text-primary-foreground active:scale-95 transition-transform disabled:opacity-50"
+                          style={{ background: 'var(--primary)' }}
                           onClick={() => handleClaimTask(task.id)}
                           disabled={completingTask === task.id}
                           data-testid={`button-claim-task-${task.id}`}
@@ -292,8 +292,8 @@ export default function Earn() {
                         </button>
                       ) : (
                         <button
-                            className="font-bold text-sm rounded-xl px-4 py-2 border border-slate-300 flex items-center gap-1.5 active:scale-95 transition-transform"
-                            style={{ color: '#173A5E', background: '#F4F7FA' }}
+                            className="font-bold text-sm rounded-xl px-4 py-2 border border-border flex items-center gap-1.5 active:scale-95 transition-transform"
+                            style={{ color: 'var(--primary)', background: 'var(--background)' }}
                           onClick={() => {
                             if (task.link) window.open(task.link, '_blank');
                             setVisitingTask(task.id);
@@ -309,7 +309,7 @@ export default function Earn() {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-200 border-dashed p-8 flex flex-col items-center text-center shadow-sm">
+            <div className="royal-panel bg-card rounded-2xl border border-border border-dashed p-8 flex flex-col items-center text-center shadow-sm">
               <CheckCircle2 size={40} className="text-muted-foreground/25 mb-3" />
               <p className="font-bold text-foreground mb-1">No tasks available</p>
               <p className="text-sm text-muted-foreground">Check back later for new earning opportunities.</p>

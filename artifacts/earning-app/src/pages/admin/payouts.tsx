@@ -138,7 +138,7 @@ export default function AdminPayouts() {
           ) : (
             <>
               <div className="flex items-center gap-2">
-                <div className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white ${payout.method === 'bkash' ? 'bg-[#E2136E]' : 'bg-[#EC1C24]'}`}>
+                <div className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-primary-foreground ${payout.method === 'bkash' ? 'bg-primary' : 'bg-primary'}`}>
                   {payout.method === 'bkash' ? 'b' : 'n'}
                 </div>
                 <span className="font-mono text-sm font-bold">{payout.accountNumber}</span>

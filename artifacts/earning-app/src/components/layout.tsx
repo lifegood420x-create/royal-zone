@@ -29,8 +29,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-20 md:pb-0 md:pl-20">
-      <main className="w-full max-w-md mx-auto min-h-[100dvh] bg-background shadow-2xl relative overflow-hidden flex flex-col">
+    <div className="min-h-[100dvh] bg-background pb-20">
+      <main className="w-full max-w-md mx-auto min-h-[100dvh] bg-background md:border-x md:border-border/70 relative overflow-hidden flex flex-col">
         {children}
       </main>
       <BottomNav />
@@ -50,7 +50,7 @@ function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border/60 shadow-[0_-4px_24px_rgba(23,48,72,0.08)] pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 royal-nav bg-card border-t border-border/60 pb-[env(safe-area-inset-bottom)]">
       <div className="max-w-md mx-auto flex items-center justify-between px-2 h-16">
         {navItems.map((item) => {
           const isActive = location === item.href;
@@ -66,18 +66,18 @@ function BottomNav() {
                 <Icon
                   size={22}
                   strokeWidth={isActive ? 2.5 : 2}
-                  style={isActive ? { color: '#173A5E' } : { color: '#64748B' }}
+                  style={isActive ? { color: 'var(--primary)' } : { color: 'var(--muted-foreground)' }}
                 />
                 {isActive && (
                   <div
                     className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full"
-                    style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}
+                    style={{ background: 'var(--primary)' }}
                   />
                 )}
               </div>
               <span
                 className="text-[10px] font-semibold transition-all"
-                style={isActive ? { color: '#173A5E' } : { color: '#64748B' }}
+                style={isActive ? { color: 'var(--primary)' } : { color: 'var(--muted-foreground)' }}
               >
                 {item.label}
               </span>

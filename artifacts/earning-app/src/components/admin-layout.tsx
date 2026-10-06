@@ -41,9 +41,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-[100dvh] bg-muted/30 flex">
+    <div className="min-h-[100dvh] bg-background flex">
       {/* Desktop Sidebar */}
-      <aside className="w-64 bg-card border-r hidden md:flex flex-col h-[100dvh] sticky top-0">
+      <aside className="w-[248px] bg-card/90 backdrop-blur-xl border-r hidden md:flex flex-col h-[100dvh] sticky top-0">
         <div className="p-6 border-b">
           <h2 className="text-lg font-bold text-foreground">Admin Panel</h2>
           <p className="text-sm text-muted-foreground">Control Panel</p>
@@ -56,7 +56,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   isActive 
                     ? 'bg-primary/10 text-primary' 
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -72,7 +72,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         <div className="p-4 border-t">
           <Link
             href="~/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             <ChevronLeft size={18} />
             Back to App
@@ -81,17 +81,17 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 md:h-[100dvh] md:overflow-y-auto bg-muted/30 md:pb-0 pb-20">
+      <div className="flex-1 flex flex-col min-w-0 md:h-[100dvh] md:overflow-y-auto bg-background md:pb-0 pb-20">
         {/* Material-style top app bar (mobile only) */}
-        <header className="bg-primary text-primary-foreground px-4 h-14 flex items-center gap-1 sticky top-0 z-20 shadow-md md:hidden">
+        <header className="bg-card text-foreground border-b border-border px-4 h-14 flex items-center gap-1 sticky top-0 z-20 shadow-md md:hidden">
           <Link
             href="~/"
-            className="p-2 -ml-2 rounded-full active:bg-white/15 transition-colors"
+            className="p-2 -ml-2 rounded-full active:bg-card/15 transition-colors"
             aria-label="Back to app"
           >
             <ChevronLeft size={22} />
           </Link>
-          <h2 className="font-medium text-lg tracking-tight">Admin Panel</h2>
+          <h2 className="font-medium text-lg tracking-normal">Admin Panel</h2>
         </header>
 
         <main className="flex-1 p-4 md:p-8 max-w-md md:max-w-6xl mx-auto w-full">

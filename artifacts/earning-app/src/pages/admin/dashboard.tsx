@@ -115,7 +115,7 @@ export default function AdminDashboard() {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      className="text-green-600 border-green-200 hover:bg-green-50"
+                      className="text-success border-success/20 hover:bg-success/10"
                       onClick={() => handleClearFlag(user.id)}
                       disabled={clearFlagMutation.isPending}
                     >
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="p-8 text-center text-muted-foreground">
-              <CheckCircle size={32} className="mx-auto text-green-500 mb-3 opacity-50" />
+              <CheckCircle size={32} className="mx-auto text-success mb-3 opacity-50" />
               <p>No flagged users at the moment.</p>
             </div>
           )}

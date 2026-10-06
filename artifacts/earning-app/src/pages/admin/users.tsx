@@ -107,12 +107,12 @@ export default function AdminUsers() {
                         <span className="font-bold text-foreground">{user.firstName}</span>
                         {user.username && <span className="text-muted-foreground text-sm">@{user.username}</span>}
                         {user.isBanned && (
-                          <span className="text-[10px] uppercase font-bold tracking-wider text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] uppercase font-bold tracking-normal text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">
                             Banned
                           </span>
                         )}
                         {user.isFlagged && !user.isBanned && (
-                          <span className="text-[10px] uppercase font-bold tracking-wider text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded flex items-center">
+                          <span className="text-[10px] uppercase font-bold tracking-normal text-warning-foreground bg-warning-foreground/10 px-1.5 py-0.5 rounded flex items-center">
                             <AlertTriangle size={10} className="mr-0.5" /> Flagged
                           </span>
                         )}
@@ -132,7 +132,7 @@ export default function AdminUsers() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="font-bold text-orange-600 border-orange-200 hover:bg-orange-50"
+                        className="font-bold text-warning-foreground border-warning-foreground/20 hover:bg-warning-foreground/10"
                         onClick={() => handleClearFlag(user.id)}
                         disabled={clearFlagMutation.isPending}
                       >
@@ -142,7 +142,7 @@ export default function AdminUsers() {
                     <Button 
                       variant={user.isBanned ? "outline" : "destructive"} 
                       size="sm"
-                      className={`font-bold ${user.isBanned ? 'text-green-600 border-green-200 hover:bg-green-50' : ''}`}
+                      className={`font-bold ${user.isBanned ? 'text-success border-success/20 hover:bg-success/10' : ''}`}
                       onClick={() => handleToggleBan(user.id, user.isBanned)}
                       disabled={banMutation.isPending || unbanMutation.isPending}
                     >

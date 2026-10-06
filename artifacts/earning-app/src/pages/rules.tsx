@@ -43,14 +43,14 @@ export default function Rules() {
       <div className="p-6 space-y-6">
         <Card className="border shadow-sm bg-card">
           <CardContent className="p-5 space-y-3">
-            <h2 className="font-bold text-base flex items-center gap-2 text-green-700">
+            <h2 className="font-bold text-base flex items-center gap-2 text-success">
               <CheckCircle2 size={18} />
               যা করবেন
             </h2>
             <ul className="space-y-2.5">
               {doRules.map((rule, i) => (
                 <li key={i} className="flex gap-2.5 text-sm text-foreground/90 leading-relaxed">
-                  <span className="text-green-600 font-bold shrink-0">•</span>
+                  <span className="text-success font-bold shrink-0">•</span>
                   {rule}
                 </li>
               ))}

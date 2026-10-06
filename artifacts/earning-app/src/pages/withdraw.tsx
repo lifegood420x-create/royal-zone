@@ -63,9 +63,9 @@ export default function Withdraw() {
   // bKash/Nagad numbers from settings plus every admin-added custom
   // method (Upay, Rocket, ...).
   const payOptions = [
-    ...(vstatus?.bkashNumber ? [{ key: 'bkash', label: 'bKash', logo: null as string | null, color: '#E2136E' }] : []),
-    ...(vstatus?.nagadNumber ? [{ key: 'nagad', label: 'Nagad', logo: null as string | null, color: '#EC1C24' }] : []),
-    ...((vstatus?.methods ?? []).map((m) => ({ key: m.name, label: m.name, logo: m.logoUrl ?? null, color: '#173A5E' }))),
+    ...(vstatus?.bkashNumber ? [{ key: 'bkash', label: 'bKash', logo: null as string | null, color: 'var(--payment-bkash)' }] : []),
+    ...(vstatus?.nagadNumber ? [{ key: 'nagad', label: 'Nagad', logo: null as string | null, color: 'var(--payment-nagad)' }] : []),
+    ...((vstatus?.methods ?? []).map((m) => ({ key: m.name, label: m.name, logo: m.logoUrl ?? null, color: 'var(--primary)' }))),
   ];
 
   useEffect(() => {
@@ -90,9 +90,9 @@ export default function Withdraw() {
   const MethodBadge = ({ m }: { m: 'bkash' | 'nagad' }) => {
     const logo = logoFor(m);
     return logo ? (
-      <img src={logo} alt={m} className="w-6 h-6 rounded-full object-contain bg-white" />
+      <img src={logo} alt={m} className="w-6 h-6 rounded-full object-contain bg-card" />
     ) : (
-      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs">
+      <div className="w-6 h-6 rounded-full bg-card/20 flex items-center justify-center font-bold text-xs">
         {m === 'bkash' ? 'b' : 'n'}
       </div>
     );
@@ -199,48 +199,48 @@ export default function Withdraw() {
 
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case 'paid': return { color: '#16A34A', bg: '#F0FDF4', border: '#86EFAC' };
-      case 'rejected': return { color: '#DC2626', bg: '#FEF2F2', border: '#FCA5A5' };
-      default: return { color: '#D97706', bg: '#FFFBEB', border: '#FCD34D' };
+      case 'paid': return { color: 'var(--success)', bg: 'var(--secondary)', border: 'var(--border)' };
+      case 'rejected': return { color: 'var(--destructive)', bg: 'var(--muted)', border: 'var(--border)' };
+      default: return { color: 'var(--warning-foreground)', bg: 'var(--accent)', border: 'var(--accent-border)' };
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: '#F4F7FA' }}>
+    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: 'var(--background)' }}>
       {/* Gradient Hero */}
       <div
-        className="relative overflow-hidden px-5 pt-10 pb-6"
-        style={{ background: 'linear-gradient(150deg, #142B49 0%, #285477 68%, #8C672B 100%)' }}
+        className="royal-header relative overflow-hidden px-5 pt-9 pb-6"
+        
       >
-        <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-10 bg-white" />
+        
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Available Balance</p>
-            <p className="text-white text-4xl font-black tracking-tight" data-testid="text-withdraw-balance">
+            <p className="text-primary-foreground/70 text-xs font-semibold uppercase tracking-normal mb-1">Available Balance</p>
+            <p className="text-primary-foreground text-4xl font-bold tracking-normal" data-testid="text-withdraw-balance">
               {formatCurrency(user?.balance || 0)}
             </p>
           </div>
-          <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-            <Wallet size={22} color="white" />
+          <div className="w-12 h-12 bg-card/20 rounded-2xl flex items-center justify-center">
+            <Wallet size={22} color="currentColor" />
           </div>
         </div>
-        <p className="text-white/60 text-xs mt-3">Min. withdrawal: {formatCurrency(minWithdraw)}</p>
+        <p className="text-primary-foreground/60 text-xs mt-3">Min. withdrawal: {formatCurrency(minWithdraw)}</p>
       </div>
 
       <div className="px-4 pb-6 pt-5 space-y-5">
         {/* Form Card */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+        <div className="royal-panel bg-card rounded-2xl p-5 shadow-sm border border-border">
           <div className="flex items-center gap-2 mb-5">
-            <ArrowDownToLine size={18} style={{ color: '#173A5E' }} />
-            <h2 className="font-black text-foreground">Request Payout</h2>
+            <ArrowDownToLine size={18} style={{ color: 'var(--primary)' }} />
+            <h2 className="font-bold text-foreground">Request Payout</h2>
           </div>
 
           {config && user && user.rejectedWithdrawCount > 0 && (
-            <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 flex gap-3 items-start mb-5">
-              <AlertCircle className="text-orange-500 shrink-0 mt-0.5" size={18} />
+            <div className="bg-warning-foreground/10 border border-warning-foreground/20 rounded-xl p-3 flex gap-3 items-start mb-5">
+              <AlertCircle className="text-warning-foreground shrink-0 mt-0.5" size={18} />
               <div>
-                <p className="text-sm font-bold text-orange-800">নোটিশ</p>
-                <p className="text-xs text-orange-700 mt-0.5 leading-relaxed">
+                <p className="text-sm font-bold text-warning-foreground">নোটিশ</p>
+                <p className="text-xs text-warning-foreground mt-0.5 leading-relaxed">
                   আগের রিজেক্টেড রিকোয়েস্টের কারণে আপনার সর্বনিম্ন উইথড্র পরিমাণ বাড়ানো হয়েছে।
                 </p>
               </div>
@@ -248,18 +248,18 @@ export default function Withdraw() {
           )}
 
           {user?.isVerified && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex gap-2 items-center mb-5">
-              <ShieldCheck className="text-green-600 shrink-0" size={18} />
-              <p className="text-xs font-bold text-green-800">আপনার অ্যাকাউন্ট ভেরিফাইড ✅</p>
+            <div className="bg-success/10 border border-success/20 rounded-xl p-3 flex gap-2 items-center mb-5">
+              <ShieldCheck className="text-success shrink-0" size={18} />
+              <p className="text-xs font-bold text-success">আপনার অ্যাকাউন্ট ভেরিফাইড ✅</p>
             </div>
           )}
 
           {verificationPending && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex gap-3 items-start mb-5" data-testid="banner-verification-pending">
-              <Clock className="text-blue-500 shrink-0 mt-0.5" size={18} />
+            <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex gap-3 items-start mb-5" data-testid="banner-verification-pending">
+              <Clock className="text-primary shrink-0 mt-0.5" size={18} />
               <div>
-                <p className="text-sm font-bold text-blue-800">ভেরিফিকেশন যাচাই চলছে</p>
-                <p className="text-xs text-blue-700 mt-0.5 leading-relaxed">
+                <p className="text-sm font-bold text-primary">ভেরিফিকেশন যাচাই চলছে</p>
+                <p className="text-xs text-primary mt-0.5 leading-relaxed">
                   আপনার পেমেন্ট অ্যাডমিন যাচাই করছেন। অনুমোদন হলে অ্যাকাউন্ট ভেরিফাইড হবে
                   এবং আপনার উইথড্র রিকোয়েস্ট নিজে থেকেই জমা হয়ে যাবে।
                 </p>
@@ -284,8 +284,8 @@ export default function Withdraw() {
                           onClick={() => field.onChange(m)}
                           className="h-12 px-4 rounded-xl flex items-center gap-2 font-bold text-sm border-2 transition-all active:scale-95"
                           style={field.value === m
-                            ? { background: m === 'bkash' ? '#E2136E' : '#EC1C24', color: 'white', borderColor: 'transparent' }
-                            : { background: '#F4F7FA', color: '#1B2F42', borderColor: '#D9E2EA' }
+                            ? { background: m === 'bkash' ? 'var(--payment-bkash)' : 'var(--payment-nagad)', color: 'var(--primary-foreground)', borderColor: 'transparent' }
+                            : { background: 'var(--background)', color: 'var(--foreground)', borderColor: 'var(--border)' }
                           }
                           data-testid={`select-method-${m}`}
                         >
@@ -311,7 +311,7 @@ export default function Withdraw() {
                         placeholder="01XXXXXXXXX"
                         type="tel"
                         maxLength={11}
-                        className="h-12 bg-muted/50 rounded-xl border-slate-200 focus:border-primary"
+                        className="h-12 bg-muted/50 rounded-xl border-border focus:border-primary"
                         data-testid="input-account-number"
                         {...field}
                       />
@@ -333,11 +333,11 @@ export default function Withdraw() {
                     </div>
                     <FormControl>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-lg">৳</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-lg">৳</span>
                         <Input
                           type="number"
                           step="0.01"
-                          className="h-12 pl-9 font-black text-xl bg-muted/50 rounded-xl border-slate-200 focus:border-primary"
+                          className="h-12 pl-9 font-bold text-xl bg-muted/50 rounded-xl border-border focus:border-primary"
                           data-testid="input-amount"
                           {...field}
                         />
@@ -350,8 +350,8 @@ export default function Withdraw() {
 
               <button
                 type="submit"
-                className="w-full h-12 rounded-xl font-black text-base text-white disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #142B49, #285477, #8C672B)' }}
+                className="w-full h-12 rounded-xl font-bold text-base text-primary-foreground disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+                style={{ background: 'var(--primary)' }}
                 disabled={requestMutation.isPending || !user || user.balance < minWithdraw}
                 data-testid="button-submit-withdrawal"
               >
@@ -364,30 +364,30 @@ export default function Withdraw() {
 
         {/* History */}
         <div>
-          <h3 className="font-black text-foreground text-base mb-3 px-1">Recent Transactions</h3>
+          <h3 className="font-bold text-foreground text-base mb-3 px-1">Recent Transactions</h3>
 
           {withdrawalsLoading ? (
             <div className="space-y-3">
-              {[1, 2].map(i => <div key={i} className="h-20 bg-white animate-pulse rounded-2xl border border-slate-200" />)}
+              {[1, 2].map(i => <div key={i} className="h-20 bg-card animate-pulse rounded-2xl border border-border" />)}
             </div>
           ) : withdrawals && withdrawals.length > 0 ? (
             <div className="space-y-3">
               {withdrawals.map((w) => {
                 const s = getStatusStyle(w.status);
                 return (
-                  <div key={w.id} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                  <div key={w.id} className="royal-panel bg-card rounded-2xl p-4 shadow-sm border border-border">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-3">
                         {logoFor(w.method as 'bkash' | 'nagad') ? (
                           <img
                             src={logoFor(w.method as 'bkash' | 'nagad')!}
                             alt={w.method}
-                            className="w-10 h-10 rounded-xl object-contain bg-white border border-slate-200 shrink-0"
+                            className="w-10 h-10 rounded-xl object-contain bg-card border border-border shrink-0"
                           />
                         ) : (
                           <div
-                            className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black text-white shrink-0"
-                            style={{ background: w.method === 'bkash' ? '#E2136E' : '#EC1C24' }}
+                            className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-primary-foreground shrink-0"
+                            style={{ background: w.method === 'bkash' ? 'var(--payment-bkash)' : 'var(--payment-nagad)' }}
                           >
                             {w.method === 'bkash' ? 'b' : 'n'}
                           </div>
@@ -398,9 +398,9 @@ export default function Withdraw() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-black text-foreground">{formatCurrency(w.amount)}</p>
+                        <p className="font-bold text-foreground">{formatCurrency(w.amount)}</p>
                         <div
-                          className="mt-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-lg"
+                          className="mt-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-normal font-bold px-2 py-0.5 rounded-lg"
                           style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}` }}
                         >
                           {w.status === 'paid' && <CheckCircle2 size={10} />}
@@ -410,7 +410,7 @@ export default function Withdraw() {
                         </div>
                       </div>
                     </div>
-                    <div className="pt-2 border-t border-slate-100 text-xs text-muted-foreground">
+                    <div className="pt-2 border-t border-border text-xs text-muted-foreground">
                       {formatDate(w.requestedAt)} · {formatTime(w.requestedAt)}
                     </div>
                     {w.note && w.status === 'rejected' && (
@@ -433,7 +433,7 @@ export default function Withdraw() {
               })}
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-8 text-center shadow-sm">
+            <div className="royal-panel bg-card rounded-2xl border border-dashed border-border p-8 text-center shadow-sm">
               <p className="text-sm text-muted-foreground">No withdrawal history yet.</p>
             </div>
           )}
@@ -445,20 +445,20 @@ export default function Withdraw() {
         <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <ShieldCheck size={20} style={{ color: '#173A5E' }} />
+              <ShieldCheck size={20} style={{ color: 'var(--primary)' }} />
               অ্যাকাউন্ট ভেরিফিকেশন
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
-              <p className="text-xs font-bold text-slate-800 leading-relaxed">
+            <div className="bg-muted border border-border rounded-xl p-3 space-y-1">
+              <p className="text-xs font-bold text-foreground leading-relaxed">
                 উইথড্র চালু করতে অ্যাকাউন্ট ভেরিফিকেশন বাধ্যতামূলক।
               </p>
-              <p className="text-xs font-black text-slate-800">
+              <p className="text-xs font-bold text-foreground">
                 💳 ফি: {formatCurrency(vstatus?.fee || 0)} (শুধুমাত্র একবার)
               </p>
-              <div className="text-xs text-slate-800 leading-relaxed space-y-0.5">
+              <div className="text-xs text-foreground leading-relaxed space-y-0.5">
                 <p>• উইথড্র চালু হবে।</p>
                 <p>• অ্যাকাউন্ট Active হবে।</p>
                 <p>• পুনরায় কোনো ফি লাগবে না।</p>
@@ -470,8 +470,8 @@ export default function Withdraw() {
                 href={vstatus.autoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full h-12 rounded-xl font-black text-sm text-white flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #173A5E, #315B7B)' }}
+                className="w-full h-12 rounded-xl font-bold text-sm text-primary-foreground flex items-center justify-center gap-2"
+                style={{ background: 'var(--primary)' }}
                 data-testid="button-auto-pay"
               >
                 অনলাইনে পেমেন্ট করুন <ExternalLink size={15} />
@@ -480,68 +480,68 @@ export default function Withdraw() {
               <div className="space-y-1.5">
                 {vstatus?.bkashNumber && (
                   <div className="flex items-center justify-between bg-muted/50 rounded-xl px-3 py-2.5 gap-2">
-                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: '#E2136E' }}>
+                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: 'var(--payment-bkash)' }}>
                       {logoFor('bkash') ? (
-                        <img src={logoFor('bkash')!} alt="bKash" className="w-7 h-7 rounded-lg object-contain bg-white shrink-0" />
+                        <img src={logoFor('bkash')!} alt="bKash" className="w-7 h-7 rounded-lg object-contain bg-card shrink-0" />
                       ) : null}
                       bKash (Send Money)
                     </span>
                     <span className="flex items-center gap-1.5 shrink-0">
-                      <span className="font-black text-sm select-all" data-testid="text-verify-bkash">{vstatus.bkashNumber}</span>
+                      <span className="font-bold text-sm select-all" data-testid="text-verify-bkash">{vstatus.bkashNumber}</span>
                       <button
                         type="button"
                         onClick={() => copyNumber(vstatus.bkashNumber!)}
-                        className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center active:scale-90 transition-transform"
+                        className="w-8 h-8 rounded-lg bg-card border border-border flex items-center justify-center active:scale-90 transition-transform"
                         aria-label="Copy bKash number"
                         data-testid="button-copy-bkash"
                       >
-                        <Copy size={14} style={{ color: '#173A5E' }} />
+                        <Copy size={14} style={{ color: 'var(--primary)' }} />
                       </button>
                     </span>
                   </div>
                 )}
                 {vstatus?.nagadNumber && (
                   <div className="flex items-center justify-between bg-muted/50 rounded-xl px-3 py-2.5 gap-2">
-                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: '#EC1C24' }}>
+                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: 'var(--payment-nagad)' }}>
                       {logoFor('nagad') ? (
-                        <img src={logoFor('nagad')!} alt="Nagad" className="w-7 h-7 rounded-lg object-contain bg-white shrink-0" />
+                        <img src={logoFor('nagad')!} alt="Nagad" className="w-7 h-7 rounded-lg object-contain bg-card shrink-0" />
                       ) : null}
                       Nagad (Send Money)
                     </span>
                     <span className="flex items-center gap-1.5 shrink-0">
-                      <span className="font-black text-sm select-all" data-testid="text-verify-nagad">{vstatus.nagadNumber}</span>
+                      <span className="font-bold text-sm select-all" data-testid="text-verify-nagad">{vstatus.nagadNumber}</span>
                       <button
                         type="button"
                         onClick={() => copyNumber(vstatus.nagadNumber!)}
-                        className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center active:scale-90 transition-transform"
+                        className="w-8 h-8 rounded-lg bg-card border border-border flex items-center justify-center active:scale-90 transition-transform"
                         aria-label="Copy Nagad number"
                         data-testid="button-copy-nagad"
                       >
-                        <Copy size={14} style={{ color: '#173A5E' }} />
+                        <Copy size={14} style={{ color: 'var(--primary)' }} />
                       </button>
                     </span>
                   </div>
                 )}
                 {(vstatus?.methods ?? []).map((m) => (
                   <div key={m.id} className="flex items-center justify-between bg-muted/50 rounded-xl px-3 py-2.5 gap-2">
-                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: '#173A5E' }}>
+                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: 'var(--primary)' }}>
                       {m.logoUrl ? (
-                        <img src={m.logoUrl} alt={m.name} className="w-7 h-7 rounded-lg object-contain bg-white shrink-0" />
+                        <img src={m.logoUrl} alt={m.name} className="w-7 h-7 rounded-lg object-contain bg-card shrink-0" />
                       ) : null}
                       <span className="truncate">
                         {m.name} ({m.paymentType === 'send_money' ? 'Send Money' : 'Cash Out'})
                       </span>
                     </span>
                     <span className="flex items-center gap-1.5 shrink-0">
-                      <span className="font-black text-sm select-all" data-testid={`text-verify-method-${m.id}`}>{m.accountNumber}</span>
+                      <span className="font-bold text-sm select-all" data-testid={`text-verify-method-${m.id}`}>{m.accountNumber}</span>
                       <button
                         type="button"
                         onClick={() => copyNumber(m.accountNumber)}
-                        className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center active:scale-90 transition-transform"
+                        className="w-8 h-8 rounded-lg bg-card border border-border flex items-center justify-center active:scale-90 transition-transform"
                         aria-label={`Copy ${m.name} number`}
                         data-testid={`button-copy-method-${m.id}`}
                       >
-                        <Copy size={14} style={{ color: '#173A5E' }} />
+                        <Copy size={14} style={{ color: 'var(--primary)' }} />
                       </button>
                     </span>
                   </div>
@@ -558,8 +558,8 @@ export default function Withdraw() {
                 {(payOptions.length > 0
                   ? payOptions
                   : [
-                      { key: 'bkash', label: 'bKash', logo: null, color: '#E2136E' },
-                      { key: 'nagad', label: 'Nagad', logo: null, color: '#EC1C24' },
+                      { key: 'bkash', label: 'bKash', logo: null, color: 'var(--payment-bkash)' },
+                      { key: 'nagad', label: 'Nagad', logo: null, color: 'var(--payment-nagad)' },
                     ]
                 ).map((o) => (
                   <button
@@ -568,17 +568,17 @@ export default function Withdraw() {
                     onClick={() => setVMethod(o.key)}
                     className="h-11 px-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm border-2 transition-all active:scale-95"
                     style={vMethod === o.key
-                      ? { background: o.color, color: 'white', borderColor: 'transparent' }
-                      : { background: '#F4F7FA', color: '#1B2F42', borderColor: '#D9E2EA' }
+                      ? { background: o.color, color: 'var(--primary-foreground)', borderColor: 'transparent' }
+                      : { background: 'var(--background)', color: 'var(--foreground)', borderColor: 'var(--border)' }
                     }
                     data-testid={`select-verify-method-${o.key}`}
                   >
                     {(o.key === 'bkash' || o.key === 'nagad') ? (
                       <MethodBadge m={o.key as 'bkash' | 'nagad'} />
                     ) : o.logo ? (
-                      <img src={o.logo} alt={o.label} className="w-6 h-6 rounded-full object-contain bg-white" />
+                      <img src={o.logo} alt={o.label} className="w-6 h-6 rounded-full object-contain bg-card" />
                     ) : (
-                      <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs">
+                      <div className="w-6 h-6 rounded-full bg-card/20 flex items-center justify-center font-bold text-xs">
                         {o.label.charAt(0)}
                       </div>
                     )}
@@ -596,7 +596,7 @@ export default function Withdraw() {
                 maxLength={11}
                 value={vPayerNumber}
                 onChange={(e) => setVPayerNumber(e.target.value)}
-                className="h-11 bg-muted/50 rounded-xl border-slate-200"
+                className="h-11 bg-muted/50 rounded-xl border-border"
                 data-testid="input-verify-payer-number"
               />
             </div>
@@ -607,7 +607,7 @@ export default function Withdraw() {
                 placeholder="যেমন: 9HK7A2B5CD"
                 value={vTrxId}
                 onChange={(e) => setVTrxId(e.target.value)}
-                className="h-11 bg-muted/50 rounded-xl border-slate-200"
+                className="h-11 bg-muted/50 rounded-xl border-border"
                 data-testid="input-verify-trxid"
               />
             </div>
@@ -616,8 +616,8 @@ export default function Withdraw() {
               type="button"
               onClick={handleSubmitVerification}
               disabled={submitVerification.isPending}
-              className="w-full h-12 rounded-xl font-black text-base text-white disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, #142B49, #285477, #8C672B)' }}
+              className="w-full h-12 rounded-xl font-bold text-base text-primary-foreground disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+              style={{ background: 'var(--primary)' }}
               data-testid="button-submit-verification"
             >
               {submitVerification.isPending && <Loader2 className="animate-spin" size={18} />}
