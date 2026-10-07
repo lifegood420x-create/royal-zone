@@ -1,26 +1,24 @@
-import { useState, useEffect } from 'react';
-import { 
-  useGetMe, 
-  useGetPublicConfig, 
-  useListTasks, 
-  useWatchAd, 
+import { useState } from 'react';
+import {
+  useGetMe,
+  useGetPublicConfig,
+  useListTasks,
+  useWatchAd,
   useClaimAd,
   useCompleteTask,
   getGetMeQueryKey,
   getListTasksQueryKey,
 } from '@workspace/api-client-react';
 import { showRewardedAd } from '../lib/rewarded-ads';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { Play, CheckCircle2, ExternalLink, Loader2, PlayCircle, Clock } from 'lucide-react';
+import { CircleCheck, ExternalLink, Loader2, Play, ListTodo, Zap } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency } from '../lib/utils';
-import { TaskIcon, getTaskIconConfig } from '../lib/task-icons';
+import { TaskIcon } from '../lib/task-icons';
 
 
 export default function Earn() {
-  const { data: user, refetch: refetchUser } = useGetMe();
+  const { data: user } = useGetMe();
   const { data: config } = useGetPublicConfig();
   const { data: tasks, isLoading: tasksLoading } = useListTasks();
   const [watchingAd, setWatchingAd] = useState(false);
@@ -125,110 +123,142 @@ export default function Earn() {
   const adProgress = adLimit > 0 ? (adsWatched / adLimit) * 100 : 0;
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: 'var(--background)' }}>
+    <div className="flex-1 flex flex-col">
       {/* Countdown overlay — only shown while the minimum watch timer is active.
            Intentionally NOT shown when countdown === 0 so the GigaPub
            ad overlay can remain visible and the user can dismiss it without
            our UI blocking the ad's close button. */}
       {countdown !== null && countdown > 0 && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-6" style={{ background: 'var(--overlay)' }} data-testid="overlay-ad-countdown">
-          <div className="bg-card rounded-3xl p-8 max-w-xs w-full flex flex-col items-center text-center gap-4 shadow-2xl">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'var(--primary)' }}>
-              <Clock size={28} color="currentColor" />
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-6" style={{ background: 'var(--overlay)', backdropFilter: 'blur(10px)' }} data-testid="overlay-ad-countdown">
+          <div className="glass-strong rounded-[32px] p-8 max-w-xs w-full flex flex-col items-center text-center gap-4 animate-scale-in">
+            <div className="relative w-20 h-20">
+              <div
+                className="absolute inset-0 rounded-full animate-spin-slow"
+                style={{
+                  background:
+                    'conic-gradient(from 0deg, transparent 0%, oklch(0.68 0.22 300) 35%, oklch(0.8 0.13 196) 60%, transparent 75%)',
+                }}
+              />
+              <div className="absolute inset-[6px] rounded-full glass-strong flex items-center justify-center">
+                <span className="num text-2xl font-bold text-gradient" data-testid="text-ad-countdown">{countdown}</span>
+              </div>
             </div>
-            <p className="font-bold text-foreground text-lg">এড দেখছেন...</p>
-            <p className="text-sm text-muted-foreground">
-              Reward পেতে আরো <span className="font-bold text-foreground text-lg" data-testid="text-ad-countdown">{countdown}s</span>
-            </p>
-            <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
+            <p className="font-bold text-foreground text-lg">এড দেখা হচ্ছে…</p>
+            <div className="w-full glass-inset rounded-full h-2 overflow-hidden">
               <div
                 className="h-full rounded-full transition-all"
                 style={{
-                  background: 'linear-gradient(90deg, var(--primary), var(--primary))',
+                  background: 'var(--grad-brand)',
                   width: `${config?.adDurationSeconds ? ((config.adDurationSeconds - countdown) / config.adDurationSeconds) * 100 : 0}%`
                 }}
               />
             </div>
-            <p className="text-xs text-muted-foreground">এখন বন্ধ করবেন না — আগে বন্ধ করলে reward পাবেন না।</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">এখন বন্ধ করবেন না — আগে বন্ধ করলে reward পাবেন না।</p>
           </div>
         </div>
       )}
 
-      {/* Gradient header */}
-      <div
-        className="royal-header relative overflow-hidden px-5 pt-9 pb-6"
-        
-      >
-        
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-primary-foreground/70 text-xs font-semibold uppercase tracking-normal mb-1">Daily Ads</p>
-            <h1 className="text-primary-foreground text-2xl font-bold tracking-normal">Earn</h1>
-          </div>
-          <div className="text-right">
-            <p className="text-primary-foreground/70 text-xs font-medium mb-0.5">Today's reward</p>
-            <p className="text-primary-foreground font-bold text-xl">{formatCurrency(config?.adReward || 0)} <span className="text-primary-foreground/60 text-sm font-medium">/ ad</span></p>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-4 pb-6 pt-5 space-y-5">
-        {/* Ad Card — Progress + Buttons একসাথে */}
-        <div className="royal-panel bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
-          {/* Progress section */}
-          <div className="px-5 pt-5 pb-4 border-b border-border">
-            <div className="flex justify-between items-center mb-2.5">
-              <span className="text-sm font-bold text-foreground">Daily Progress</span>
-              <span className="font-bold text-sm" style={{ color: 'var(--primary)' }}>{adsWatched} / {adLimit} watched</span>
-            </div>
-            <div className="bg-muted rounded-full h-2.5 overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all"
-                style={{ width: `${adProgress}%`, background: 'linear-gradient(90deg, var(--primary), var(--primary))' }}
-              />
-            </div>
-            {adsLeft === 0 && config?.monetagEnabled && (
-              <p className="text-xs text-center text-muted-foreground mt-3 font-medium">
-                🎉 You've reached your daily limit. Come back tomorrow!
-              </p>
-            )}
-          </div>
-
-          {/* Buttons section */}
-          <div className="px-5 py-4">
-            {config?.monetagEnabled ? (
-              <button
-                disabled={adsLeft === 0 || watchingAd}
-                onClick={handleWatchAd}
-                className="w-full rounded-xl py-3.5 flex items-center justify-center gap-2 font-bold text-sm text-primary-foreground disabled:opacity-50 active:scale-95 transition-all"
-                style={{ background: 'var(--primary)' }}
-                data-testid="button-ad-watch"
-              >
-                {watchingAd ? (
-                  <Loader2 className="animate-spin" size={18} />
-                ) : (
-                  <><Play size={15} fill="currentColor" color="currentColor" /> Watch</>
-                )}
-              </button>
-            ) : (
-              <p className="text-sm text-center text-muted-foreground py-3 font-medium" data-testid="text-ads-unavailable">
-                Video ads are temporarily unavailable. Please check back later.
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Tasks Section */}
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <header className="px-4 pt-5 flex items-end justify-between animate-fade-up">
         <div>
-          <div className="flex items-center gap-2 mb-3 px-1">
-            <CheckCircle2 size={18} style={{ color: 'var(--primary)' }} />
-            <h2 className="font-bold text-foreground text-base">Tasks</h2>
+          <p className="text-[10px] font-bold tracking-[0.22em] text-gradient mb-1">EARN ZONE</p>
+          <h1 className="text-2xl font-bold text-foreground">আয় করুন</h1>
+        </div>
+        <div className="glass rounded-2xl px-3.5 py-2 flex items-center gap-2">
+          <Zap size={13} style={{ color: 'var(--warning-foreground)' }} />
+          <span className="num text-sm font-bold text-foreground">{formatCurrency(config?.adReward || 0)}</span>
+          <span className="text-[10px] font-semibold text-muted-foreground">/ অ্যাড</span>
+        </div>
+      </header>
+
+      <div className="px-4 pt-4 space-y-5 flex-1">
+        {/* ── Ad reactor card ──────────────────────────────────────── */}
+        <section
+          className="relative rounded-[28px] p-[1.2px] animate-fade-up stagger-1"
+          style={{ background: 'linear-gradient(135deg, oklch(0.68 0.22 300 / 70%), oklch(0.8 0.13 196 / 60%))' }}
+        >
+          <div className="relative rounded-[27px] px-5 py-5 overflow-hidden" style={{ background: 'oklch(0.17 0.035 286 / 92%)' }}>
+            <div className="absolute -top-14 -left-10 w-44 h-44 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, oklch(0.66 0.22 305 / 30%) 0%, transparent 65%)' }} />
+            <div className="flex items-center gap-5">
+              {/* Ring gauge */}
+              <div className="relative w-[104px] h-[104px] shrink-0">
+                <svg viewBox="0 0 104 104" className="w-full h-full -rotate-90">
+                  <circle cx="52" cy="52" r="45" fill="none" stroke="oklch(1 0 0 / 8%)" strokeWidth="9" />
+                  <circle
+                    cx="52"
+                    cy="52"
+                    r="45"
+                    fill="none"
+                    stroke="url(#adRing)"
+                    strokeWidth="9"
+                    strokeLinecap="round"
+                    strokeDasharray={`${(adProgress / 100) * 282.7} 282.7`}
+                    className="transition-all duration-500"
+                  />
+                  <defs>
+                    <linearGradient id="adRing" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="oklch(0.68 0.22 300)" />
+                      <stop offset="100%" stopColor="oklch(0.8 0.13 196)" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="num text-xl font-bold text-foreground leading-none">{adsWatched}<span className="text-muted-foreground text-sm font-semibold">/{adLimit}</span></span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mt-1">আজ</span>
+                </div>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-foreground">ডেইলি অ্যাড</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                  {config?.monetagEnabled
+                    ? adsLeft > 0
+                      ? <>আজ আরো <span className="font-bold text-gradient-cyan num">{adsLeft}</span>টি অ্যাড দেখতে পারবেন</>
+                      : '🎉 আজকের লিমিট শেষ — কাল আবার আসুন!'
+                    : 'ভিডিও অ্যাড এখন উপলব্ধ নেই'}
+                </p>
+                {config?.monetagEnabled ? (
+                  <button
+                    disabled={adsLeft === 0 || watchingAd}
+                    onClick={handleWatchAd}
+                    className={`mt-3 rounded-2xl h-11 px-6 flex items-center justify-center gap-2 font-bold text-sm active-scale disabled:opacity-40 disabled:pointer-events-none ${adsLeft > 0 ? 'animate-pulse-glow' : ''}`}
+                    style={{ background: 'var(--grad-brand)', color: 'var(--primary-foreground)' }}
+                    data-testid="button-ad-watch"
+                  >
+                    {watchingAd ? (
+                      <Loader2 className="animate-spin" size={18} />
+                    ) : (
+                      <><Play size={15} fill="currentColor" /> দেখুন</>
+                    )}
+                  </button>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-3" data-testid="text-ads-unavailable">
+                    পরে আবার চেষ্টা করুন।
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Tasks ────────────────────────────────────────────────── */}
+        <section className="animate-fade-up stagger-2">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <div className="flex items-center gap-2">
+              <ListTodo size={16} style={{ color: 'var(--accent-foreground)' }} />
+              <h2 className="font-bold text-foreground text-base">টাস্কসমূহ</h2>
+            </div>
+            {tasks && (
+              <span className="glass-inset rounded-full px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground">
+                {tasks.filter(t => t.completed).length}/{tasks.length} সম্পন্ন
+              </span>
+            )}
           </div>
 
           {tasksLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-24 bg-card animate-pulse rounded-2xl border border-border" />
+                <div key={i} className="h-[84px] glass animate-pulse rounded-3xl" />
               ))}
             </div>
           ) : tasks && tasks.length > 0 ? (
@@ -236,86 +266,83 @@ export default function Earn() {
               {tasks.map((task) => (
                 <div
                   key={task.id}
-                  className={`royal-panel bg-card rounded-2xl border border-border shadow-sm transition-opacity ${task.completed ? 'opacity-80' : 'opacity-100'}`}
+                  className={`glass rounded-3xl p-4 flex gap-3.5 items-center transition-opacity ${task.completed ? 'opacity-60' : ''}`}
                 >
-                  <div className="p-4 flex gap-4 items-center">
-                    <div
-                      className={`w-12 h-12 rounded-xl ${getTaskIconConfig(task.type).bgClassName} flex items-center justify-center shrink-0`}
-                    >
-                      <TaskIcon type={task.type} size={24} />
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border border-white/10"
+                    style={{ background: 'oklch(0.24 0.045 288 / 80%)' }}
+                  >
+                    <TaskIcon type={task.type} size={24} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-foreground truncate text-sm">{task.title}</h3>
+                    {task.description && (
+                      <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{task.description}</p>
+                    )}
+                    <div className="flex items-center gap-2 mt-2">
+                      <span
+                        className="num text-xs font-bold px-2 py-0.5 rounded-lg"
+                        style={{ background: 'var(--grad-brand)', color: 'var(--primary-foreground)' }}
+                      >
+                        +{formatCurrency(task.reward)}
+                      </span>
+                      <span className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground glass-inset px-1.5 py-0.5 rounded-md">
+                        {task.type.replace('_', ' ')}
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-foreground truncate text-sm">{task.title}</h3>
-                      {task.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{task.description}</p>
-                      )}
-                      <div className="flex items-center gap-2 mt-2">
-                        <span
-                          className="text-xs font-bold px-2 py-0.5 rounded-lg text-primary-foreground"
-                          style={{ background: 'var(--primary)' }}
-                        >
-                          +{formatCurrency(task.reward)}
-                        </span>
-                        <span className="text-[10px] uppercase font-bold tracking-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                          {task.type.replace('_', ' ')}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="shrink-0 flex flex-col justify-center">
-                      {task.completed ? (
-                        // The reward is one-time (the server rejects repeat
-                        // claims), but the link stays usable forever so users
-                        // can revisit the channel/page from the task card.
-                        task.link ? (
-                          <button
-                            className="font-bold text-sm rounded-xl px-4 py-2 border border-border flex items-center gap-1.5 active:scale-95 transition-transform"
-                            style={{ color: 'var(--primary)', background: 'var(--background)' }}
-                            onClick={() => window.open(task.link!, '_blank')}
-                            data-testid={`button-visit-done-task-${task.id}`}
-                          >
-                            Join <ExternalLink size={13} />
-                          </button>
-                        ) : (
-                          <div className="flex items-center text-sm font-bold px-3 py-1.5 rounded-xl" style={{ color: 'var(--primary)', background: 'var(--secondary)' }}>
-                            <CheckCircle2 size={15} className="mr-1.5" /> Done
-                          </div>
-                        )
-                      ) : visitingTask === task.id ? (
+                  </div>
+                  <div className="shrink-0 flex flex-col justify-center">
+                    {task.completed ? (
+                      // The reward is one-time (the server rejects repeat
+                      // claims), but the link stays usable forever so users
+                      // can revisit the channel/page from the task card.
+                      task.link ? (
                         <button
-                          className="font-bold text-sm rounded-xl px-4 py-2 text-primary-foreground active:scale-95 transition-transform disabled:opacity-50"
-                          style={{ background: 'var(--primary)' }}
-                          onClick={() => handleClaimTask(task.id)}
-                          disabled={completingTask === task.id}
-                          data-testid={`button-claim-task-${task.id}`}
+                          className="font-bold text-xs rounded-xl px-3.5 py-2 glass-inset flex items-center gap-1.5 active-scale text-foreground"
+                          onClick={() => window.open(task.link!, '_blank')}
+                          data-testid={`button-visit-done-task-${task.id}`}
                         >
-                          {completingTask === task.id ? <Loader2 className="animate-spin" size={16} /> : 'Claim'}
+                          Join <ExternalLink size={12} />
                         </button>
                       ) : (
-                        <button
-                            className="font-bold text-sm rounded-xl px-4 py-2 border border-border flex items-center gap-1.5 active:scale-95 transition-transform"
-                            style={{ color: 'var(--primary)', background: 'var(--background)' }}
-                          onClick={() => {
-                            if (task.link) window.open(task.link, '_blank');
-                            setVisitingTask(task.id);
-                          }}
-                          data-testid={`button-do-task-${task.id}`}
-                        >
-                          Join <ExternalLink size={13} />
-                        </button>
-                      )}
-                    </div>
+                        <div className="flex items-center text-xs font-bold px-3 py-1.5 rounded-xl" style={{ color: 'var(--success)', background: 'oklch(0.8 0.17 155 / 12%)', border: '1px solid oklch(0.8 0.17 155 / 25%)' }}>
+                          <CircleCheck size={14} className="mr-1.5" /> Done
+                        </div>
+                      )
+                    ) : visitingTask === task.id ? (
+                      <button
+                        className="font-bold text-sm rounded-xl px-4 py-2 active-scale disabled:opacity-50 animate-pulse-glow"
+                        style={{ background: 'var(--grad-brand)', color: 'var(--primary-foreground)' }}
+                        onClick={() => handleClaimTask(task.id)}
+                        disabled={completingTask === task.id}
+                        data-testid={`button-claim-task-${task.id}`}
+                      >
+                        {completingTask === task.id ? <Loader2 className="animate-spin" size={16} /> : 'Claim'}
+                      </button>
+                    ) : (
+                      <button
+                        className="font-bold text-xs rounded-xl px-3.5 py-2 glass-inset flex items-center gap-1.5 active-scale text-foreground"
+                        onClick={() => {
+                          if (task.link) window.open(task.link, '_blank');
+                          setVisitingTask(task.id);
+                        }}
+                        data-testid={`button-do-task-${task.id}`}
+                      >
+                        Join <ExternalLink size={12} />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="royal-panel bg-card rounded-2xl border border-border border-dashed p-8 flex flex-col items-center text-center shadow-sm">
-              <CheckCircle2 size={40} className="text-muted-foreground/25 mb-3" />
-              <p className="font-bold text-foreground mb-1">No tasks available</p>
-              <p className="text-sm text-muted-foreground">Check back later for new earning opportunities.</p>
+            <div className="glass rounded-3xl border-dashed p-8 flex flex-col items-center text-center">
+              <CircleCheck size={40} className="text-muted-foreground/25 mb-3" />
+              <p className="font-bold text-foreground mb-1">কোনো টাস্ক নেই</p>
+              <p className="text-sm text-muted-foreground">নতুন আয়ের সুযোগের জন্য পরে আবার দেখুন।</p>
             </div>
           )}
-        </div>
+        </section>
       </div>
     </div>
   );

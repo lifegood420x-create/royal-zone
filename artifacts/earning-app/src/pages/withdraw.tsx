@@ -13,7 +13,7 @@ import {
 } from '@workspace/api-client-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Wallet, AlertCircle, Clock, CheckCircle2, XCircle, ArrowDownToLine, Loader2, ChevronDown, ShieldCheck, ExternalLink, Copy } from 'lucide-react';
+import { Wallet, AlertCircle, Clock, CircleCheck, CircleX, Loader2, ChevronDown, ShieldCheck, ExternalLink, Copy, ArrowUpRight } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency, formatDate, formatTime } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -90,9 +90,9 @@ export default function Withdraw() {
   const MethodBadge = ({ m }: { m: 'bkash' | 'nagad' }) => {
     const logo = logoFor(m);
     return logo ? (
-      <img src={logo} alt={m} className="w-6 h-6 rounded-full object-contain bg-card" />
+      <img src={logo} alt={m} className="w-6 h-6 rounded-full object-contain bg-white/90" />
     ) : (
-      <div className="w-6 h-6 rounded-full bg-card/20 flex items-center justify-center font-bold text-xs">
+      <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center font-bold text-xs">
         {m === 'bkash' ? 'b' : 'n'}
       </div>
     );
@@ -197,75 +197,79 @@ export default function Withdraw() {
     );
   };
 
-  const getStatusStyle = (status: string) => {
+  const getStatusChip = (status: string) => {
     switch (status) {
-      case 'paid': return { color: 'var(--success)', bg: 'var(--secondary)', border: 'var(--border)' };
-      case 'rejected': return { color: 'var(--destructive)', bg: 'var(--muted)', border: 'var(--border)' };
-      default: return { color: 'var(--warning-foreground)', bg: 'var(--accent)', border: 'var(--accent-border)' };
+      case 'paid':
+        return { color: 'var(--success)', bg: 'oklch(0.8 0.17 155 / 13%)', border: 'oklch(0.8 0.17 155 / 30%)', Icon: CircleCheck };
+      case 'rejected':
+        return { color: 'oklch(0.75 0.17 24)', bg: 'oklch(0.63 0.21 24 / 13%)', border: 'oklch(0.63 0.21 24 / 32%)', Icon: CircleX };
+      default:
+        return { color: 'var(--warning-foreground)', bg: 'oklch(0.84 0.14 88 / 12%)', border: 'oklch(0.84 0.14 88 / 30%)', Icon: Clock };
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto" style={{ background: 'var(--background)' }}>
-      {/* Gradient Hero */}
-      <div
-        className="royal-header relative overflow-hidden px-5 pt-9 pb-6"
-        
+    <div className="flex-1 flex flex-col">
+      {/* ── Balance strip ─────────────────────────────────────────────── */}
+      <header
+        className="mx-4 mt-5 rounded-[28px] p-[1.2px] animate-fade-up"
+        style={{ background: 'linear-gradient(135deg, oklch(0.8 0.13 196 / 60%), oklch(0.68 0.22 300 / 60%))' }}
       >
-        
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-primary-foreground/70 text-xs font-semibold uppercase tracking-normal mb-1">Available Balance</p>
-            <p className="text-primary-foreground text-4xl font-bold tracking-normal" data-testid="text-withdraw-balance">
+        <div className="relative rounded-[27px] px-5 py-4 flex items-center justify-between overflow-hidden" style={{ background: 'oklch(0.17 0.035 286 / 92%)' }}>
+          <div className="absolute -top-10 -left-8 w-36 h-36 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, oklch(0.8 0.13 196 / 22%) 0%, transparent 65%)' }} />
+          <div className="relative">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">উপলব্ধ ব্যালেন্স</p>
+            <p className="num text-3xl font-bold text-gradient-cyan mt-0.5" data-testid="text-withdraw-balance">
               {formatCurrency(user?.balance || 0)}
             </p>
+            <p className="text-[11px] text-muted-foreground mt-1">সর্বনিম্ন উইথড্র: <span className="num font-bold text-foreground">{formatCurrency(minWithdraw)}</span></p>
           </div>
-          <div className="w-12 h-12 bg-card/20 rounded-2xl flex items-center justify-center">
-            <Wallet size={22} color="currentColor" />
+          <div className="relative w-14 h-14 rounded-[20px] cyan-btn flex items-center justify-center shrink-0 animate-float">
+            <Wallet size={24} />
           </div>
         </div>
-        <p className="text-primary-foreground/60 text-xs mt-3">Min. withdrawal: {formatCurrency(minWithdraw)}</p>
-      </div>
+      </header>
 
-      <div className="px-4 pb-6 pt-5 space-y-5">
-        {/* Form Card */}
-        <div className="royal-panel bg-card rounded-2xl p-5 shadow-sm border border-border">
-          <div className="flex items-center gap-2 mb-5">
-            <ArrowDownToLine size={18} style={{ color: 'var(--primary)' }} />
-            <h2 className="font-bold text-foreground">Request Payout</h2>
+      <div className="px-4 pt-4 space-y-4">
+        {/* ── Notices ─────────────────────────────────────────────────── */}
+        {config && user && user.rejectedWithdrawCount > 0 && (
+          <div className="glass rounded-2xl p-3.5 flex gap-3 items-start" style={{ borderLeft: '3px solid var(--warning)' }}>
+            <AlertCircle className="shrink-0 mt-0.5" size={17} style={{ color: 'var(--warning-foreground)' }} />
+            <div>
+              <p className="text-[13px] font-bold" style={{ color: 'var(--warning-foreground)' }}>নোটিশ</p>
+              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                আগের রিজেক্টেড রিকোয়েস্টের কারণে আপনার সর্বনিম্ন উইথড্র পরিমাণ বাড়ানো হয়েছে।
+              </p>
+            </div>
           </div>
+        )}
 
-          {config && user && user.rejectedWithdrawCount > 0 && (
-            <div className="bg-warning-foreground/10 border border-warning-foreground/20 rounded-xl p-3 flex gap-3 items-start mb-5">
-              <AlertCircle className="text-warning-foreground shrink-0 mt-0.5" size={18} />
-              <div>
-                <p className="text-sm font-bold text-warning-foreground">নোটিশ</p>
-                <p className="text-xs text-warning-foreground mt-0.5 leading-relaxed">
-                  আগের রিজেক্টেড রিকোয়েস্টের কারণে আপনার সর্বনিম্ন উইথড্র পরিমাণ বাড়ানো হয়েছে।
-                </p>
-              </div>
-            </div>
-          )}
+        {user?.isVerified && (
+          <div className="glass rounded-2xl p-3.5 flex gap-2.5 items-center" style={{ borderLeft: '3px solid var(--success)' }}>
+            <ShieldCheck className="shrink-0" size={17} style={{ color: 'var(--success)' }} />
+            <p className="text-xs font-bold" style={{ color: 'var(--success)' }}>আপনার অ্যাকাউন্ট ভেরিফাইড ✅</p>
+          </div>
+        )}
 
-          {user?.isVerified && (
-            <div className="bg-success/10 border border-success/20 rounded-xl p-3 flex gap-2 items-center mb-5">
-              <ShieldCheck className="text-success shrink-0" size={18} />
-              <p className="text-xs font-bold text-success">আপনার অ্যাকাউন্ট ভেরিফাইড ✅</p>
+        {verificationPending && (
+          <div className="glass rounded-2xl p-3.5 flex gap-3 items-start" style={{ borderLeft: '3px solid var(--primary)' }} data-testid="banner-verification-pending">
+            <Clock className="shrink-0 mt-0.5" size={17} style={{ color: 'var(--primary)' }} />
+            <div>
+              <p className="text-[13px] font-bold" style={{ color: 'var(--primary)' }}>ভেরিফিকেশন যাচাই চলছে</p>
+              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                আপনার পেমেন্ট অ্যাডমিন যাচাই করছেন। অনুমোদন হলে অ্যাকাউন্ট ভেরিফাইড হবে
+                এবং আপনার উইথড্র রিকোয়েস্ট নিজে থেকেই জমা হয়ে যাবে।
+              </p>
             </div>
-          )}
+          </div>
+        )}
 
-          {verificationPending && (
-            <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex gap-3 items-start mb-5" data-testid="banner-verification-pending">
-              <Clock className="text-primary shrink-0 mt-0.5" size={18} />
-              <div>
-                <p className="text-sm font-bold text-primary">ভেরিফিকেশন যাচাই চলছে</p>
-                <p className="text-xs text-primary mt-0.5 leading-relaxed">
-                  আপনার পেমেন্ট অ্যাডমিন যাচাই করছেন। অনুমোদন হলে অ্যাকাউন্ট ভেরিফাইড হবে
-                  এবং আপনার উইথড্র রিকোয়েস্ট নিজে থেকেই জমা হয়ে যাবে।
-                </p>
-              </div>
-            </div>
-          )}
+        {/* ── Request form ────────────────────────────────────────────── */}
+        <section className="glass rounded-3xl p-5 animate-fade-up stagger-1">
+          <div className="flex items-center gap-2 mb-5">
+            <ArrowUpRight size={18} style={{ color: 'var(--accent-foreground)' }} />
+            <h2 className="font-bold text-foreground">পেআউট রিকোয়েস্ট</h2>
+          </div>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -275,24 +279,28 @@ export default function Withdraw() {
                 name="method"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-bold text-foreground text-sm">Payment Method</FormLabel>
+                    <FormLabel className="font-bold text-foreground text-sm">পেমেন্ট মেথড</FormLabel>
                     <div className="grid grid-cols-2 gap-3 mt-1.5">
-                      {(['bkash', 'nagad'] as const).map((m) => (
-                        <button
-                          key={m}
-                          type="button"
-                          onClick={() => field.onChange(m)}
-                          className="h-12 px-4 rounded-xl flex items-center gap-2 font-bold text-sm border-2 transition-all active:scale-95"
-                          style={field.value === m
-                            ? { background: m === 'bkash' ? 'var(--payment-bkash)' : 'var(--payment-nagad)', color: 'var(--primary-foreground)', borderColor: 'transparent' }
-                            : { background: 'var(--background)', color: 'var(--foreground)', borderColor: 'var(--border)' }
-                          }
-                          data-testid={`select-method-${m}`}
-                        >
-                          <MethodBadge m={m} />
-                          {m === 'bkash' ? 'bKash' : 'Nagad'}
-                        </button>
-                      ))}
+                      {(['bkash', 'nagad'] as const).map((m) => {
+                        const selected = field.value === m;
+                        const brand = m === 'bkash' ? 'var(--payment-bkash)' : 'var(--payment-nagad)';
+                        return (
+                          <button
+                            key={m}
+                            type="button"
+                            onClick={() => field.onChange(m)}
+                            className="h-12 px-4 rounded-2xl flex items-center gap-2 font-bold text-sm transition-all active-scale"
+                            style={selected
+                              ? { background: 'oklch(1 0 0 / 4%)', color: 'var(--foreground)', border: `1.5px solid ${brand}`, boxShadow: `0 0 18px -6px ${brand}` }
+                              : { background: 'oklch(1 0 0 / 3%)', color: 'var(--muted-foreground)', border: '1.5px solid oklch(1 0 0 / 10%)' }
+                            }
+                            data-testid={`select-method-${m}`}
+                          >
+                            <MethodBadge m={m} />
+                            {m === 'bkash' ? 'bKash' : 'Nagad'}
+                          </button>
+                        );
+                      })}
                     </div>
                     <FormMessage />
                   </FormItem>
@@ -305,13 +313,13 @@ export default function Withdraw() {
                 name="accountNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-bold text-foreground text-sm">Account Number</FormLabel>
+                    <FormLabel className="font-bold text-foreground text-sm">অ্যাকাউন্ট নম্বর</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="01XXXXXXXXX"
                         type="tel"
                         maxLength={11}
-                        className="h-12 bg-muted/50 rounded-xl border-border focus:border-primary"
+                        className="h-12 rounded-2xl glass-inset border-white/10 focus-visible:ring-primary num"
                         data-testid="input-account-number"
                         {...field}
                       />
@@ -328,8 +336,8 @@ export default function Withdraw() {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex justify-between items-end mb-1">
-                      <FormLabel className="font-bold text-foreground text-sm">Amount</FormLabel>
-                      <span className="text-xs text-muted-foreground font-medium">Min: {formatCurrency(minWithdraw)}</span>
+                      <FormLabel className="font-bold text-foreground text-sm">পরিমাণ</FormLabel>
+                      <span className="text-xs text-muted-foreground font-medium">সর্বনিম্ন: {formatCurrency(minWithdraw)}</span>
                     </div>
                     <FormControl>
                       <div className="relative">
@@ -337,7 +345,7 @@ export default function Withdraw() {
                         <Input
                           type="number"
                           step="0.01"
-                          className="h-12 pl-9 font-bold text-xl bg-muted/50 rounded-xl border-border focus:border-primary"
+                          className="h-12 pl-9 font-bold text-xl rounded-2xl glass-inset border-white/10 focus-visible:ring-primary num"
                           data-testid="input-amount"
                           {...field}
                         />
@@ -350,67 +358,65 @@ export default function Withdraw() {
 
               <button
                 type="submit"
-                className="w-full h-12 rounded-xl font-bold text-base text-primary-foreground disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
-                style={{ background: 'var(--primary)' }}
+                className="w-full h-12 rounded-2xl font-bold text-base hero-btn disabled:opacity-50 active-scale flex items-center justify-center gap-2"
                 disabled={requestMutation.isPending || !user || user.balance < minWithdraw}
                 data-testid="button-submit-withdrawal"
               >
                 {requestMutation.isPending && <Loader2 className="animate-spin" size={18} />}
-                Request {formatCurrency(amount || 0)}
+                {formatCurrency(amount || 0)} রিকোয়েস্ট করুন
               </button>
             </form>
           </Form>
-        </div>
+        </section>
 
-        {/* History */}
-        <div>
-          <h3 className="font-bold text-foreground text-base mb-3 px-1">Recent Transactions</h3>
+        {/* ── History ─────────────────────────────────────────────────── */}
+        <section className="animate-fade-up stagger-2">
+          <h3 className="font-bold text-foreground text-base mb-3 px-1">সাম্প্রতিক লেনদেন</h3>
 
           {withdrawalsLoading ? (
-            <div className="space-y-3">
-              {[1, 2].map(i => <div key={i} className="h-20 bg-card animate-pulse rounded-2xl border border-border" />)}
+            <div className="space-y-2.5">
+              {[1, 2].map(i => <div key={i} className="h-20 glass animate-pulse rounded-3xl" />)}
             </div>
           ) : withdrawals && withdrawals.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {withdrawals.map((w) => {
-                const s = getStatusStyle(w.status);
+                const s = getStatusChip(w.status);
+                const methodColor = w.method === 'bkash' ? 'var(--payment-bkash)' : 'var(--payment-nagad)';
                 return (
-                  <div key={w.id} className="royal-panel bg-card rounded-2xl p-4 shadow-sm border border-border">
+                  <div key={w.id} className="glass rounded-3xl p-4">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-3">
                         {logoFor(w.method as 'bkash' | 'nagad') ? (
                           <img
                             src={logoFor(w.method as 'bkash' | 'nagad')!}
                             alt={w.method}
-                            className="w-10 h-10 rounded-xl object-contain bg-card border border-border shrink-0"
+                            className="w-10 h-10 rounded-2xl object-contain bg-white/90 border border-white/15 shrink-0"
                           />
                         ) : (
                           <div
-                            className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-primary-foreground shrink-0"
-                            style={{ background: w.method === 'bkash' ? 'var(--payment-bkash)' : 'var(--payment-nagad)' }}
+                            className="w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-bold text-white shrink-0"
+                            style={{ background: methodColor, boxShadow: `0 0 16px -6px ${methodColor}` }}
                           >
                             {w.method === 'bkash' ? 'b' : 'n'}
                           </div>
                         )}
                         <div>
                           <p className="font-bold text-sm text-foreground capitalize">{w.method}</p>
-                          <p className="text-xs text-muted-foreground">{w.accountNumber}</p>
+                          <p className="text-xs text-muted-foreground num">{w.accountNumber}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-foreground">{formatCurrency(w.amount)}</p>
+                        <p className="num font-bold text-foreground">{formatCurrency(w.amount)}</p>
                         <div
-                          className="mt-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-normal font-bold px-2 py-0.5 rounded-lg"
+                          className="mt-1 inline-flex items-center gap-1 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full"
                           style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}` }}
                         >
-                          {w.status === 'paid' && <CheckCircle2 size={10} />}
-                          {w.status === 'rejected' && <XCircle size={10} />}
-                          {w.status === 'pending' && <Clock size={10} />}
+                          <s.Icon size={10} />
                           {w.status}
                         </div>
                       </div>
                     </div>
-                    <div className="pt-2 border-t border-border text-xs text-muted-foreground">
+                    <div className="pt-2 text-xs text-muted-foreground" style={{ borderTop: '1px dashed oklch(1 0 0 / 8%)' }}>
                       {formatDate(w.requestedAt)} · {formatTime(w.requestedAt)}
                     </div>
                     {w.note && w.status === 'rejected' && (
@@ -421,10 +427,10 @@ export default function Withdraw() {
                         data-testid={`button-reason-${w.id}`}
                       >
                         <div className="flex items-start gap-1.5">
-                          <p className={`text-destructive font-medium text-xs flex-1 ${expandedReasons.has(w.id) ? '' : 'truncate'}`}>
+                          <p className={`font-medium text-xs flex-1 ${expandedReasons.has(w.id) ? '' : 'truncate'}`} style={{ color: 'oklch(0.75 0.17 24)' }}>
                             Reason: {w.note}
                           </p>
-                          <ChevronDown size={14} className={`text-destructive shrink-0 mt-0.5 transition-transform ${expandedReasons.has(w.id) ? 'rotate-180' : ''}`} />
+                          <ChevronDown size={14} className={`shrink-0 mt-0.5 transition-transform ${expandedReasons.has(w.id) ? 'rotate-180' : ''}`} style={{ color: 'oklch(0.75 0.17 24)' }} />
                         </div>
                       </button>
                     )}
@@ -433,32 +439,32 @@ export default function Withdraw() {
               })}
             </div>
           ) : (
-            <div className="royal-panel bg-card rounded-2xl border border-dashed border-border p-8 text-center shadow-sm">
-              <p className="text-sm text-muted-foreground">No withdrawal history yet.</p>
+            <div className="glass rounded-3xl border-dashed p-8 text-center">
+              <p className="text-sm text-muted-foreground">এখনও কোনো উইথড্র হিস্টোরি নেই।</p>
             </div>
           )}
-        </div>
+        </section>
       </div>
 
       {/* Account Verification Dialog */}
       <Dialog open={verifyOpen} onOpenChange={setVerifyOpen}>
-        <DialogContent className="max-w-md rounded-2xl">
+        <DialogContent className="max-w-md rounded-[28px] glass-strong" style={{ background: 'oklch(0.2 0.04 286 / 95%)' }}>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-foreground">
               <ShieldCheck size={20} style={{ color: 'var(--primary)' }} />
               অ্যাকাউন্ট ভেরিফিকেশন
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="bg-muted border border-border rounded-xl p-3 space-y-1">
+            <div className="glass-inset rounded-2xl p-3.5 space-y-1" style={{ borderLeft: '3px solid var(--primary)' }}>
               <p className="text-xs font-bold text-foreground leading-relaxed">
                 উইথড্র চালু করতে অ্যাকাউন্ট ভেরিফিকেশন বাধ্যতামূলক।
               </p>
               <p className="text-xs font-bold text-foreground">
                 💳 ফি: {formatCurrency(vstatus?.fee || 0)} (শুধুমাত্র একবার)
               </p>
-              <div className="text-xs text-foreground leading-relaxed space-y-0.5">
+              <div className="text-xs text-muted-foreground leading-relaxed space-y-0.5">
                 <p>• উইথড্র চালু হবে।</p>
                 <p>• অ্যাকাউন্ট Active হবে।</p>
                 <p>• পুনরায় কোনো ফি লাগবে না।</p>
@@ -470,8 +476,7 @@ export default function Withdraw() {
                 href={vstatus.autoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full h-12 rounded-xl font-bold text-sm text-primary-foreground flex items-center justify-center gap-2"
-                style={{ background: 'var(--primary)' }}
+                className="w-full h-12 rounded-2xl font-bold text-sm hero-btn flex items-center justify-center gap-2"
                 data-testid="button-auto-pay"
               >
                 অনলাইনে পেমেন্ট করুন <ExternalLink size={15} />
@@ -479,69 +484,69 @@ export default function Withdraw() {
             ) : (
               <div className="space-y-1.5">
                 {vstatus?.bkashNumber && (
-                  <div className="flex items-center justify-between bg-muted/50 rounded-xl px-3 py-2.5 gap-2">
-                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: 'var(--payment-bkash)' }}>
+                  <div className="flex items-center justify-between rounded-2xl px-3 py-2.5 gap-2" style={{ background: 'color-mix(in oklab, var(--payment-bkash) 12%, transparent)', border: '1px solid color-mix(in oklab, var(--payment-bkash) 30%, transparent)' }}>
+                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: 'oklch(0.78 0.16 356)' }}>
                       {logoFor('bkash') ? (
-                        <img src={logoFor('bkash')!} alt="bKash" className="w-7 h-7 rounded-lg object-contain bg-card shrink-0" />
+                        <img src={logoFor('bkash')!} alt="bKash" className="w-7 h-7 rounded-lg object-contain bg-white/90 shrink-0" />
                       ) : null}
                       bKash (Send Money)
                     </span>
                     <span className="flex items-center gap-1.5 shrink-0">
-                      <span className="font-bold text-sm select-all" data-testid="text-verify-bkash">{vstatus.bkashNumber}</span>
+                      <span className="num font-bold text-sm select-all" data-testid="text-verify-bkash">{vstatus.bkashNumber}</span>
                       <button
                         type="button"
                         onClick={() => copyNumber(vstatus.bkashNumber!)}
-                        className="w-8 h-8 rounded-lg bg-card border border-border flex items-center justify-center active:scale-90 transition-transform"
+                        className="w-8 h-8 rounded-lg glass-inset flex items-center justify-center active-scale"
                         aria-label="Copy bKash number"
                         data-testid="button-copy-bkash"
                       >
-                        <Copy size={14} style={{ color: 'var(--primary)' }} />
+                        <Copy size={13} style={{ color: 'var(--primary)' }} />
                       </button>
                     </span>
                   </div>
                 )}
                 {vstatus?.nagadNumber && (
-                  <div className="flex items-center justify-between bg-muted/50 rounded-xl px-3 py-2.5 gap-2">
-                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: 'var(--payment-nagad)' }}>
+                  <div className="flex items-center justify-between rounded-2xl px-3 py-2.5 gap-2" style={{ background: 'color-mix(in oklab, var(--payment-nagad) 12%, transparent)', border: '1px solid color-mix(in oklab, var(--payment-nagad) 30%, transparent)' }}>
+                    <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: 'oklch(0.75 0.17 27)' }}>
                       {logoFor('nagad') ? (
-                        <img src={logoFor('nagad')!} alt="Nagad" className="w-7 h-7 rounded-lg object-contain bg-card shrink-0" />
+                        <img src={logoFor('nagad')!} alt="Nagad" className="w-7 h-7 rounded-lg object-contain bg-white/90 shrink-0" />
                       ) : null}
                       Nagad (Send Money)
                     </span>
                     <span className="flex items-center gap-1.5 shrink-0">
-                      <span className="font-bold text-sm select-all" data-testid="text-verify-nagad">{vstatus.nagadNumber}</span>
+                      <span className="num font-bold text-sm select-all" data-testid="text-verify-nagad">{vstatus.nagadNumber}</span>
                       <button
                         type="button"
                         onClick={() => copyNumber(vstatus.nagadNumber!)}
-                        className="w-8 h-8 rounded-lg bg-card border border-border flex items-center justify-center active:scale-90 transition-transform"
+                        className="w-8 h-8 rounded-lg glass-inset flex items-center justify-center active-scale"
                         aria-label="Copy Nagad number"
                         data-testid="button-copy-nagad"
                       >
-                        <Copy size={14} style={{ color: 'var(--primary)' }} />
+                        <Copy size={13} style={{ color: 'var(--primary)' }} />
                       </button>
                     </span>
                   </div>
                 )}
                 {(vstatus?.methods ?? []).map((m) => (
-                  <div key={m.id} className="flex items-center justify-between bg-muted/50 rounded-xl px-3 py-2.5 gap-2">
+                  <div key={m.id} className="flex items-center justify-between rounded-2xl px-3 py-2.5 gap-2 glass-inset" style={{ borderColor: 'oklch(0.66 0.18 295 / 30%)' }}>
                     <span className="flex items-center gap-2 text-sm font-bold min-w-0" style={{ color: 'var(--primary)' }}>
                       {m.logoUrl ? (
-                        <img src={m.logoUrl} alt={m.name} className="w-7 h-7 rounded-lg object-contain bg-card shrink-0" />
+                        <img src={m.logoUrl} alt={m.name} className="w-7 h-7 rounded-lg object-contain bg-white/90 shrink-0" />
                       ) : null}
                       <span className="truncate">
                         {m.name} ({m.paymentType === 'send_money' ? 'Send Money' : 'Cash Out'})
                       </span>
                     </span>
                     <span className="flex items-center gap-1.5 shrink-0">
-                      <span className="font-bold text-sm select-all" data-testid={`text-verify-method-${m.id}`}>{m.accountNumber}</span>
+                      <span className="num font-bold text-sm select-all" data-testid={`text-verify-method-${m.id}`}>{m.accountNumber}</span>
                       <button
                         type="button"
                         onClick={() => copyNumber(m.accountNumber)}
-                        className="w-8 h-8 rounded-lg bg-card border border-border flex items-center justify-center active:scale-90 transition-transform"
+                        className="w-8 h-8 rounded-lg glass-inset flex items-center justify-center active-scale"
                         aria-label={`Copy ${m.name} number`}
                         data-testid={`button-copy-method-${m.id}`}
                       >
-                        <Copy size={14} style={{ color: 'var(--primary)' }} />
+                        <Copy size={13} style={{ color: 'var(--primary)' }} />
                       </button>
                     </span>
                   </div>
@@ -566,19 +571,19 @@ export default function Withdraw() {
                     key={o.key}
                     type="button"
                     onClick={() => setVMethod(o.key)}
-                    className="h-11 px-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm border-2 transition-all active:scale-95"
+                    className="h-11 px-3 rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-all active-scale"
                     style={vMethod === o.key
-                      ? { background: o.color, color: 'var(--primary-foreground)', borderColor: 'transparent' }
-                      : { background: 'var(--background)', color: 'var(--foreground)', borderColor: 'var(--border)' }
+                      ? { background: 'oklch(1 0 0 / 4%)', color: 'var(--foreground)', border: `1.5px solid ${o.color}`, boxShadow: `0 0 16px -6px ${o.color}` }
+                      : { background: 'oklch(1 0 0 / 3%)', color: 'var(--muted-foreground)', border: '1.5px solid oklch(1 0 0 / 10%)' }
                     }
                     data-testid={`select-verify-method-${o.key}`}
                   >
                     {(o.key === 'bkash' || o.key === 'nagad') ? (
                       <MethodBadge m={o.key as 'bkash' | 'nagad'} />
                     ) : o.logo ? (
-                      <img src={o.logo} alt={o.label} className="w-6 h-6 rounded-full object-contain bg-card" />
+                      <img src={o.logo} alt={o.label} className="w-6 h-6 rounded-full object-contain bg-white/90" />
                     ) : (
-                      <div className="w-6 h-6 rounded-full bg-card/20 flex items-center justify-center font-bold text-xs">
+                      <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs">
                         {o.label.charAt(0)}
                       </div>
                     )}
@@ -596,7 +601,7 @@ export default function Withdraw() {
                 maxLength={11}
                 value={vPayerNumber}
                 onChange={(e) => setVPayerNumber(e.target.value)}
-                className="h-11 bg-muted/50 rounded-xl border-border"
+                className="h-11 rounded-2xl glass-inset border-white/10 focus-visible:ring-primary num"
                 data-testid="input-verify-payer-number"
               />
             </div>
@@ -607,7 +612,7 @@ export default function Withdraw() {
                 placeholder="যেমন: 9HK7A2B5CD"
                 value={vTrxId}
                 onChange={(e) => setVTrxId(e.target.value)}
-                className="h-11 bg-muted/50 rounded-xl border-border"
+                className="h-11 rounded-2xl glass-inset border-white/10 focus-visible:ring-primary"
                 data-testid="input-verify-trxid"
               />
             </div>
@@ -616,8 +621,7 @@ export default function Withdraw() {
               type="button"
               onClick={handleSubmitVerification}
               disabled={submitVerification.isPending}
-              className="w-full h-12 rounded-xl font-bold text-base text-primary-foreground disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
-              style={{ background: 'var(--primary)' }}
+              className="w-full h-12 rounded-2xl font-bold text-base hero-btn disabled:opacity-50 active-scale flex items-center justify-center gap-2"
               data-testid="button-submit-verification"
             >
               {submitVerification.isPending && <Loader2 className="animate-spin" size={18} />}

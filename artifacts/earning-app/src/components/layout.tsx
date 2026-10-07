@@ -1,88 +1,111 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { Home, ListTodo, Settings } from 'lucide-react';
+import { House, Coins, LayoutGrid } from 'lucide-react';
 import { useAuth } from './auth-provider';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { isLoading, error } = useAuth();
-  
+
   if (isLoading) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-background">
-        <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+      <div className="aurora-view min-h-[100dvh] flex flex-col items-center justify-center gap-6">
+        <div className="relative flex items-center justify-center">
+          <div
+            className="absolute w-24 h-24 rounded-[28px] animate-spin-slow"
+            style={{
+              background:
+                'conic-gradient(from 0deg, transparent 0%, oklch(0.68 0.22 300) 30%, oklch(0.8 0.13 196) 55%, transparent 70%)',
+              filter: 'blur(2px)',
+            }}
+          />
+          <div className="relative w-[86px] h-[86px] rounded-[26px] glass-strong flex items-center justify-center animate-pulse-glow">
+            <span className="text-3xl font-bold text-gradient num">RZ</span>
+          </div>
+        </div>
+        <p className="text-sm font-semibold text-muted-foreground tracking-widest uppercase">Loading…</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center p-6 bg-background">
-        <div className="text-center space-y-4 max-w-sm">
-          <div className="w-16 h-16 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div className="aurora-view min-h-[100dvh] flex items-center justify-center p-6">
+        <div className="glass rounded-[28px] p-8 max-w-sm w-full text-center space-y-4 animate-scale-in">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-destructive/15 border border-destructive/25 flex items-center justify-center">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--destructive)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           </div>
-          <h1 className="text-xl font-bold">Authentication Failed</h1>
-          <p className="text-muted-foreground text-sm">We couldn't verify your session. Please restart the app from Telegram.</p>
+          <h1 className="text-xl font-bold text-foreground">সেশন যাচাই ব্যর্থ হয়েছে</h1>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            আপনার সেশন যাচাই করা যায়নি। অনুগ্রহ করে Telegram থেকে অ্যাপটি আবার চালু করুন।
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-20">
-      <main className="w-full max-w-md mx-auto min-h-[100dvh] bg-background md:border-x md:border-border/70 relative overflow-hidden flex flex-col">
+    <div className="aurora-view">
+      <main
+        className="relative z-10 w-full max-w-md mx-auto min-h-[100dvh] flex flex-col pb-32"
+      >
         {children}
       </main>
-      <BottomNav />
+      <DockNav />
     </div>
   );
 }
 
-function BottomNav() {
+function DockNav() {
   const [location] = useLocation();
 
   const navItems = [
-    { href: '/', label: 'Home', icon: Home },
-    { href: '/earn', label: 'Earn', icon: ListTodo },
-    { href: '/settings', label: 'Settings', icon: Settings },
+    { href: '/', label: 'Home', icon: House },
+    { href: '/earn', label: 'Earn', icon: Coins },
+    { href: '/settings', label: 'Menu', icon: LayoutGrid },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 royal-nav bg-card border-t border-border/60 pb-[env(safe-area-inset-bottom)]">
-      <div className="max-w-md mx-auto flex items-center justify-between px-2 h-16">
-        {navItems.map((item) => {
-          const isActive = location === item.href || (item.href === '/settings' && ['/profile', '/withdraw', '/refer', '/rules'].includes(location));
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex flex-1 flex-col items-center justify-center h-full space-y-1 rounded-lg transition-all duration-200 active:scale-95"
-              aria-current={isActive ? 'page' : undefined}
-              data-testid={`nav-${item.label.toLowerCase()}`}
-            >
-              <div className={`relative transition-transform ${isActive ? 'translate-y-[-2px]' : ''}`}>
-                <Icon
-                  size={22}
-                  strokeWidth={isActive ? 2.5 : 2}
-                  style={isActive ? { color: 'var(--primary)' } : { color: 'var(--muted-foreground)' }}
-                />
-                {isActive && (
-                  <div
-                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full"
-                    style={{ background: 'var(--primary)' }}
-                  />
-                )}
-              </div>
-              <span
-                className="text-[10px] font-semibold transition-all"
-                style={isActive ? { color: 'var(--primary)' } : { color: 'var(--muted-foreground)' }}
+    <nav className="fixed bottom-0 inset-x-0 z-50 pointer-events-none">
+      <div className="max-w-md mx-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="glass-strong rounded-[26px] p-2 flex items-center gap-2 pointer-events-auto">
+          {navItems.map((item) => {
+            const isActive =
+              location === item.href ||
+              (item.href === '/settings' && ['/profile', '/withdraw', '/refer', '/rules'].includes(location));
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex-1 active:scale-95 transition-transform"
+                aria-current={isActive ? 'page' : undefined}
+                data-testid={`nav-${item.href === '/' ? 'home' : item.href.slice(1)}`}
               >
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+                <div
+                  className={`flex items-center justify-center gap-2 h-12 rounded-2xl transition-all duration-300 ${
+                    isActive ? '' : 'opacity-70'
+                  }`}
+                  style={
+                    isActive
+                      ? {
+                          background: 'var(--grad-brand)',
+                          color: 'var(--primary-foreground)',
+                          boxShadow: 'var(--shadow-glow-primary)',
+                        }
+                      : { color: 'var(--muted-foreground)' }
+                  }
+                >
+                  <Icon size={19} strokeWidth={isActive ? 2.6 : 2} />
+                  <span
+                    className={`text-[11px] font-bold tracking-wide ${isActive ? 'inline' : 'hidden'}`}
+                  >
+                    {item.label}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );

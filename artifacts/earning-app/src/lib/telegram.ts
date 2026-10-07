@@ -72,4 +72,12 @@ export function bootstrapTelegram(): void {
   webApp.ready();
   webApp.expand();
   webApp.disableVerticalSwipes?.();
+
+  // Match the Telegram chrome to the app's dark aurora theme.
+  try {
+    webApp.setHeaderColor?.('#12101f');
+    webApp.setBackgroundColor?.('#12101f');
+  } catch {
+    // Older clients may not support these — safe to ignore.
+  }
 }

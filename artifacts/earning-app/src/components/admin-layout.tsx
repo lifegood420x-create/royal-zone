@@ -4,12 +4,12 @@ import { useAuth } from './auth-provider';
 import {
   LayoutDashboard,
   Users,
-  Settings,
+  SlidersHorizontal,
   CreditCard,
   ListTodo,
-  LogOut,
-  ChevronLeft,
+  ArrowLeft,
   ShieldCheck,
+  LockKeyhole,
 } from 'lucide-react';
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -18,10 +18,19 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 bg-background">
-        <h1 className="text-2xl font-bold text-destructive mb-2">Access Denied</h1>
-        <p className="text-muted-foreground text-center mb-6">You do not have permission to view the admin area.</p>
-        <Link href="/" className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium">Return Home</Link>
+      <div className="aurora-view min-h-[100dvh] flex flex-col items-center justify-center p-6">
+        <div className="relative z-10 glass rounded-[32px] p-10 max-w-sm w-full text-center space-y-5 animate-scale-in">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-destructive/15 border border-destructive/25 flex items-center justify-center">
+            <LockKeyhole size={26} className="text-destructive" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-destructive mb-1.5">Access Denied</h1>
+            <p className="text-muted-foreground text-sm leading-relaxed">You do not have permission to view the admin area.</p>
+          </div>
+          <Link href="/" className="hero-btn inline-flex items-center justify-center h-11 px-6 rounded-2xl text-sm font-bold active-scale">
+            Return Home
+          </Link>
+        </div>
       </div>
     );
   }
@@ -37,18 +46,23 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     { href: '/verifications', label: 'Verify', icon: ShieldCheck },
     { href: '/users', label: 'Users', icon: Users },
     { href: '/tasks', label: 'Tasks', icon: ListTodo },
-    { href: '/config', label: 'Settings', icon: Settings },
+    { href: '/config', label: 'Settings', icon: SlidersHorizontal },
   ];
 
   return (
-    <div className="min-h-[100dvh] bg-background flex">
+    <div className="aurora-view min-h-[100dvh] flex">
       {/* Desktop Sidebar */}
-      <aside className="w-[248px] bg-card/90 backdrop-blur-xl border-r hidden md:flex flex-col h-[100dvh] sticky top-0">
-        <div className="p-6 border-b">
-          <h2 className="text-lg font-bold text-foreground">Admin Panel</h2>
-          <p className="text-sm text-muted-foreground">Control Panel</p>
+      <aside className="relative z-10 w-[256px] hidden md:flex flex-col h-[100dvh] sticky top-0 glass-strong border-r">
+        <div className="p-5" style={{ borderBottom: '1px solid oklch(1 0 0 / 8%)' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl hero-btn flex items-center justify-center num font-bold text-sm">RZ</div>
+            <div>
+              <h2 className="text-sm font-bold text-foreground leading-tight">Admin Console</h2>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gradient">Royal Zone</p>
+            </div>
+          </div>
         </div>
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1.5">
           {navItems.map((item) => {
             const isActive = location === item.href;
             const Icon = item.icon;
@@ -56,78 +70,79 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  isActive 
-                    ? 'bg-primary/10 text-primary' 
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                }`}
+                className="relative flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200"
+                style={
+                  isActive
+                    ? { background: 'var(--grad-brand)', color: 'var(--primary-foreground)', boxShadow: 'var(--shadow-glow-primary)' }
+                    : { color: 'var(--muted-foreground)' }
+                }
                 data-testid={`admin-nav-${item.label.toLowerCase()}`}
               >
-                <Icon size={18} />
+                <Icon size={17} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="p-4 border-t">
+        <div className="p-4" style={{ borderTop: '1px solid oklch(1 0 0 / 8%)' }}>
           <Link
             href="~/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            className="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-bold text-muted-foreground transition-colors active-scale"
           >
-            <ChevronLeft size={18} />
+            <ArrowLeft size={17} />
             Back to App
           </Link>
         </div>
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 md:h-[100dvh] md:overflow-y-auto bg-background md:pb-0 pb-20">
-        {/* Material-style top app bar (mobile only) */}
-        <header className="bg-card text-foreground border-b border-border px-4 h-14 flex items-center gap-1 sticky top-0 z-20 shadow-md md:hidden">
+      <div className="relative z-10 flex-1 flex flex-col min-w-0 md:h-[100dvh] md:overflow-y-auto pb-32 md:pb-0">
+        {/* Mobile top bar */}
+        <header className="glass-strong sticky top-3 z-20 mx-4 mt-3 rounded-3xl px-4 h-13 py-2.5 flex items-center gap-2 md:hidden">
           <Link
             href="~/"
-            className="p-2 -ml-2 rounded-full active:bg-card/15 transition-colors"
+            className="w-9 h-9 rounded-xl glass-inset flex items-center justify-center active-scale -ml-1"
             aria-label="Back to app"
           >
-            <ChevronLeft size={22} />
+            <ArrowLeft size={17} />
           </Link>
-          <h2 className="font-medium text-lg tracking-normal">Admin Panel</h2>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl hero-btn flex items-center justify-center num font-bold text-[11px]">RZ</div>
+            <h2 className="font-bold text-foreground text-sm">Admin Console</h2>
+          </div>
         </header>
 
         <main className="flex-1 p-4 md:p-8 max-w-md md:max-w-6xl mx-auto w-full">
           {children}
         </main>
 
-        {/* Android-style bottom navigation bar (mobile only) */}
-        <nav className="fixed bottom-0 left-0 right-0 z-30 bg-card border-t shadow-[0_-4px_24px_rgba(0,0,0,0.08)] pb-[env(safe-area-inset-bottom)] md:hidden">
-          <div className="max-w-md mx-auto flex items-stretch justify-between px-1 h-16">
-            {navItems.map((item) => {
-              const isActive = location === item.href;
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex-1 flex flex-col items-center justify-center gap-1 relative active:scale-95 transition-transform"
-                  data-testid={`admin-nav-${item.label.toLowerCase()}`}
-                >
-                  <div
-                    className={`flex items-center justify-center h-8 w-14 rounded-full transition-colors ${
-                      isActive ? 'bg-primary/15 text-primary' : 'text-muted-foreground'
-                    }`}
+        {/* Mobile floating dock */}
+        <nav className="fixed bottom-0 inset-x-0 z-30 pointer-events-none md:hidden">
+          <div className="max-w-md mx-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="glass-strong rounded-[24px] p-1.5 grid grid-cols-6 gap-1 pointer-events-auto">
+              {navItems.map((item) => {
+                const isActive = location === item.href;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-2xl transition-all duration-200 active:scale-95"
+                    style={
+                      isActive
+                        ? { background: 'var(--grad-brand)', color: 'var(--primary-foreground)', boxShadow: 'var(--shadow-glow-primary)' }
+                        : { color: 'var(--muted-foreground)' }
+                    }
+                    data-testid={`admin-nav-${item.label.toLowerCase()}`}
                   >
-                    <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                  </div>
-                  <span
-                    className={`text-[11px] font-medium leading-none ${
-                      isActive ? 'text-primary' : 'text-muted-foreground'
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
+                    <Icon size={17} strokeWidth={isActive ? 2.6 : 2} />
+                    <span className="text-[8.5px] font-bold leading-none">
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </nav>
       </div>

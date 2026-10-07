@@ -424,7 +424,7 @@ export default function AdminConfig() {
                         type="button"
                         size="sm"
                         variant="outline"
-                        className="text-orange-600 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                        className="text-warning-foreground border-warning-foreground/25"
                         onClick={handleRegenerateSecret}
                         disabled={regenerateSecretMutation.isPending}
                       >
@@ -437,7 +437,7 @@ export default function AdminConfig() {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background">
                             <div className="space-y-0.5 flex items-start gap-2">
-                              <ShieldCheck size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                              <ShieldCheck size={18} className="text-success shrink-0 mt-0.5" />
                               <div>
                                 <FormLabel>Require Postback Verification</FormLabel>
                                 <p className="text-[10px] text-muted-foreground">
@@ -767,7 +767,7 @@ export default function AdminConfig() {
               
               <Button 
                 variant="outline" 
-                className="w-full text-orange-600 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                className="w-full text-warning-foreground border-warning-foreground/25"
                 onClick={handleResetWebhook}
                 disabled={resetWebhookMutation.isPending}
               >

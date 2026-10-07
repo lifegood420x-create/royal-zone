@@ -190,7 +190,7 @@ export default function AdminTasks() {
                     </div>
                     <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${task.isActive ? 'bg-success/10' : 'bg-muted-foreground'}`} />
+                      <span className={`w-2 h-2 rounded-full ${task.isActive ? 'bg-success' : 'bg-muted-foreground'}`} />
                       <h3 className="font-bold text-foreground truncate">{task.title}</h3>
                       <span className="text-[10px] uppercase font-bold tracking-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                         {task.type.replace('_', ' ')}
