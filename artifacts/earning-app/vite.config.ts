@@ -19,6 +19,13 @@ if (Number.isNaN(port) || port <= 0) {
 // artifact router, which injects its own BASE_PATH.
 const basePath = process.env.BASE_PATH ?? '/';
 
+// OPTIONAL dev-only convenience: when VITE_DEV_API_ORIGIN is set (e.g. a
+// local mock of the api-server), `/api` requests made by the Vite dev server
+// are proxied there. It is read ONLY for `server.proxy` — production builds
+// are byte-identical to before, and the deployed app keeps calling
+// same-origin `/api` like it always has.
+const devApiOrigin = process.env.VITE_DEV_API_ORIGIN;
+
 export default defineConfig({
   base: basePath,
   plugins: [
@@ -64,6 +71,16 @@ export default defineConfig({
     fs: {
       strict: true,
     },
+    ...(devApiOrigin
+      ? {
+          proxy: {
+            '/api': {
+              target: devApiOrigin,
+              changeOrigin: true,
+            },
+          },
+        }
+      : {}),
   },
   preview: {
     port,
