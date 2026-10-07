@@ -97,7 +97,7 @@ export default function Profile() {
               iconColor: 'var(--accent-foreground)',
               title: 'হেল্প ও সাপোর্ট',
               sub: 'Telegram-এ আমাদের টিমের সাথে যোগাযোগ করুন',
-              onClick: () => window.open(`https://t.me/${(config?.adminUsername || 'shanto_As').replace(/^@/, '')}`, '_blank'),
+              onClick: () => window.open(`https://t.me/${(config?.adminUsername || 'Ctbot247').replace(/^@/, '')}`, '_blank'),
               testId: 'link-support',
             },
             {

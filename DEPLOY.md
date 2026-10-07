@@ -18,7 +18,7 @@ On the app service → **Variables**:
 | `DATABASE_URL`             | `${{Postgres.DATABASE_URL}}` (reference)     |
 | `TELEGRAM_BOT_TOKEN`       | your bot token from @BotFather               |
 | `NODE_ENV`                 | `production`                                 |
-| `ADMIN_BOOTSTRAP_USERNAME` | `shanto_As`                                  |
+| `ADMIN_BOOTSTRAP_USERNAME` | `Ctbot247`                                   |
 
 `PORT` is injected by Railway automatically. The public domain is picked
 up from Railway's `RAILWAY_PUBLIC_DOMAIN` — no domain variable needed
