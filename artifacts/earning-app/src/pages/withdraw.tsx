@@ -14,6 +14,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Wallet, AlertCircle, Clock, CircleCheck, CircleX, Loader2, ChevronDown, ShieldCheck, ExternalLink, Copy, ArrowUpRight } from 'lucide-react';
+import { PageHeader } from '../components/page-header';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatCurrency, formatDate, formatTime } from '../lib/utils';
 import { useForm } from 'react-hook-form';
@@ -210,6 +211,8 @@ export default function Withdraw() {
 
   return (
     <div className="flex-1 flex flex-col">
+      <PageHeader title="উইথড্র" subtitle="bKash / Nagad-এ টাকা তুলুন" backTo="/settings" testId="button-back-withdraw" />
+
       {/* ── Balance strip ─────────────────────────────────────────────── */}
       <header
         className="mx-4 mt-5 rounded-[28px] p-[1.2px] animate-fade-up"
