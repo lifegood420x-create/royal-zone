@@ -4,6 +4,16 @@ import { Wallet, Users, Trophy, TrendingUp, CircleCheck, ChevronRight, PlayCircl
 import { useLocation } from 'wouter';
 import { formatCurrency } from '../lib/utils';
 import { useAuth } from '../components/auth-provider';
+import { MembershipCard } from '../components/membership-card';
+import { getMembershipTier } from '../lib/membership';
+
+function timeGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return 'শুভ সকাল';
+  if (h < 17) return 'শুভ দুপুর';
+  if (h < 20) return 'শুভ সন্ধ্যা';
+  return 'শুভ রাত্রি';
+}
 
 export default function Home() {
   const { data: user, isLoading: isLoadingMe } = useGetMe();
@@ -29,12 +39,12 @@ export default function Home() {
           </div>
           <div className="w-11 h-11 rounded-full glass animate-pulse" />
         </div>
+        <div className="h-28 rounded-[24px] glass animate-pulse" />
         <div className="h-44 rounded-[28px] glass animate-pulse" />
         <div className="grid grid-cols-2 gap-3">
           <div className="h-20 rounded-3xl glass animate-pulse" />
           <div className="h-20 rounded-3xl glass animate-pulse" />
         </div>
-        <div className="h-28 rounded-3xl glass animate-pulse" />
       </div>
     );
   }
@@ -44,58 +54,82 @@ export default function Home() {
   const done = tasks ? tasks.filter((t) => t.completed).length : 0;
   const total = tasks ? tasks.length : 0;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const tier = getMembershipTier(currentUser.totalEarned);
 
   return (
     <div className="flex-1 flex flex-col px-4 pt-5 gap-4">
-      {/* ── Brand bar ─────────────────────────────────────────────── */}
+      {/* ── Greeting bar ─────────────────────────────────────────────── */}
       <header className="flex items-center justify-between animate-fade-up">
         <div className="flex items-center gap-3 min-w-0">
-          <div
-            className="relative w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 hero-btn"
-          >
+          <div className="relative w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 hero-btn">
             <Crown size={22} strokeWidth={2} style={{ color: 'var(--primary-foreground)' }} />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-bold tracking-[0.22em] text-gradient leading-none mb-1">ROYAL ZONE</p>
+            <p className="text-[10px] font-bold tracking-[0.18em] text-gradient leading-none mb-1 uppercase">
+              {timeGreeting()}
+            </p>
             <h1 className="text-base font-bold text-foreground truncate leading-tight" data-testid="text-greeting">
               {displayName} 👋
             </h1>
+            <span
+              className="inline-flex items-center mt-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
+              style={{ background: 'var(--grad-brand-soft)', color: 'var(--accent-foreground)' }}
+            >
+              {tier.bn} {tier.label}
+            </span>
           </div>
         </div>
-        {currentUser.photoUrl && !photoFailed ? (
-          <div className="relative shrink-0">
-            <div
-              className="absolute inset-0 rounded-full animate-spin-slow"
-              style={{
-                background:
-                  'conic-gradient(from 40deg, oklch(0.68 0.22 300), oklch(0.8 0.13 196), transparent 65%, oklch(0.68 0.22 300))',
-              }}
-            />
-            <img
-              src={currentUser.photoUrl}
-              alt="Profile"
-              className="relative w-11 h-11 m-[2.5px] rounded-full border-2 border-background object-cover"
-              referrerPolicy="no-referrer"
-              onError={() => setPhotoFailed(true)}
-            />
-          </div>
-        ) : (
-          <button
-            onClick={() => setLocation('/profile')}
-            className="w-11 h-11 rounded-full glass-strong flex items-center justify-center font-bold text-base text-gradient shrink-0 active-scale"
-          >
-            {currentUser.firstName.charAt(0)}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => setLocation('/profile')}
+          className="relative shrink-0 active-scale"
+          aria-label="Open profile"
+          data-testid="button-home-profile"
+        >
+          {currentUser.photoUrl && !photoFailed ? (
+            <>
+              <div
+                className="absolute inset-0 rounded-full animate-spin-slow"
+                style={{
+                  background:
+                    'conic-gradient(from 40deg, oklch(0.68 0.22 300), oklch(0.8 0.13 196), transparent 65%, oklch(0.68 0.22 300))',
+                }}
+              />
+              <img
+                src={currentUser.photoUrl}
+                alt="Profile"
+                className="relative w-11 h-11 m-[2.5px] rounded-full border-2 border-background object-cover"
+                referrerPolicy="no-referrer"
+                onError={() => setPhotoFailed(true)}
+              />
+            </>
+          ) : (
+            <span className="w-11 h-11 rounded-full glass-strong flex items-center justify-center font-bold text-base text-gradient">
+              {currentUser.firstName.charAt(0)}
+            </span>
+          )}
+        </button>
       </header>
+
+      {/* ── Membership pass ──────────────────────────────────────────── */}
+      <div className="animate-fade-up stagger-1">
+        <MembershipCard
+          firstName={currentUser.firstName}
+          telegramId={currentUser.telegramId}
+          totalEarned={currentUser.totalEarned}
+          createdAt={currentUser.createdAt}
+          isVerified={currentUser.isVerified}
+          compact
+          onClick={() => setLocation('/profile')}
+        />
+      </div>
 
       {/* ── Vault (balance) card ──────────────────────────────────── */}
       <section
-        className="relative overflow-hidden rounded-[28px] p-[1.2px] animate-fade-up stagger-1"
+        className="relative overflow-hidden rounded-[28px] p-[1.2px] animate-fade-up stagger-2"
         style={{ background: 'var(--grad-brand)' }}
       >
         <div className="relative rounded-[27px] px-5 pt-5 pb-4 overflow-hidden" style={{ background: 'oklch(0.17 0.035 286 / 92%)' }}>
-          {/* Orbs */}
           <div className="absolute -top-16 -right-12 w-52 h-52 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, oklch(0.66 0.22 305 / 40%) 0%, transparent 65%)' }} />
           <div className="absolute -bottom-20 -left-10 w-44 h-44 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, oklch(0.78 0.13 196 / 22%) 0%, transparent 65%)' }} />
 
@@ -134,7 +168,7 @@ export default function Home() {
       {/* ── Daily mission strip ───────────────────────────────────── */}
       <button
         onClick={() => setLocation('/earn')}
-        className="glass rounded-3xl p-4 text-left active-scale animate-fade-up stagger-2"
+        className="glass rounded-3xl p-4 text-left active-scale animate-fade-up stagger-3"
       >
         <div className="flex items-center gap-3">
           <div className="relative w-12 h-12 shrink-0">
@@ -175,7 +209,7 @@ export default function Home() {
       </button>
 
       {/* ── Stat chips ────────────────────────────────────────────── */}
-      <section className="grid grid-cols-3 gap-3 animate-fade-up stagger-3">
+      <section className="grid grid-cols-3 gap-3 animate-fade-up stagger-4">
         {[
           {
             label: 'রেফারেল',
@@ -221,7 +255,7 @@ export default function Home() {
       </section>
 
       {/* ── How to earn ───────────────────────────────────────────── */}
-      <section className="glass rounded-3xl p-4 animate-fade-up stagger-4">
+      <section className="glass rounded-3xl p-4 animate-fade-up stagger-5">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-3">কীভাবে আয় করবেন</p>
         <div className="space-y-1">
           {[

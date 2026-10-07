@@ -2,9 +2,11 @@ import React from 'react';
 import { Link, useLocation } from 'wouter';
 import { House, Coins, LayoutGrid } from 'lucide-react';
 import { useAuth } from './auth-provider';
+import { useTelegramBackButton } from '../hooks/use-telegram-back-button';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { isLoading, error } = useAuth();
+  useTelegramBackButton();
 
   if (isLoading) {
     return (

@@ -307,6 +307,22 @@ body { min-height: 100dvh; }
 .royal-nav { background: oklch(0.22 0.04 286 / 82%); backdrop-filter: blur(26px); box-shadow: var(--shadow-md); }
 .royal-header { background: transparent; border-bottom: none; }
 
+@keyframes cardShine {
+  0% { transform: translateX(-130%) rotate(14deg); }
+  100% { transform: translateX(230%) rotate(14deg); }
+}
+.membership-shine::after {
+  content: '';
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  left: 0;
+  width: 45%;
+  background: linear-gradient(105deg, transparent 30%, oklch(1 0 0 / 22%) 50%, transparent 70%);
+  animation: cardShine 5.2s ease-in-out 1.2s infinite;
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }

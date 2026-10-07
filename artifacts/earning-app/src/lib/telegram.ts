@@ -2,6 +2,14 @@ import { setAuthTokenGetter } from '@workspace/api-client-react';
 
 // Minimal shape of the Telegram WebApp SDK we rely on. The real SDK is much
 // larger; we only type what we use.
+interface TelegramBackButton {
+  isVisible?: boolean;
+  show: () => void;
+  hide: () => void;
+  onClick: (cb: () => void) => void;
+  offClick: (cb: () => void) => void;
+}
+
 interface TelegramWebApp {
   initData: string;
   initDataUnsafe?: {
@@ -13,6 +21,7 @@ interface TelegramWebApp {
   setBackgroundColor?: (color: string) => void;
   disableVerticalSwipes?: () => void;
   platform?: string;
+  BackButton?: TelegramBackButton;
 }
 
 declare global {

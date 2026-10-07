@@ -3,6 +3,7 @@ import { useGetMe, useGetPublicConfig, useListReferrals, useGetReferralLeaderboa
 import { useToast } from '@/hooks/use-toast';
 import { Users, Copy, Share2, Check, UserPlus, Trophy } from 'lucide-react';
 import { formatCurrency, formatDate } from '../lib/utils';
+import { PageHeader } from '../components/page-header';
 
 type Tab = 'leaderboard' | 'my-referrals';
 
@@ -46,8 +47,10 @@ export default function Refer() {
 
   return (
     <div className="flex-1 flex flex-col">
+      <PageHeader title="রেফার" subtitle="বন্ধু ইনভাইট করে বোনাস পান" backTo="/settings" testId="button-back-refer" />
+
       {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <header className="px-4 pt-6 pb-2 text-center animate-fade-up">
+      <header className="px-4 pt-3 pb-2 text-center animate-fade-up">
         <div className="relative mx-auto w-16 h-16 mb-4">
           <div className="absolute inset-0 rounded-[22px] animate-float" style={{ background: 'var(--grad-brand)', boxShadow: 'var(--shadow-glow-primary)' }} />
           <div className="absolute inset-0 rounded-[22px] flex items-center justify-center">
