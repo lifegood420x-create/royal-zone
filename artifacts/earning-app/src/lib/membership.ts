@@ -18,7 +18,7 @@ const TIERS: MembershipTier[] = [
     id: 'member',
     label: 'Member',
     bn: 'মেম্বার',
-    tagline: 'Monetage CMP-এ স্বাগতম',
+    tagline: 'Monetage CPM-এ স্বাগতম',
     face: 'linear-gradient(135deg, oklch(0.28 0.06 286) 0%, oklch(0.2 0.05 300) 55%, oklch(0.26 0.07 250) 100%)',
     accent: 'oklch(0.82 0.12 196)',
     text: 'oklch(0.96 0.01 282)',

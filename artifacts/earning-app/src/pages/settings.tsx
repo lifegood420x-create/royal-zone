@@ -62,7 +62,7 @@ export default function Settings() {
       </div>
 
       <footer className="mt-auto pt-8 pb-2 text-center">
-        <p className="text-[10px] font-bold tracking-[0.3em] text-gradient">MONETAGE CMP</p>
+        <p className="text-[10px] font-bold tracking-[0.3em] text-gradient">MONETAGE CPM</p>
         <p className="text-[10px] text-muted-foreground mt-1">টাস্ক করো, আয় করো</p>
       </footer>
     </div>

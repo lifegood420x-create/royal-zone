@@ -52,7 +52,7 @@ export function MembershipCard({
               className="text-[10px] font-bold tracking-[0.22em] uppercase leading-none"
               style={{ color: tier.muted }}
             >
-              Monetage CMP
+              Monetage CPM
             </p>
             <p className="text-xs font-bold mt-1 truncate" style={{ color: tier.text }}>
               {tier.bn} · {tier.label}

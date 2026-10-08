@@ -548,7 +548,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'Monetage CMP'"
+          "default": "'Monetage CPM'"
         },
         "bot_username": {
           "name": "bot_username",
