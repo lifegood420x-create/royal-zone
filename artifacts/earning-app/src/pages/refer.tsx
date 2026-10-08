@@ -18,7 +18,7 @@ export default function Refer() {
   const [failedPhotoIds, setFailedPhotoIds] = useState<Set<number>>(new Set());
   const [failedLeaderboardIds, setFailedLeaderboardIds] = useState<Set<number>>(new Set());
 
-  const botUsername = 'royal_zone_bot';
+  const botUsername = 'Monetage_cpm_bot';
   const referralLink = user ? `https://t.me/${botUsername}?start=${user.referralCode}` : '';
 
   const handleCopy = () => {
@@ -31,7 +31,23 @@ export default function Refer() {
 
   const handleShare = () => {
     if (!referralLink) return;
-    const text = `Join me on Royal Zone and get rewarded! Use my link: ${referralLink}`;
+    const text = `Monetage BD
+
+এখন ঘরে বসেই ইনকাম করুন সহজে!
+
+মনিটাইজ ডট পাবলিশ এর এড দেখা।
+
+টেলিগ্রাম চ্যানেল সাবস্ক্রিপশন টাস্ক ।
+
+ইউটিউব চ্যানেল সাবস্ক্রাইব ও ভিডিও দেখার কাজ ।
+
+Daily Bonus
+
+Instant Withdraw
+
+Trusted & Professional Telegram Earning Platform
+
+আজই জয়েন করুন এবং ইনকাম শুরু করুন!`;
     const url = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };

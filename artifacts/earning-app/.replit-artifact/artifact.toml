@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Royal Zone"
+title = "Monetage CMP"
 version = "1.0.0"
 id = "artifacts/earning-app"
 router = "path"

@@ -58,7 +58,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <div className="w-10 h-10 rounded-2xl hero-btn flex items-center justify-center num font-bold text-sm">RZ</div>
             <div>
               <h2 className="text-sm font-bold text-foreground leading-tight">Admin Console</h2>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gradient">Royal Zone</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gradient">Monetage CMP</p>
             </div>
           </div>
         </div>

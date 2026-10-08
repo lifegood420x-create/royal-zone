@@ -3,7 +3,7 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: Bangla Task Hub Telegram mini app API
+  description: Monetage CMP Telegram mini app API
 servers:
   - url: /api
     description: Base API path
