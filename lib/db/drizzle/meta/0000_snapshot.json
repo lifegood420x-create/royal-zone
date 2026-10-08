@@ -548,14 +548,14 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'Bangla Task Hub'"
+          "default": "'Monetage CPM'"
         },
         "bot_username": {
           "name": "bot_username",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "''"
+          "default": "'Monetage_cpm_bot'"
         },
         "channel_username": {
           "name": "channel_username",

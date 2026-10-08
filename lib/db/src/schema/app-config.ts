@@ -20,8 +20,8 @@ export const appConfigTable = pgTable("app_config", {
   // of whatever the ad network's own SDK does, so users can't skip straight
   // to the reward.
   adDurationSeconds: integer("ad_duration_seconds").notNull().default(15),
-  botName: text("bot_name").notNull().default("Bangla Task Hub"),
-  botUsername: text("bot_username").notNull().default("Bangla_hub_bot"),
+  botName: text("bot_name").notNull().default("Monetage CPM"),
+  botUsername: text("bot_username").notNull().default("Monetage_cpm_bot"),
   channelUsername: text("channel_username"),
   adminUsername: text("admin_username").notNull().default("admin"),
   monetagZoneId: text("monetag_zone_id"),

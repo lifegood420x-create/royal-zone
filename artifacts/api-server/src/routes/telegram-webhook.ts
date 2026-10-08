@@ -54,7 +54,23 @@ router.post("/telegram/webhook", async (req, res): Promise<void> => {
   try {
     await sendMessage(
       String(message.chat.id),
-      `Bangla Task Hub 🇧🇩\n\n📋 এখন ঘরে বসেই ইনকাম করুন সহজে! 💻\n\n✅ YouTube Subscribe Task 📺\n✅ Telegram Join Task 💬\n✅ Referral Income System 🤝\n✅ Daily Bonus 💰\n✅ Instant Withdraw ⚡\n\n🏆 Trusted & Professional Telegram Earning Platform\n🎯 আজই জয়েন করুন এবং ইনকাম শুরু করুন! 🚀`,
+      `Monetage BD
+
+এখন ঘরে বসেই ইনকাম করুন সহজে!
+
+মনিটাইজ ডট পাবলিশ এর এড দেখা।
+
+টেলিগ্রাম চ্যানেল সাবস্ক্রিপশন টাস্ক ।
+
+ইউটিউব চ্যানেল সাবস্ক্রাইব ও ভিডিও দেখার কাজ ।
+
+Daily Bonus
+
+Instant Withdraw
+
+Trusted & Professional Telegram Earning Platform
+
+আজই জয়েন করুন এবং ইনকাম শুরু করুন!`,
       {
         reply_markup: {
           inline_keyboard: [
